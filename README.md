@@ -7,10 +7,16 @@ from files, the AI reads them from the running application. Inspired by
 
 **Development-only tooling. Do not install or enable in production.**
 
+> **Status: alpha** — verified live against TYPO3 13.4 and 14.3, but APIs and
+> tool output formats may still change between releases.
+
 ## Installation
 
 ```bash
-composer require --dev balatd/typo3-dev-mcp
+# until the package is listed on Packagist:
+composer config repositories.typo3-dev-mcp vcs https://github.com/balatD/typo3-dev-mcp.git
+
+composer require --dev "balatd/typo3-dev-mcp:^0.1@alpha"
 vendor/bin/typo3 devmcp:install        # or: ddev exec vendor/bin/typo3 devmcp:install
 ```
 

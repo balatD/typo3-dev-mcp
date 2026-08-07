@@ -1,0 +1,28 @@
+# Changelog
+
+## 0.1.0-alpha.1 — 2026-08-07
+
+First public alpha. Verified live against TYPO3 13.4.33 and 14.3.5.
+
+### Added
+
+- MCP server on stdio via `vendor/bin/typo3 devmcp:serve`, built on the official
+  PHP MCP SDK (`mcp/sdk`), announcing 14 development tools:
+  `application_info`, `database_schema`, `database_query`, `site_info`,
+  `tca_schema`, `content_elements`, `typoscript`, `get_config`, `list_commands`,
+  `read_log_entries`, `last_error`, `search_changelog`, `get_url`, `flush_cache`
+  — plus the opt-in `tinker`.
+- `vendor/bin/typo3 devmcp:install`: registers the server in `.mcp.json`
+  (DDEV auto-detected) and composes version-specific AI guidelines into
+  `.ai/guidelines/typo3.md`, linked from `CLAUDE.md` / `AGENTS.md`.
+- Safety model: read-only by default with MCP `readOnlyHint` annotations,
+  secret masking, SQL write-guard (`DEV_MCP_ALLOW_WRITE=1` to lift),
+  `tinker` double-gated behind Development context + `DEV_MCP_ALLOW_TINKER=1`.
+
+### Known limitations
+
+- `typoscript` builds on a core factory API marked `@internal` — it is verified
+  on 13.4/14.3 but may need adjustments for future core versions.
+- `search_docs` (querying docs.typo3.org) is not shipped yet; `search_changelog`
+  covers the offline case.
+- No functional test suite yet (unit tests + live smoke tests only).
