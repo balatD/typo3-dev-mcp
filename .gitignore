@@ -1,9 +1,24 @@
+# Composer / build
 /.Build/
 /vendor/
 /composer.lock
+
+# TYPO3 runtime artifacts from the dev install in this directory
+/public/
+/var/
+
+# Local per-developer configuration
+/.mcp.json
+/.claude/
+/.ai/
+/.ddev/apache/apache-site.conf
+
+# Tool caches
 /.php-cs-fixer.cache
 /.phpunit.cache
 /.phpstan.cache
+
+# OS / IDE
 .DS_Store
 /.idea/
 /.vscode/

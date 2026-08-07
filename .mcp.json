@@ -1,8 +1,0 @@
-{
-    "mcpServers": {
-        "typo3-dev-mcp": {
-            "command": "ddev",
-            "args": ["exec", "-d", "/var/www/html/v13", "vendor/bin/typo3", "devmcp:serve"]
-        }
-    }
-}
