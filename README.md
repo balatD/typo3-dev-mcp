@@ -13,9 +13,6 @@ from files, the AI reads them from the running application. Inspired by
 ## Installation
 
 ```bash
-# until the package is listed on Packagist:
-composer config repositories.typo3-dev-mcp vcs https://github.com/balatD/typo3-dev-mcp.git
-
 composer require --dev "balatd/typo3-dev-mcp:^0.1@alpha"
 vendor/bin/typo3 devmcp:install        # or: ddev exec vendor/bin/typo3 devmcp:install
 ```
