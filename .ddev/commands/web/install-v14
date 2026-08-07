@@ -15,7 +15,8 @@ composer config extra.typo3/cms.web-dir public -d /var/www/html/$VERSION
 composer config repositories.$EXTENSION_KEY path /var/www/$EXTENSION_KEY -d /var/www/html/$VERSION
 composer config --no-plugins allow-plugins.typo3/cms-composer-installers true -d /var/www/html/$VERSION
 composer config --no-plugins allow-plugins.typo3/class-alias-loader true -d /var/www/html/$VERSION
-composer req t3/cms:'^14' $PACKAGE_NAME:'*@dev' --no-progress -n -d /var/www/html/$VERSION
+# t3/cms (helhum's meta) has no v14 tags — use the official base distribution
+composer req typo3/cms-base-distribution:'^14' typo3/cms-fluid-styled-content:'^14' typo3/cms-tstemplate:'^14' typo3/cms-lowlevel:'^14' $PACKAGE_NAME:'*@dev' --no-progress -n -d /var/www/html/$VERSION
 
 cd /var/www/html/$VERSION
 
