@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Install;
 
-use Composer\InstalledVersions;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Package\PackageManager;
 
@@ -41,10 +40,6 @@ final class GuidelineComposer
             'extbase.md',
             'testing.md',
         ];
-
-        if (InstalledVersions::isInstalled('friendsoftypo3/content-blocks')) {
-            $files[] = 'content-blocks.md';
-        }
 
         if ($this->ddevDetector->isDdevProject()) {
             $files[] = 'ddev.md';

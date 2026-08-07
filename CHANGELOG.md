@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+
+- The content-blocks guideline; the ddev guideline remains and is only composed
+  when DDEV is detected (`.ddev/config.yaml` or running inside the container).
+
 ## 0.1.0-alpha.1 — 2026-08-07
 
 First public alpha. Verified live against TYPO3 13.4.33 and 14.3.5.
