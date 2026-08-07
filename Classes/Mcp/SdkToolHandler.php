@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Mcp;
 
+use Mcp\Exception\ToolCallException;
 use Mcp\Server\ClientGateway;
 use Mcp\Server\Handler\ToolHandlerInterface;
 
@@ -22,6 +23,14 @@ final class SdkToolHandler implements ToolHandlerInterface
 
     public function execute(array $arguments, ClientGateway $gateway): mixed
     {
-        return $this->tool->execute($arguments);
+        try {
+            return $this->tool->execute($arguments);
+        } catch (ToolCallException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            // Only ToolCallException reaches the client as a readable isError
+            // result — anything else degrades to an opaque internal error.
+            throw new ToolCallException($e->getMessage(), 0, $e);
+        }
     }
 }

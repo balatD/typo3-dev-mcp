@@ -3,6 +3,7 @@ services:
         environment:
             - EXTENSION_KEY=dev_mcp
             - PACKAGE_NAME=balatd/typo3-dev-mcp
+            - TYPO3_CONTEXT=Development/Ddev
 
             # TYPO3 v13/v14 `typo3 setup` configuration
             - TYPO3_DB_DRIVER=mysqli
