@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Install;
+namespace BalatD\DevMcp\Install;
 
 /**
- * Registers the t3boost server in the project's .mcp.json (the project-scope
+ * Registers the typo3-dev-mcp server in the project's .mcp.json (the project-scope
  * MCP registry Claude Code and other clients read). Merges into an existing
  * file — other servers are never touched.
  */
@@ -26,9 +26,9 @@ final class McpJsonWriter
             }
         }
 
-        $config['mcpServers']['t3boost'] = $viaDdev
-            ? ['command' => 'ddev', 'args' => ['exec', 'vendor/bin/typo3', 'boost:mcp']]
-            : ['command' => 'vendor/bin/typo3', 'args' => ['boost:mcp']];
+        $config['mcpServers']['typo3-dev-mcp'] = $viaDdev
+            ? ['command' => 'ddev', 'args' => ['exec', 'vendor/bin/typo3', 'devmcp:serve']]
+            : ['command' => 'vendor/bin/typo3', 'args' => ['devmcp:serve']];
 
         file_put_contents(
             $file,

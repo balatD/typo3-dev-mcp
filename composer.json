@@ -1,5 +1,5 @@
 {
-    "name": "t3boost/t3boost",
+    "name": "balatd/typo3-dev-mcp",
     "description": "AI development helper for TYPO3 v13/v14 — an MCP server exposing TCA, database schema, sites, TypoScript, logs and the core changelog to Claude Code and other MCP clients. Inspired by laravel/boost.",
     "license": "MIT",
     "type": "typo3-cms-extension",
@@ -23,12 +23,12 @@
     },
     "autoload": {
         "psr-4": {
-            "T3Boost\\": "Classes/"
+            "BalatD\\DevMcp\\": "Classes/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "T3Boost\\Tests\\": "Tests/"
+            "BalatD\\DevMcp\\Tests\\": "Tests/"
         }
     },
     "config": {
@@ -45,7 +45,7 @@
     },
     "extra": {
         "typo3/cms": {
-            "extension-key": "t3boost"
+            "extension-key": "dev_mcp"
         }
     }
 }

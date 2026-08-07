@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp\Tool;
+namespace BalatD\DevMcp\Mcp\Tool;
 
-use T3Boost\Mcp\ConditionalToolInterface;
+use BalatD\DevMcp\Mcp\ConditionalToolInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
 
@@ -13,7 +13,7 @@ use TYPO3\CMS\Core\Core\Environment;
  * application.
  *
  * Doubly guarded: requires Development application context AND an explicit
- * opt-in (env T3BOOST_ALLOW_TINKER=1 or extension configuration allowTinker).
+ * opt-in (env DEV_MCP_ALLOW_TINKER=1 or extension configuration allowTinker).
  * When not enabled the tool is not announced at all.
  */
 final class TinkerTool implements ConditionalToolInterface
@@ -63,12 +63,12 @@ final class TinkerTool implements ConditionalToolInterface
             return false;
         }
 
-        if (getenv('T3BOOST_ALLOW_TINKER') === '1') {
+        if (getenv('DEV_MCP_ALLOW_TINKER') === '1') {
             return true;
         }
 
         try {
-            return (bool)$this->extensionConfiguration->get('t3boost', 'allowTinker');
+            return (bool)$this->extensionConfiguration->get('dev_mcp', 'allowTinker');
         } catch (\Throwable) {
             return false;
         }

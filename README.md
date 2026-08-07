@@ -1,8 +1,8 @@
-# T3Boost — AI development helper for TYPO3
+# typo3-dev-mcp — AI development helper for TYPO3
 
-T3Boost gives Claude Code (and any MCP client) live insight into your TYPO3 v13/v14
-installation: instead of guessing versions, TCA columns, CTypes or config keys from
-files, the AI reads them from the running application. Inspired by
+`typo3-dev-mcp` gives Claude Code (and any MCP client) live insight into your TYPO3
+v13/v14 installation: instead of guessing versions, TCA columns, CTypes or config keys
+from files, the AI reads them from the running application. Inspired by
 [laravel/boost](https://github.com/laravel/boost).
 
 **Development-only tooling. Do not install or enable in production.**
@@ -10,14 +10,14 @@ files, the AI reads them from the running application. Inspired by
 ## Installation
 
 ```bash
-composer require --dev t3boost/t3boost
-vendor/bin/typo3 boost:install        # or: ddev exec vendor/bin/typo3 boost:install
+composer require --dev balatd/typo3-dev-mcp
+vendor/bin/typo3 devmcp:install        # or: ddev exec vendor/bin/typo3 devmcp:install
 ```
 
-`boost:install`
+`devmcp:install`
 
 - registers the MCP server in the project's `.mcp.json` — when DDEV is detected the
-  server is started via `ddev exec vendor/bin/typo3 boost:mcp`, otherwise via local PHP;
+  server is started via `ddev exec vendor/bin/typo3 devmcp:serve`, otherwise via local PHP;
 - composes version-specific AI guidelines into `.ai/guidelines/typo3.md` and links them
   from `CLAUDE.md` / `AGENTS.md` (between idempotent markers, existing content is kept).
 
@@ -29,7 +29,7 @@ Then restart your AI assistant (or run `/mcp` in Claude Code).
 |------|--------------|
 | `application_info` | TYPO3/PHP version, context, DB platform, active extensions, composer packages |
 | `database_schema` | Live schema: tables, columns, indexes, foreign keys |
-| `database_query` | Run a single SQL query (read-only unless `T3BOOST_ALLOW_WRITE=1`) |
+| `database_query` | Run a single SQL query (read-only unless `DEV_MCP_ALLOW_WRITE=1`) |
 | `site_info` | Sites, base URLs, root pages, languages, error handling |
 | `tca_schema` | The TCA: tables, columns, types, relations, record types, palettes |
 | `content_elements` | Registered CTypes (+ legacy `list_type` plugins where present) |
@@ -48,9 +48,9 @@ Then restart your AI assistant (or run `/mcp` in Claude Code).
 - Secret-looking configuration values (`password`, `encryptionKey`, tokens, …) are masked
   before they leave the server.
 - `database_query` accepts only `SELECT`/`SHOW`/`EXPLAIN`/`DESCRIBE`/`WITH` unless the
-  developer sets `T3BOOST_ALLOW_WRITE=1`.
+  developer sets `DEV_MCP_ALLOW_WRITE=1`.
 - `tinker` is double-gated: it only exists when the application context is `Development/*`
-  **and** `T3BOOST_ALLOW_TINKER=1` (or the `allowTinker` extension setting) is set.
+  **and** `DEV_MCP_ALLOW_TINKER=1` (or the `allowTinker` extension setting) is set.
 
 ## Requirements
 
@@ -67,15 +67,16 @@ ddev install-v13      # TYPO3 13.4 + this extension at /var/www/html/v13
 ddev install-v14      # TYPO3 14 + this extension at /var/www/html/v14
 ```
 
-Backends: `https://v13.t3boost.ddev.site/typo3/` / `https://v14.t3boost.ddev.site/typo3/`
-(admin / `Joh316!!`). Protocol smoke test without an MCP client:
+Backends: `https://v13.typo3-dev-mcp.ddev.site/typo3/` /
+`https://v14.typo3-dev-mcp.ddev.site/typo3/` (admin / `Joh316!!`).
+Protocol smoke test without an MCP client:
 
 ```bash
 printf '%s\n' \
   '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"smoke","version":"0"}}}' \
   '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
-  | ddev exec -d /var/www/html/v13 vendor/bin/typo3 boost:mcp
+  | ddev exec -d /var/www/html/v13 vendor/bin/typo3 devmcp:serve
 ```
 
 ## License

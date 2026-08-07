@@ -2,7 +2,7 @@
 
 This project runs TYPO3 {{typo3Version}} on PHP {{phpVersion}}.
 
-## Use the t3boost MCP tools instead of guessing
+## Use the typo3-dev-mcp MCP tools instead of guessing
 
 - Call `application_info` once at the start of a session: exact versions, active extensions, installed packages.
 - Never invent table columns, CTypes or configuration keys. Read the real ones: `tca_schema` (semantic model, relations), `database_schema` (physical schema), `content_elements` (registered CTypes), `get_config` (TYPO3_CONF_VARS / extension configuration).

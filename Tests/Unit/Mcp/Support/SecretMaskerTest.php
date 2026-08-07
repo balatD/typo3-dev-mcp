@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Tests\Unit\Mcp\Support;
+namespace BalatD\DevMcp\Tests\Unit\Mcp\Support;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use T3Boost\Mcp\Support\SecretMasker;
+use BalatD\DevMcp\Mcp\Support\SecretMasker;
 
 final class SecretMaskerTest extends TestCase
 {

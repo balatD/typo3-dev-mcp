@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp;
+namespace BalatD\DevMcp\Mcp;
 
 /**
  * Tools that are only available under certain conditions (opt-in flags,

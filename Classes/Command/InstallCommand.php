@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Command;
+namespace BalatD\DevMcp\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use T3Boost\Install\DdevDetector;
-use T3Boost\Install\GuidelineComposer;
-use T3Boost\Install\McpJsonWriter;
+use BalatD\DevMcp\Install\DdevDetector;
+use BalatD\DevMcp\Install\GuidelineComposer;
+use BalatD\DevMcp\Install\McpJsonWriter;
 use TYPO3\CMS\Core\Core\Environment;
 
 /**
- * `typo3 boost:install` — registers the MCP server with AI assistants
+ * `typo3 devmcp:install` — registers the MCP server with AI assistants
  * (.mcp.json, DDEV-aware) and installs composed AI guidelines.
  */
 final class InstallCommand extends Command
@@ -41,12 +41,12 @@ final class InstallCommand extends Command
         $projectPath = Environment::getProjectPath();
         $viaDdev = $this->ddevDetector->isDdevProject();
 
-        $io->title('T3Boost install');
+        $io->title('typo3-dev-mcp install');
 
         if (!$input->getOption('skip-mcp-json')) {
             $file = $this->mcpJsonWriter->register($projectPath, $viaDdev);
             $io->writeln(sprintf(
-                ' ✓ Registered MCP server "t3boost" in %s (%s)',
+                ' ✓ Registered MCP server "typo3-dev-mcp" in %s (%s)',
                 $file,
                 $viaDdev ? 'via `ddev exec`' : 'local PHP',
             ));

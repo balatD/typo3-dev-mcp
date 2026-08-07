@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp;
+namespace BalatD\DevMcp\Mcp;
 
 use Mcp\Server\ClientGateway;
 use Mcp\Server\Handler\ToolHandlerInterface;
 
 /**
- * Bridges a T3Boost tool to the MCP SDK's explicit handler contract, which
+ * Bridges a typo3-dev-mcp tool to the MCP SDK's explicit handler contract, which
  * passes the raw argument bag instead of reflection-mapping named parameters.
  *
  * Not a DI service — instantiated by the ServeCommand (excluded in Services.yaml).

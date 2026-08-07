@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp\Tool;
+namespace BalatD\DevMcp\Mcp\Tool;
 
-use T3Boost\Mcp\Support\LogReader;
-use T3Boost\Mcp\ToolInterface;
+use BalatD\DevMcp\Mcp\Support\LogReader;
+use BalatD\DevMcp\Mcp\ToolInterface;
 
 /**
  * Boost analog: last-error.

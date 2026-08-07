@@ -1,18 +1,18 @@
-ENV EXTENSION_KEY=t3boost
+ENV EXTENSION_KEY=dev_mcp
 
 # Landing page listing the per-version environments
 RUN rm -f /var/www/html/index.html
 RUN cat > /var/www/html/index.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>EXT:t3boost - DDEV Environment</title>
+<head><meta charset="UTF-8"><title>typo3-dev-mcp - DDEV Environment</title>
 <style>body{font-family:system-ui,sans-serif;max-width:700px;margin:50px auto;padding:0 20px;line-height:1.6}h1{color:#ff8700}a{color:#0078e7}</style>
 </head>
 <body>
-<h1>EXT:t3boost Development Environment</h1>
+<h1>typo3-dev-mcp Development Environment</h1>
 <ul>
-<li>TYPO3 13.4 LTS: <a href="https://v13.t3boost.ddev.site/">Frontend</a> · <a href="https://v13.t3boost.ddev.site/typo3/">Backend</a></li>
-<li>TYPO3 14: <a href="https://v14.t3boost.ddev.site/">Frontend</a> · <a href="https://v14.t3boost.ddev.site/typo3/">Backend</a></li>
+<li>TYPO3 13.4 LTS: <a href="https://v13.typo3-dev-mcp.ddev.site/">Frontend</a> · <a href="https://v13.typo3-dev-mcp.ddev.site/typo3/">Backend</a></li>
+<li>TYPO3 14: <a href="https://v14.typo3-dev-mcp.ddev.site/">Frontend</a> · <a href="https://v14.typo3-dev-mcp.ddev.site/typo3/">Backend</a></li>
 </ul>
 <p>Credentials: <code>admin</code> / <code>Joh316!!</code></p>
 <p>Install: <code>ddev install-v13</code> · <code>ddev install-v14</code></p>

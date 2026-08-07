@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Tests\Unit\Mcp;
+namespace BalatD\DevMcp\Tests\Unit\Mcp;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use T3Boost\Mcp\ConditionalToolInterface;
-use T3Boost\Mcp\ToolInterface;
-use T3Boost\Mcp\ToolRegistry;
+use BalatD\DevMcp\Mcp\ConditionalToolInterface;
+use BalatD\DevMcp\Mcp\ToolInterface;
+use BalatD\DevMcp\Mcp\ToolRegistry;
 
 final class ToolRegistryTest extends TestCase
 {

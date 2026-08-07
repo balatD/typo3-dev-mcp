@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Tests\Unit\Mcp\Tool;
+namespace BalatD\DevMcp\Tests\Unit\Mcp\Tool;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use T3Boost\Mcp\Tool\DatabaseQueryTool;
+use BalatD\DevMcp\Mcp\Tool\DatabaseQueryTool;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 
 final class DatabaseQueryToolTest extends TestCase
 {
     protected function setUp(): void
     {
-        putenv('T3BOOST_ALLOW_WRITE');
+        putenv('DEV_MCP_ALLOW_WRITE');
     }
 
     private function createTool(): DatabaseQueryTool
@@ -73,11 +73,11 @@ final class DatabaseQueryToolTest extends TestCase
         $tool = $this->createTool();
         self::assertTrue($tool->isReadOnly());
 
-        putenv('T3BOOST_ALLOW_WRITE=1');
+        putenv('DEV_MCP_ALLOW_WRITE=1');
         try {
             self::assertFalse($tool->isReadOnly());
         } finally {
-            putenv('T3BOOST_ALLOW_WRITE');
+            putenv('DEV_MCP_ALLOW_WRITE');
         }
     }
 }

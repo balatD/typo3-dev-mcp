@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Install;
+namespace BalatD\DevMcp\Install;
 
 use TYPO3\CMS\Core\Core\Environment;
 

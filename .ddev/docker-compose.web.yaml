@@ -1,8 +1,8 @@
 services:
     web:
         environment:
-            - EXTENSION_KEY=t3boost
-            - PACKAGE_NAME=t3boost/t3boost
+            - EXTENSION_KEY=dev_mcp
+            - PACKAGE_NAME=balatd/typo3-dev-mcp
 
             # TYPO3 v13/v14 `typo3 setup` configuration
             - TYPO3_DB_DRIVER=mysqli
@@ -12,12 +12,12 @@ services:
             - TYPO3_SETUP_ADMIN_EMAIL=admin@example.com
             - TYPO3_SETUP_ADMIN_USERNAME=admin
             - TYPO3_SETUP_ADMIN_PASSWORD=Joh316!!
-            - TYPO3_PROJECT_NAME=EXT:t3boost Dev Environment
+            - TYPO3_PROJECT_NAME=EXT:dev_mcp Dev Environment
             - TYPO3_SERVER_TYPE=apache
         volumes:
             - type: bind
               source: ../
-              target: /var/www/t3boost
+              target: /var/www/dev_mcp
               consistency: cached
             - v13-data:/var/www/html/v13
             - v14-data:/var/www/html/v14

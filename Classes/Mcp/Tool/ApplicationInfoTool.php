@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp\Tool;
+namespace BalatD\DevMcp\Mcp\Tool;
 
 use Composer\InstalledVersions;
-use T3Boost\Mcp\ToolInterface;
+use BalatD\DevMcp\Mcp\ToolInterface;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Information\Typo3Version;

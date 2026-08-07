@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp\Tool;
+namespace BalatD\DevMcp\Mcp\Tool;
 
-use T3Boost\Mcp\ToolInterface;
+use BalatD\DevMcp\Mcp\ToolInterface;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 

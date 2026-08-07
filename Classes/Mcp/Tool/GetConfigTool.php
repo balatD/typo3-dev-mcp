@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp\Tool;
+namespace BalatD\DevMcp\Mcp\Tool;
 
-use T3Boost\Mcp\Support\SecretMasker;
-use T3Boost\Mcp\ToolInterface;
+use BalatD\DevMcp\Mcp\Support\SecretMasker;
+use BalatD\DevMcp\Mcp\ToolInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 
 /**

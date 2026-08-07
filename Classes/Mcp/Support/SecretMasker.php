@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp\Support;
+namespace BalatD\DevMcp\Mcp\Support;
 
 /**
  * Masks secret-looking values before configuration leaves the MCP boundary.

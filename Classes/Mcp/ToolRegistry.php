@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp;
+namespace BalatD\DevMcp\Mcp;
 
 /**
- * Collects all ToolInterface services tagged with `t3boost.tool`.
+ * Collects all ToolInterface services tagged with `devmcp.tool`.
  */
 final class ToolRegistry
 {

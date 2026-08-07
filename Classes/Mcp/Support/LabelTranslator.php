@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp\Support;
+namespace BalatD\DevMcp\Mcp\Support;
 
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Command;
+namespace BalatD\DevMcp\Command;
 
 use Composer\InstalledVersions;
 use Mcp\Schema\Tool;
@@ -12,11 +12,11 @@ use Mcp\Server\Transport\StdioTransport;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use T3Boost\Mcp\SdkToolHandler;
-use T3Boost\Mcp\ToolRegistry;
+use BalatD\DevMcp\Mcp\SdkToolHandler;
+use BalatD\DevMcp\Mcp\ToolRegistry;
 
 /**
- * `typo3 boost:mcp` — serves the MCP protocol on stdio.
+ * `typo3 devmcp:serve` — serves the MCP protocol on stdio.
  *
  * stdout is reserved for JSON-RPC frames; anything else (PHP notices,
  * deprecations, accidental echo) would corrupt the protocol, so all
@@ -41,8 +41,8 @@ final class ServeCommand extends Command
 
         $builder = Server::builder()
             ->setServerInfo(
-                't3boost',
-                InstalledVersions::getPrettyVersion('t3boost/t3boost') ?? 'dev',
+                'typo3-dev-mcp',
+                InstalledVersions::getPrettyVersion('balatd/typo3-dev-mcp') ?? 'dev',
                 'TYPO3 development helper MCP server',
             )
             ->setInstructions(self::INSTRUCTIONS);

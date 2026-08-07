@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp\Tool;
+namespace BalatD\DevMcp\Mcp\Tool;
 
-use T3Boost\Mcp\Support\LabelTranslator;
-use T3Boost\Mcp\ToolInterface;
+use BalatD\DevMcp\Mcp\Support\LabelTranslator;
+use BalatD\DevMcp\Mcp\ToolInterface;
 
 /**
  * No boost analog — TYPO3's semantic data model. The TCA is what an AI

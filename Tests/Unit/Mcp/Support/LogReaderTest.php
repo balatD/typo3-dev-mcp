@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Tests\Unit\Mcp\Support;
+namespace BalatD\DevMcp\Tests\Unit\Mcp\Support;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use T3Boost\Mcp\Support\LogReader;
+use BalatD\DevMcp\Mcp\Support\LogReader;
 
 final class LogReaderTest extends TestCase
 {
@@ -14,7 +14,7 @@ final class LogReaderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->logFile = tempnam(sys_get_temp_dir(), 't3boost_log_') . '.log';
+        $this->logFile = tempnam(sys_get_temp_dir(), 'dev_mcp_log_') . '.log';
     }
 
     protected function tearDown(): void

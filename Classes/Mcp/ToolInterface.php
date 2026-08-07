@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace T3Boost\Mcp;
+namespace BalatD\DevMcp\Mcp;
 
 /**
- * A single MCP tool exposed by the T3Boost server.
+ * A single MCP tool exposed by the typo3-dev-mcp server.
  *
- * Implementations are auto-registered via the `t3boost.tool` service tag
+ * Implementations are auto-registered via the `devmcp.tool` service tag
  * (see Configuration/Services.yaml) and bridged to the MCP SDK by the
  * ServeCommand, so they stay free of any SDK-specific types.
  */

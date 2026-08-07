@@ -1,4 +1,4 @@
-name: t3boost
+name: typo3-dev-mcp
 type: php
 docroot: ""
 no_project_mount: true
@@ -7,7 +7,7 @@ composer_version: "2"
 webserver_type: apache-fpm
 xdebug_enabled: false
 additional_hostnames:
-    - v13.t3boost
-    - v14.t3boost
+    - v13.typo3-dev-mcp
+    - v14.typo3-dev-mcp
 additional_fqdns: []
 use_dns_when_possible: true

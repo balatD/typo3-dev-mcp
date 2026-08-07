@@ -5,28 +5,28 @@ services:
     public: false
 
   _instanceof:
-    T3Boost\Mcp\ToolInterface:
-      tags: ['t3boost.tool']
+    BalatD\DevMcp\Mcp\ToolInterface:
+      tags: ['devmcp.tool']
 
-  T3Boost\:
+  BalatD\DevMcp\:
     resource: '../Classes/*'
     exclude:
       - '../Classes/Mcp/SdkToolHandler.php'
 
-  T3Boost\Mcp\ToolRegistry:
+  BalatD\DevMcp\Mcp\ToolRegistry:
     arguments:
-      $tools: !tagged_iterator t3boost.tool
+      $tools: !tagged_iterator devmcp.tool
 
-  T3Boost\Command\ServeCommand:
+  BalatD\DevMcp\Command\ServeCommand:
     tags:
       - name: console.command
-        command: 'boost:mcp'
-        description: 'Start the T3Boost MCP server on stdio (for AI assistants, not humans)'
+        command: 'devmcp:serve'
+        description: 'Start the typo3-dev-mcp MCP server on stdio (for AI assistants, not humans)'
         schedulable: false
 
-  T3Boost\Command\InstallCommand:
+  BalatD\DevMcp\Command\InstallCommand:
     tags:
       - name: console.command
-        command: 'boost:install'
-        description: 'Register the T3Boost MCP server with AI assistants and install AI guidelines'
+        command: 'devmcp:install'
+        description: 'Register the typo3-dev-mcp MCP server with AI assistants and install AI guidelines'
         schedulable: false
