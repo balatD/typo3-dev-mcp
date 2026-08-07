@@ -88,9 +88,10 @@ final class DatabaseSchemaTool implements ToolInterface
     }
 
     /**
+     * @param \Doctrine\DBAL\Schema\AbstractSchemaManager<\Doctrine\DBAL\Platforms\AbstractPlatform> $schemaManager
      * @return array<string, mixed>
      */
-    private function describeTable(object $schemaManager, string $table): array
+    private function describeTable(\Doctrine\DBAL\Schema\AbstractSchemaManager $schemaManager, string $table): array
     {
         $details = $schemaManager->introspectTable($table);
 

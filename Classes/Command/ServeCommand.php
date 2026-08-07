@@ -48,11 +48,13 @@ final class ServeCommand extends Command
             ->setInstructions(self::INSTRUCTIONS);
 
         foreach ($this->toolRegistry->all() as $tool) {
+            /** @var array{type: 'object', properties: array<string, mixed>, required: array<string>|null} $inputSchema */
+            $inputSchema = $tool->getInputSchema();
             $builder->add(
                 new Tool(
                     name: $tool->getName(),
                     title: null,
-                    inputSchema: $tool->getInputSchema(),
+                    inputSchema: $inputSchema,
                     description: $tool->getDescription(),
                     annotations: new ToolAnnotations(readOnlyHint: $tool->isReadOnly()),
                 ),

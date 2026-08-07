@@ -77,19 +77,19 @@ final class DatabaseQueryTool implements ToolInterface
             throw new \RuntimeException('Only a single SQL statement is allowed per call.');
         }
 
+        // All guards must pass before a connection is even opened
+        $isReadStatement = $this->isReadStatement($query);
+        if (!$isReadStatement && !$this->isWriteAllowed()) {
+            throw new \RuntimeException(
+                'Write statements are disabled. Only SELECT/SHOW/EXPLAIN/DESCRIBE/WITH are allowed. '
+                . 'The developer can opt in by setting the environment variable DEV_MCP_ALLOW_WRITE=1.',
+            );
+        }
+
         $connection = $this->connectionPool->getConnectionByName(ConnectionPool::DEFAULT_CONNECTION_NAME);
 
-        if (!$this->isReadStatement($query)) {
-            if (!$this->isWriteAllowed()) {
-                throw new \RuntimeException(
-                    'Write statements are disabled. Only SELECT/SHOW/EXPLAIN/DESCRIBE/WITH are allowed. '
-                    . 'The developer can opt in by setting the environment variable DEV_MCP_ALLOW_WRITE=1.',
-                );
-            }
-
-            $affectedRows = $connection->executeStatement($query);
-
-            return ['affectedRows' => $affectedRows];
+        if (!$isReadStatement) {
+            return ['affectedRows' => $connection->executeStatement($query)];
         }
 
         $result = $connection->executeQuery($query);

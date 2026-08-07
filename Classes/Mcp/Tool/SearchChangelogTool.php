@@ -78,7 +78,7 @@ final class SearchChangelogTool implements ToolInterface
             throw new \RuntimeException('Argument "query" must not be empty.');
         }
 
-        $words = array_filter(array_map(strtolower(...), preg_split('/\s+/', $query) ?: []));
+        $words = array_values(array_filter(array_map(strtolower(...), preg_split('/\s+/', $query) ?: [])));
         $typeFilter = $arguments['type'] ?? null;
         $versionFilter = isset($arguments['version']) ? (string)$arguments['version'] : null;
         $limit = min(30, max(1, (int)($arguments['limit'] ?? self::DEFAULT_LIMIT)));

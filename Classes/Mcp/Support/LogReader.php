@@ -91,6 +91,7 @@ final class LogReader
             }
 
             $entries = [];
+            $current = null;
             while (($line = fgets($handle)) !== false) {
                 $line = rtrim($line, "\r\n");
                 if ($line === '') {
@@ -98,15 +99,21 @@ final class LogReader
                 }
 
                 if (preg_match('/^(.*?)\[(EMERGENCY|ALERT|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG)\]\s*(.*)$/', $line, $matches) === 1) {
-                    $entries[] = [
+                    if ($current !== null) {
+                        $entries[] = $current;
+                    }
+                    $current = [
                         'timestamp' => trim($matches[1]) !== '' ? trim($matches[1]) : null,
                         'level' => $matches[2],
                         'message' => $matches[3],
                     ];
-                } elseif ($entries !== []) {
+                } elseif ($current !== null) {
                     // continuation line (stack trace etc.) belongs to the previous entry
-                    $entries[array_key_last($entries)]['message'] .= "\n" . $line;
+                    $current['message'] .= "\n" . $line;
                 }
+            }
+            if ($current !== null) {
+                $entries[] = $current;
             }
 
             return $entries;
