@@ -1,0 +1,43 @@
+#!/bin/bash
+
+## Description: Install TYPO3 14 with EXT:t3boost
+## Usage: install-v14
+## Example: ddev install-v14
+
+set -e
+
+VERSION=v14
+
+rm -rf /var/www/html/$VERSION/*
+mkdir -p /var/www/html/$VERSION/
+echo "{}" > /var/www/html/$VERSION/composer.json
+composer config extra.typo3/cms.web-dir public -d /var/www/html/$VERSION
+composer config repositories.$EXTENSION_KEY path /var/www/$EXTENSION_KEY -d /var/www/html/$VERSION
+composer config --no-plugins allow-plugins.typo3/cms-composer-installers true -d /var/www/html/$VERSION
+composer config --no-plugins allow-plugins.typo3/class-alias-loader true -d /var/www/html/$VERSION
+composer req t3/cms:'^14' $PACKAGE_NAME:'*@dev' --no-progress -n -d /var/www/html/$VERSION
+
+cd /var/www/html/$VERSION
+
+mysql -h db -u root -p"root" -e "DROP DATABASE IF EXISTS ${VERSION}; CREATE DATABASE ${VERSION};"
+
+vendor/bin/typo3 setup -n --dbname=$VERSION --password=$TYPO3_DB_PASSWORD --create-site="https://${VERSION}.t3boost.ddev.site" --admin-user-password=$TYPO3_SETUP_ADMIN_PASSWORD
+
+vendor/bin/typo3 configuration:set 'BE/debug' 1
+vendor/bin/typo3 configuration:set 'FE/debug' 1
+vendor/bin/typo3 configuration:set 'SYS/devIPmask' '*'
+vendor/bin/typo3 configuration:set 'SYS/displayErrors' 1
+mkdir -p /var/www/html/$VERSION/config/system
+echo '<?php' > /var/www/html/$VERSION/config/system/additional.php
+echo '$GLOBALS["TYPO3_CONF_VARS"]["SYS"]["trustedHostsPattern"] = ".*";' >> /var/www/html/$VERSION/config/system/additional.php
+echo '$GLOBALS["TYPO3_CONF_VARS"]["SYS"]["features"]["security.backend.enforceReferrer"] = false;' >> /var/www/html/$VERSION/config/system/additional.php
+
+# Enable the deprecation log writer so EXT:t3boost's log tools have data to read
+sed -i "/'deprecations'/,/^[[:space:]]*'disabled' => true,/s/'disabled' => true,/'disabled' => false,/" /var/www/html/$VERSION/config/system/settings.php
+
+vendor/bin/typo3 extension:setup
+vendor/bin/typo3 cache:flush
+
+echo ""
+echo "✅ TYPO3 $VERSION installation complete — EXT:t3boost is active"
+echo "🌐 https://v14.t3boost.ddev.site/typo3/ (admin / Joh316!!)"

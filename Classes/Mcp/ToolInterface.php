@@ -31,6 +31,12 @@ interface ToolInterface
     public function getInputSchema(): array;
 
     /**
+     * Whether the tool never mutates application state — announced to MCP
+     * clients as the readOnlyHint tool annotation.
+     */
+    public function isReadOnly(): bool;
+
+    /**
      * Execute the tool. The result must be JSON-serializable; throw a
      * \RuntimeException with an AI-actionable message on failure.
      *

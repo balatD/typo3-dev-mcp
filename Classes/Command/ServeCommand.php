@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace T3Boost\Command;
 
+use Composer\InstalledVersions;
+use Mcp\Schema\Tool;
+use Mcp\Schema\ToolAnnotations;
 use Mcp\Server;
 use Mcp\Server\Transport\StdioTransport;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use T3Boost\Mcp\SdkToolHandler;
 use T3Boost\Mcp\ToolRegistry;
 
 /**
@@ -20,6 +24,11 @@ use T3Boost\Mcp\ToolRegistry;
  */
 final class ServeCommand extends Command
 {
+    private const INSTRUCTIONS = 'Development helper for this TYPO3 installation. '
+        . 'Call application_info once at the start of a session to learn the TYPO3/PHP versions and '
+        . 'installed extensions, then prefer these tools over guessing: they reflect the live '
+        . 'installation (TCA, database, sites, TypoScript, logs), not just the files on disk.';
+
     public function __construct(
         private readonly ToolRegistry $toolRegistry,
     ) {
@@ -31,20 +40,27 @@ final class ServeCommand extends Command
         $this->enforceStdoutHygiene();
 
         $builder = Server::builder()
-            ->setServerInfo('t3boost', '0.1.0');
+            ->setServerInfo(
+                't3boost',
+                InstalledVersions::getPrettyVersion('t3boost/t3boost') ?? 'dev',
+                'TYPO3 development helper MCP server',
+            )
+            ->setInstructions(self::INSTRUCTIONS);
 
         foreach ($this->toolRegistry->all() as $tool) {
-            $builder = $builder->addTool(
-                $tool->execute(...),
-                $tool->getName(),
-                $tool->getDescription(),
-                $tool->getInputSchema(),
+            $builder->add(
+                new Tool(
+                    name: $tool->getName(),
+                    title: null,
+                    inputSchema: $tool->getInputSchema(),
+                    description: $tool->getDescription(),
+                    annotations: new ToolAnnotations(readOnlyHint: $tool->isReadOnly()),
+                ),
+                new SdkToolHandler($tool),
             );
         }
 
-        $builder->build()->run(new StdioTransport());
-
-        return Command::SUCCESS;
+        return $builder->build()->run(new StdioTransport());
     }
 
     private function enforceStdoutHygiene(): void

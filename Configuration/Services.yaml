@@ -10,6 +10,8 @@ services:
 
   T3Boost\:
     resource: '../Classes/*'
+    exclude:
+      - '../Classes/Mcp/SdkToolHandler.php'
 
   T3Boost\Mcp\ToolRegistry:
     arguments:

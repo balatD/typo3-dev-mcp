@@ -44,6 +44,11 @@ final class ApplicationInfoTool implements ToolInterface
         ];
     }
 
+    public function isReadOnly(): bool
+    {
+        return true;
+    }
+
     public function execute(array $arguments): mixed
     {
         $typo3Version = new Typo3Version();

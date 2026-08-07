@@ -1,0 +1,28 @@
+services:
+    web:
+        environment:
+            - EXTENSION_KEY=t3boost
+            - PACKAGE_NAME=t3boost/t3boost
+
+            # TYPO3 v13/v14 `typo3 setup` configuration
+            - TYPO3_DB_DRIVER=mysqli
+            - TYPO3_DB_USERNAME=root
+            - TYPO3_DB_PASSWORD=root
+            - TYPO3_DB_HOST=db
+            - TYPO3_SETUP_ADMIN_EMAIL=admin@example.com
+            - TYPO3_SETUP_ADMIN_USERNAME=admin
+            - TYPO3_SETUP_ADMIN_PASSWORD=Joh316!!
+            - TYPO3_PROJECT_NAME=EXT:t3boost Dev Environment
+            - TYPO3_SERVER_TYPE=apache
+        volumes:
+            - type: bind
+              source: ../
+              target: /var/www/t3boost
+              consistency: cached
+            - v13-data:/var/www/html/v13
+            - v14-data:/var/www/html/v14
+volumes:
+    v13-data:
+        name: "${DDEV_SITENAME}-v13-data"
+    v14-data:
+        name: "${DDEV_SITENAME}-v14-data"

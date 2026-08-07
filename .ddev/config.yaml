@@ -1,0 +1,13 @@
+name: t3boost
+type: php
+docroot: ""
+no_project_mount: true
+php_version: "8.3"
+composer_version: "2"
+webserver_type: apache-fpm
+xdebug_enabled: false
+additional_hostnames:
+    - v13.t3boost
+    - v14.t3boost
+additional_fqdns: []
+use_dns_when_possible: true
