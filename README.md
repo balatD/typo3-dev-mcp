@@ -48,7 +48,6 @@ Then restart your AI assistant (or run `/mcp` in Claude Code).
 | `search_changelog` | Search the core changelog (Breaking/Deprecation/Feature/Important) of the installed version — offline and exact |
 | `get_url` | Real routed frontend URL for a page + backend login URL |
 | `flush_cache` | Flush all caches or a cache group |
-| `tinker` | Execute PHP in the booted TYPO3 context — opt-in only (see below) |
 
 ### Safety model
 
@@ -57,8 +56,8 @@ Then restart your AI assistant (or run `/mcp` in Claude Code).
   before they leave the server.
 - `database_query` accepts only `SELECT`/`SHOW`/`EXPLAIN`/`DESCRIBE`/`WITH` unless the
   developer sets `DEV_MCP_ALLOW_WRITE=1`.
-- `tinker` is double-gated: it only exists when the application context is `Development/*`
-  **and** `DEV_MCP_ALLOW_TINKER=1` (or the `allowTinker` extension setting) is set.
+- There is deliberately **no code-execution tool**: nothing this server exposes can run
+  arbitrary PHP.
 
 ## Requirements
 

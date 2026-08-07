@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+
+- The `tinker` tool (arbitrary PHP execution in the booted TYPO3) — removed
+  entirely for safety, together with its `allowTinker` extension configuration
+  (`ext_conf_template.txt`) and the `DEV_MCP_ALLOW_TINKER` opt-in. The server
+  now exposes no code-execution capability at all.
+
 ## 0.1.0-alpha.2 — 2026-08-07
 
 ### Changed

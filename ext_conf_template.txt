@@ -1,2 +1,0 @@
-# cat=basic; type=boolean; label=Allow tinker tool: Expose the tinker MCP tool that executes arbitrary PHP in the TYPO3 context (Development context only). Alternatively set the environment variable DEV_MCP_ALLOW_TINKER=1.
-allowTinker = 0
