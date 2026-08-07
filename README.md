@@ -58,7 +58,7 @@ Then restart your AI assistant (or run `/mcp` in Claude Code).
 ## Requirements
 
 - TYPO3 13.4 LTS or 14, Composer mode
-- PHP 8.2+ (per your TYPO3 version's requirements)
+- PHP 8.2, 8.3 or 8.4 — every PHP/TYPO3 combination is tested in CI
 
 ## Development
 
