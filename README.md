@@ -26,6 +26,11 @@ vendor/bin/typo3 devmcp:install        # or: ddev exec vendor/bin/typo3 devmcp:i
 
 Then restart your AI assistant (or run `/mcp` in Claude Code).
 
+> **Claude Code** is supported out of the box via the project-scoped `.mcp.json`.
+> Support for other AI CLIs (Codex, Gemini CLI, …) is coming. Meanwhile any MCP
+> client can be pointed at `vendor/bin/typo3 devmcp:serve` manually — and the
+> composed guidelines already land in `AGENTS.md`, which most agents read.
+
 ## Tools
 
 | Tool | What it does |
