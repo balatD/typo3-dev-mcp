@@ -1,0 +1,36 @@
+{
+    "name": "t3boost/t3boost",
+    "description": "AI development helper for TYPO3 v13/v14 — an MCP server exposing TCA, database schema, sites, TypoScript, logs and the core changelog to Claude Code and other MCP clients. Inspired by laravel/boost.",
+    "license": "MIT",
+    "type": "typo3-cms-extension",
+    "keywords": [
+        "typo3",
+        "mcp",
+        "ai",
+        "development",
+        "claude"
+    ],
+    "require": {
+        "php": "^8.2",
+        "mcp/sdk": "^0.7",
+        "typo3/cms-core": "^13.4 || ^14.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "T3Boost\\": "Classes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "T3Boost\\Tests\\": "Tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "t3boost"
+        }
+    }
+}

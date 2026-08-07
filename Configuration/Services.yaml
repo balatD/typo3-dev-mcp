@@ -1,0 +1,30 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  _instanceof:
+    T3Boost\Mcp\ToolInterface:
+      tags: ['t3boost.tool']
+
+  T3Boost\:
+    resource: '../Classes/*'
+
+  T3Boost\Mcp\ToolRegistry:
+    arguments:
+      $tools: !tagged_iterator t3boost.tool
+
+  T3Boost\Command\ServeCommand:
+    tags:
+      - name: console.command
+        command: 'boost:mcp'
+        description: 'Start the T3Boost MCP server on stdio (for AI assistants, not humans)'
+        schedulable: false
+
+  T3Boost\Command\InstallCommand:
+    tags:
+      - name: console.command
+        command: 'boost:install'
+        description: 'Register the T3Boost MCP server with AI assistants and install AI guidelines'
+        schedulable: false
