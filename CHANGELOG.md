@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-alpha.2 — 2026-08-07
+
+### Changed
+
+- CI now tests the full PHP 8.2–8.4 range on both TYPO3 13.4 and 14
+  (TYPO3 14.3 accepts PHP `^8.2`, so all six combinations are covered).
+- Installation goes through Packagist — no VCS repository entry needed anymore.
 
 ### Removed
 
