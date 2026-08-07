@@ -2,6 +2,9 @@ name: typo3-dev-mcp
 type: php
 docroot: ""
 no_project_mount: true
+# The project is bind-mounted via docker-compose.web.yaml; DDEV's own project
+# mount is disabled, so Mutagen has nothing to sync and must stay off.
+performance_mode: none
 php_version: "8.3"
 composer_version: "2"
 webserver_type: apache-fpm
