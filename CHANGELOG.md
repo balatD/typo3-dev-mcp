@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- `tca_schema` is now built on the official Schema API
+  (`TYPO3\CMS\Core\Schema\TcaSchemaFactory`, public since v13) instead of the raw
+  `$GLOBALS['TCA']` array. Output got richer: schema capabilities, record types
+  and pre-resolved relations (e.g. file fields → `sys_file_reference` with
+  relationship type) — identical on v13 and v14.
+
 ## 0.1.0-alpha.3 — 2026-08-07
 
 ### Added

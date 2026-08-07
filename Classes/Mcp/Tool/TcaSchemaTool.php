@@ -4,16 +4,24 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Mcp\Tool;
 
+use TYPO3\CMS\Core\Schema\ActiveRelation;
+use TYPO3\CMS\Core\Schema\Capability\TcaSchemaCapability;
+use TYPO3\CMS\Core\Schema\Field\RelationalFieldTypeInterface;
+use TYPO3\CMS\Core\Schema\TcaSchema;
+use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
 use BalatD\DevMcp\Mcp\Support\LabelTranslator;
 use BalatD\DevMcp\Mcp\ToolInterface;
 
 /**
- * No boost analog — TYPO3's semantic data model. The TCA is what an AI
- * actually needs to write correct queries, forms and extensions.
+ * No boost analog — TYPO3's semantic data model, read through the official
+ * Schema API (TYPO3\CMS\Core\Schema, public since v13) instead of the raw
+ * $GLOBALS['TCA'] array: capabilities, relations and record types come
+ * pre-resolved and identical on v13 and v14.
  */
 final class TcaSchemaTool implements ToolInterface
 {
     public function __construct(
+        private readonly TcaSchemaFactory $tcaSchemaFactory,
         private readonly LabelTranslator $labelTranslator,
     ) {
     }
@@ -25,10 +33,10 @@ final class TcaSchemaTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Inspect the loaded TCA (Table Configuration Array) — TYPO3\'s semantic data model. '
-            . 'Without arguments: all TCA tables with their key ctrl settings. With "table": per-column '
-            . 'summary (type, relations) plus record types and palettes. With "table" and "field": the '
-            . 'complete column configuration. Prefer this over database_schema to understand relations, '
+        return 'Inspect TYPO3\'s semantic data model (TCA) via the official Schema API. '
+            . 'Without arguments: all tables with their key capabilities. With "table": per-field '
+            . 'summary (type, relations), record types and capabilities. With "table" and "field": the '
+            . 'complete field configuration. Prefer this over database_schema to understand relations, '
             . 'enable-fields and record types.';
     }
 
@@ -39,11 +47,11 @@ final class TcaSchemaTool implements ToolInterface
             'properties' => [
                 'table' => [
                     'type' => 'string',
-                    'description' => 'TCA table name, e.g. "tt_content" or "pages"',
+                    'description' => 'Table (schema) name, e.g. "tt_content" or "pages"',
                 ],
                 'field' => [
                     'type' => 'string',
-                    'description' => 'Column name within "table" to get the full configuration for',
+                    'description' => 'Field name within "table" to get the full configuration for',
                 ],
             ],
             'additionalProperties' => false,
@@ -57,108 +65,136 @@ final class TcaSchemaTool implements ToolInterface
 
     public function execute(array $arguments): mixed
     {
-        $tca = $GLOBALS['TCA'] ?? [];
-        if ($tca === []) {
-            throw new \RuntimeException('TCA is not loaded — this should not happen in CLI context.');
-        }
-
         $table = $arguments['table'] ?? null;
         $field = $arguments['field'] ?? null;
 
         if (!\is_string($table) || $table === '') {
-            return $this->listTables($tca);
+            return $this->listSchemas();
         }
 
-        if (!isset($tca[$table])) {
+        if (!$this->tcaSchemaFactory->has($table)) {
             throw new \RuntimeException(
-                'Table "' . $table . '" has no TCA. Call tca_schema without arguments to list TCA tables.',
+                'Table "' . $table . '" has no TCA schema. Call tca_schema without arguments to list tables.',
             );
         }
 
-        if (\is_string($field) && $field !== '') {
-            if (!isset($tca[$table]['columns'][$field])) {
-                throw new \RuntimeException(
-                    'Field "' . $field . '" does not exist in TCA of "' . $table . '".',
-                );
-            }
+        $schema = $this->tcaSchemaFactory->get($table);
 
-            return [
-                'table' => $table,
-                'field' => $field,
-                'configuration' => $tca[$table]['columns'][$field],
-            ];
+        if (\is_string($field) && $field !== '') {
+            return $this->describeField($schema, $table, $field);
         }
 
-        return $this->describeTable($table, $tca[$table]);
+        return $this->describeSchema($schema, $table);
     }
 
     /**
-     * @param array<string, mixed> $tca
      * @return array<string, mixed>
      */
-    private function listTables(array $tca): array
+    private function listSchemas(): array
     {
         $tables = [];
-        foreach ($tca as $tableName => $tableTca) {
-            $ctrl = $tableTca['ctrl'] ?? [];
-            $tables[$tableName] = array_filter([
-                'title' => $this->labelTranslator->translate($ctrl['title'] ?? null),
-                'labelField' => $ctrl['label'] ?? null,
-                'typeField' => $ctrl['type'] ?? null,
-                'sortby' => $ctrl['sortby'] ?? null,
-                'softDelete' => isset($ctrl['delete']),
-                'hiddenField' => $ctrl['enablecolumns']['disabled'] ?? null,
-                'languageAware' => isset($ctrl['languageField']),
-                'workspaceAware' => (bool)($ctrl['versioningWS'] ?? false),
-                'columnCount' => \count($tableTca['columns'] ?? []),
-            ], static fn (mixed $value): bool => $value !== null && $value !== false);
+        foreach ($this->tcaSchemaFactory->all() as $schema) {
+            $rawConfiguration = $schema->getRawConfiguration();
+            $tables[$schema->getName()] = array_filter([
+                'title' => $this->labelTranslator->translate($rawConfiguration['title'] ?? null),
+                'labelField' => $rawConfiguration['label'] ?? null,
+                'typeField' => $schema->supportsSubSchema()
+                    ? $schema->getSubSchemaTypeInformation()->getFieldName()
+                    : null,
+                'softDelete' => $schema->hasCapability(TcaSchemaCapability::SoftDelete) ?: null,
+                'languageAware' => $schema->isLanguageAware() ?: null,
+                'workspaceAware' => $schema->isWorkspaceAware() ?: null,
+                'fieldCount' => \count($schema->getFields()),
+            ], static fn (mixed $value): bool => $value !== null);
         }
         ksort($tables);
 
         return [
             'tableCount' => \count($tables),
             'tables' => $tables,
-            'hint' => 'Pass {"table": "<name>"} for column details.',
+            'hint' => 'Pass {"table": "<name>"} for field details.',
         ];
     }
 
     /**
-     * @param array<string, mixed> $tableTca
      * @return array<string, mixed>
      */
-    private function describeTable(string $table, array $tableTca): array
+    private function describeSchema(TcaSchema $schema, string $table): array
     {
-        $columns = [];
-        foreach ($tableTca['columns'] ?? [] as $columnName => $columnTca) {
-            $config = $columnTca['config'] ?? [];
-            $columns[$columnName] = array_filter([
-                'label' => $this->labelTranslator->translate($columnTca['label'] ?? null),
-                'type' => $config['type'] ?? null,
-                'renderType' => $config['renderType'] ?? null,
-                'foreign_table' => $config['foreign_table'] ?? null,
-                'MM' => $config['MM'] ?? null,
-                'allowed' => $config['allowed'] ?? null,
-                'required' => ($config['required'] ?? false) ?: null,
-                'itemCount' => isset($config['items']) ? \count($config['items']) : null,
-            ], static fn (mixed $value): bool => $value !== null);
+        $fields = [];
+        foreach ($schema->getFields() as $schemaField) {
+            $configuration = $schemaField->getConfiguration();
+            $entry = array_filter([
+                'label' => $this->labelTranslator->translate($schemaField->getLabel()),
+                'type' => $schemaField->getType(),
+                'renderType' => $configuration['renderType'] ?? null,
+                'required' => $schemaField->isRequired() ?: null,
+                'itemCount' => isset($configuration['items']) ? \count($configuration['items']) : null,
+            ], static fn (mixed $value): bool => $value !== null && $value !== '');
+
+            if ($schemaField instanceof RelationalFieldTypeInterface) {
+                $entry['relationship'] = $schemaField->getRelationshipType()->name;
+                $entry['relations'] = array_map(
+                    static fn (ActiveRelation $relation): array => array_filter([
+                        'table' => $relation->toTable(),
+                        'field' => $relation->toField(),
+                    ]),
+                    $schemaField->getRelations(),
+                );
+            }
+
+            $fields[$schemaField->getName()] = $entry;
         }
 
-        $types = array_keys($tableTca['types'] ?? []);
-        $palettes = array_keys($tableTca['palettes'] ?? []);
+        $capabilities = [];
+        foreach (TcaSchemaCapability::cases() as $capability) {
+            if ($schema->hasCapability($capability)) {
+                $capabilities[] = $capability->name;
+            }
+        }
+
+        $recordTypes = [];
+        if ($schema->supportsSubSchema()) {
+            $recordTypes = array_map(
+                static fn (TcaSchema $subSchema): string => $subSchema->getName(),
+                iterator_to_array($schema->getSubSchemata(), false),
+            );
+        }
+
+        return array_filter([
+            'table' => $table,
+            'title' => $this->labelTranslator->translate($schema->getTitle()),
+            'capabilities' => $capabilities,
+            'typeField' => $schema->supportsSubSchema()
+                ? $schema->getSubSchemaTypeInformation()->getFieldName()
+                : null,
+            'recordTypes' => $recordTypes ?: null,
+            'fields' => $fields,
+            'hint' => 'Pass {"table": "' . $table . '", "field": "<name>"} for a full field configuration.',
+        ], static fn (mixed $value): bool => $value !== null);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function describeField(TcaSchema $schema, string $table, string $field): array
+    {
+        if (!$schema->hasField($field)) {
+            throw new \RuntimeException(
+                'Field "' . $field . '" does not exist in the schema of "' . $table . '".',
+            );
+        }
+
+        $schemaField = $schema->getField($field);
 
         return [
             'table' => $table,
-            'ctrl' => [
-                'title' => $this->labelTranslator->translate($tableTca['ctrl']['title'] ?? null),
-                'label' => $tableTca['ctrl']['label'] ?? null,
-                'type' => $tableTca['ctrl']['type'] ?? null,
-                'enablecolumns' => $tableTca['ctrl']['enablecolumns'] ?? [],
-                'languageField' => $tableTca['ctrl']['languageField'] ?? null,
-            ],
-            'columns' => $columns,
-            'types' => $types,
-            'palettes' => $palettes,
-            'hint' => 'Pass {"table": "' . $table . '", "field": "<column>"} for a full column configuration.',
+            'field' => $field,
+            'label' => $this->labelTranslator->translate($schemaField->getLabel()),
+            'type' => $schemaField->getType(),
+            'required' => $schemaField->isRequired(),
+            'nullable' => $schemaField->isNullable(),
+            'configuration' => $schemaField->getConfiguration(),
         ];
     }
 }
