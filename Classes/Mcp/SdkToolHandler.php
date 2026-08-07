@@ -7,6 +7,9 @@ namespace BalatD\DevMcp\Mcp;
 use Mcp\Exception\ToolCallException;
 use Mcp\Server\ClientGateway;
 use Mcp\Server\Handler\ToolHandlerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use BalatD\DevMcp\Event\AfterToolExecutionEvent;
+use BalatD\DevMcp\Event\BeforeToolExecutionEvent;
 
 /**
  * Bridges a typo3-dev-mcp tool to the MCP SDK's explicit handler contract, which
@@ -18,13 +21,24 @@ final class SdkToolHandler implements ToolHandlerInterface
 {
     public function __construct(
         private readonly ToolInterface $tool,
+        private readonly EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
     public function execute(array $arguments, ClientGateway $gateway): mixed
     {
         try {
-            return $this->tool->execute($arguments);
+            $beforeEvent = new BeforeToolExecutionEvent($this->tool, $arguments);
+            $this->eventDispatcher->dispatch($beforeEvent);
+
+            $result = $beforeEvent->hasResult()
+                ? $beforeEvent->getResult()
+                : $this->tool->execute($beforeEvent->getArguments());
+
+            $afterEvent = new AfterToolExecutionEvent($this->tool, $beforeEvent->getArguments(), $result);
+            $this->eventDispatcher->dispatch($afterEvent);
+
+            return $afterEvent->getResult();
         } catch (ToolCallException $e) {
             throw $e;
         } catch (\Throwable $e) {

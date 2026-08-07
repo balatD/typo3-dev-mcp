@@ -4,10 +4,6 @@ services:
     autoconfigure: true
     public: false
 
-  _instanceof:
-    BalatD\DevMcp\Mcp\ToolInterface:
-      tags: ['devmcp.tool']
-
   BalatD\DevMcp\:
     resource: '../Classes/*'
     exclude:

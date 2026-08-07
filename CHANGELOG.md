@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+
+- First-class extensibility: any extension or sitepackage can ship MCP tools by
+  implementing `ToolInterface` (auto-registered via container autoconfiguration,
+  no manual tagging needed).
+- PSR-14 events: `CollectToolsEvent` (add/remove/replace announced tools),
+  `BeforeToolExecutionEvent` (adjust arguments, short-circuit or veto calls),
+  `AfterToolExecutionEvent` (post-process results).
+
 ### Removed
 
 - The `tinker` tool (arbitrary PHP execution in the booted TYPO3) — removed

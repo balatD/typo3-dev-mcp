@@ -59,6 +59,67 @@ Then restart your AI assistant (or run `/mcp` in Claude Code).
 - There is deliberately **no code-execution tool**: nothing this server exposes can run
   arbitrary PHP.
 
+## Extending
+
+### Custom tools from your extension or sitepackage
+
+Implement `BalatD\DevMcp\Mcp\ToolInterface` — that's it. With standard
+autoconfiguration (`autoconfigure: true` in your `Services.yaml`, the default in
+every modern extension) the service is tagged and announced automatically:
+
+```php
+final class ProjectInfoTool implements ToolInterface
+{
+    public function getName(): string
+    {
+        return 'project_info';
+    }
+
+    public function getDescription(): string
+    {
+        return 'Project-specific conventions the AI should know.';
+    }
+
+    public function getInputSchema(): array
+    {
+        return ['type' => 'object', 'properties' => new \stdClass()];
+    }
+
+    public function isReadOnly(): bool
+    {
+        return true;
+    }
+
+    public function execute(array $arguments): mixed
+    {
+        return ['deployTarget' => 'staging.example.com'];
+    }
+}
+```
+
+Constructor injection works as in any TYPO3 service. Throw a
+`\RuntimeException` with an actionable message on failure — it reaches the AI
+as a readable error. After adding a tool, flush the DI cache
+(`vendor/bin/typo3 cache:flush`) and restart the MCP server.
+
+### PSR-14 events
+
+| Event | Dispatched | Use it to |
+|-------|------------|-----------|
+| `CollectToolsEvent` | once at server start | add, remove or replace tools before they are announced |
+| `BeforeToolExecutionEvent` | before every tool call | adjust arguments, short-circuit with your own result, or veto by throwing |
+| `AfterToolExecutionEvent` | after every successful call | post-process results (extra masking, audit logging) |
+
+```php
+#[AsEventListener]
+public function __invoke(BeforeToolExecutionEvent $event): void
+{
+    if ($event->getTool()->getName() === 'flush_cache') {
+        throw new \RuntimeException('Cache flushing is disabled in this project.');
+    }
+}
+```
+
 ## Requirements
 
 - TYPO3 13.4 LTS or 14, Composer mode
