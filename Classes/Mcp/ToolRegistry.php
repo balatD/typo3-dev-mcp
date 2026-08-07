@@ -18,6 +18,9 @@ final class ToolRegistry
     public function __construct(iterable $tools)
     {
         foreach ($tools as $tool) {
+            if ($tool instanceof ConditionalToolInterface && !$tool->isEnabled()) {
+                continue;
+            }
             $this->tools[$tool->getName()] = $tool;
         }
     }

@@ -115,7 +115,10 @@ final class ReadLogEntriesTool implements ToolInterface
             // sys_log stores printf-style placeholders with serialized substitution data
             $logData = @unserialize((string)$row['log_data'], ['allowed_classes' => false]);
             if (\is_array($logData) && $logData !== [] && str_contains($details, '%')) {
-                $formatted = @vsprintf($details, array_map(strval(...), $logData));
+                $formatted = @vsprintf($details, array_map(
+                    static fn (mixed $value): string => \is_scalar($value) ? (string)$value : (string)json_encode($value),
+                    $logData,
+                ));
                 if ($formatted !== false) {
                     $details = $formatted;
                 }
