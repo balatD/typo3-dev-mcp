@@ -8,9 +8,9 @@ use BalatD\DevMcp\Mcp\ToolInterface;
 use TYPO3\CMS\Core\Package\PackageManager;
 
 /**
- * No boost analog. Searches the RST changelog that ships inside typo3/cms-core,
- * so results are offline and exact for the installed TYPO3 version — the
- * primary source for "what changed / what is deprecated / how do I migrate".
+ * Searches the RST changelog that ships inside typo3/cms-core, so results are
+ * offline and exact for the installed TYPO3 version — the primary source for
+ * "what changed / what is deprecated / how do I migrate".
  */
 final class SearchChangelogTool implements ToolInterface
 {

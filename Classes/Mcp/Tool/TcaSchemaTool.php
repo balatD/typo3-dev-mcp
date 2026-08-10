@@ -13,10 +13,11 @@ use BalatD\DevMcp\Mcp\Support\LabelTranslator;
 use BalatD\DevMcp\Mcp\ToolInterface;
 
 /**
- * No boost analog — TYPO3's semantic data model, read through the official
- * Schema API (TYPO3\CMS\Core\Schema, public since v13) instead of the raw
- * $GLOBALS['TCA'] array: capabilities, relations and record types come
- * pre-resolved and identical on v13 and v14.
+ * TYPO3's semantic data model, read through the official Schema API
+ * (TYPO3\CMS\Core\Schema) instead of the raw $GLOBALS['TCA'] array:
+ * capabilities, relations and record types come pre-resolved and identical on
+ * v13 and v14. Core still marks that API @internal on 13.4 ("experimental until
+ * TYPO3 v13 LTS"); the marker is gone in v14.
  */
 final class TcaSchemaTool implements ToolInterface
 {
