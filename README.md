@@ -33,6 +33,8 @@ Then restart your AI assistant (or run `/mcp` in Claude Code).
 
 ## Tools
 
+### Application and data
+
 | Tool | What it does |
 |------|--------------|
 | `application_info` | TYPO3/PHP version, context, DB platform, active extensions, composer packages |
@@ -41,21 +43,58 @@ Then restart your AI assistant (or run `/mcp` in Claude Code).
 | `site_info` | Sites, base URLs, root pages, languages, error handling |
 | `tca_schema` | The TCA: tables, columns, types, relations, record types, palettes |
 | `content_elements` | Registered CTypes (+ legacy `list_type` plugins where present) |
+| `content_blocks` | Registered Content Blocks with type name, table and YAML field definitions |
+| `get_url` | Real routed frontend URL for a page + backend login URL |
+
+### Resolved configuration
+
+The backend-module-only corners of TYPO3 — core ships no CLI for any of these.
+
+| Tool | What it does |
+|------|--------------|
+| `typoscript` | Compiled frontend TypoScript for a page (setup / constants / config) |
+| `page_tsconfig` | Resolved Page TSconfig for a page — `mod.*`, `TCEFORM`, `TCEMAIN` |
+| `site_sets` | Site sets, dependency order, settings definitions, effective site settings |
+| `flexform_schema` | Resolved FlexForm data structures: sheets, fields, per-field TCA |
+| `middleware_stack` | PSR-15 stacks in execution order with package and before/after |
 | `get_config` | `TYPO3_CONF_VARS` subtrees, feature toggles, extension configuration (secrets masked) |
+
+### API discovery
+
+| Tool | What it does |
+|------|--------------|
+| `viewhelper_lookup` | Every available ViewHelper with its exact arguments, types and defaults |
+| `list_events` | PSR-14 events and the listeners actually registered for them |
+| `backend_modules` | Registered backend modules: identifier, parent, path, access, routes |
 | `list_commands` | All `vendor/bin/typo3` console commands with synopsis |
+
+### Documentation and diagnostics
+
+| Tool | What it does |
+|------|--------------|
+| `search_docs` | Search docs.typo3.org, pinned to the installed major version |
+| `search_changelog` | Search the core changelog (Breaking/Deprecation/Feature/Important) of the installed version — offline and exact |
+| `extension_info` | An extension here vs. in the TER and on Packagist — including TYPO3 compatibility |
 | `read_log_entries` | Recent log entries — file logs, deprecation log or `sys_log` |
 | `last_error` | The most recent error-level log entry |
-| `search_changelog` | Search the core changelog (Breaking/Deprecation/Feature/Important) of the installed version — offline and exact |
-| `get_url` | Real routed frontend URL for a page + backend login URL |
 | `flush_cache` | Flush all caches or a cache group |
+
+`content_blocks` is only announced when `friendsoftypo3/content-blocks` is installed.
+Because the DI container is cached, installing that package later needs a
+`vendor/bin/typo3 cache:flush` before the tool appears.
 
 ### Safety model
 
 - Everything is read-only by default; results carry MCP `readOnlyHint` annotations.
+  `flush_cache` is the only tool that changes state.
 - Secret-looking configuration values (`password`, `encryptionKey`, tokens, …) are masked
   before they leave the server.
 - `database_query` accepts only `SELECT`/`SHOW`/`EXPLAIN`/`DESCRIBE`/`WITH` unless the
   developer sets `DEV_MCP_ALLOW_WRITE=1`.
+- `search_docs` and `extension_info` are the only tools that reach the network
+  (docs.typo3.org, extensions.typo3.org, Packagist). They use TYPO3's own HTTP client, so
+  proxy and TLS settings apply. Set `DEV_MCP_NO_NETWORK=1` to keep the server fully offline
+  — those two tools then fail with an explanatory message and everything else is unaffected.
 - There is deliberately **no code-execution tool**: nothing this server exposes can run
   arbitrary PHP.
 

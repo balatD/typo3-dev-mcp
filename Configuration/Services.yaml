@@ -8,6 +8,8 @@ services:
     resource: '../Classes/*'
     exclude:
       - '../Classes/Mcp/SdkToolHandler.php'
+      # depends on an optional package — registered from Services.php when present
+      - '../Classes/Mcp/Tool/ContentBlocksTool.php'
 
   BalatD\DevMcp\Mcp\ToolRegistry:
     arguments:
