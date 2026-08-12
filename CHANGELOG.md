@@ -1,5 +1,56 @@
 # Changelog
 
+## 0.1.0-alpha.6 — 2026-08-12
+
+### Changed
+
+Tool responses got much smaller. Benchmarking the server against a plain Claude
+Code session showed three tools dominating token cost, and almost all of it was
+payload nobody reads. A tool result also stays in the conversation for every
+later turn, so an oversized response is paid repeatedly, not once.
+
+- `last_error` returned the raw log line — 16 KB for one Fluid exception, 96% of
+  it stack trace. It now returns exception class, code, file, line, message,
+  request URL and the first five frames (1.8 KB, −89%). Pass `{"full": true}`
+  for the untouched entry.
+- `read_log_entries` had the same problem multiplied by its default limit of 20:
+  276 KB for a single call at `level: error`. Same structured output, same
+  escape hatch (34 KB, −87%).
+- `application_info` no longer lists every installed Composer package by default
+  — 52% of its response, mostly transitive dependencies nothing asks about. It
+  reports `composerPackageCount` instead; `{"packages": true}` restores the full
+  list. `activeExtensions` is unchanged and still answers "is extension X
+  installed", as does `extension_info` for a specific package.
+- The composed guidelines no longer instruct an unconditional `application_info`
+  call at the start of every session, and now state explicitly that pure code
+  work — refactoring, reading, explaining a file — needs none of these tools.
+  On a refactoring task that instruction alone had been costing 3.6× the
+  baseline in tool calls the agent never used.
+
+**Output shapes changed.** Anything parsing `last_error` or `read_log_entries`
+now sees structured fields where a raw `message` string used to be, and
+`application_info` no longer carries `composerPackages`. The `full` and
+`packages` arguments return the previous payloads.
+
+### Added
+
+- `Tests/Benchmark/` — an A/B harness measuring this extension against a plain
+  Claude Code session on a real TYPO3 13.4 install. It builds a separate,
+  host-mounted benchmark project so the baseline arm keeps genuine file access,
+  seeds a fixture extension providing the live state under test, and grades 17
+  tasks against oracles that never consult the MCP, with a blind judge for the
+  open-ended ones. Run via `composer bench:setup`, `bench:verify`, `bench:tax`,
+  `bench`.
+
+First full sweep, 170 runs on `claude-opus-5`: on questions about the running
+installation (TCA, compiled TypoScript, FlexForms, site sets) the tools cut cost
+53% and turns 60% — the widest case being `lib.contentElement.templateRootPaths`
+after site-set merging, where the baseline spent 458k more tokens rebuilding a
+value that exists in no single file. Task success was 100% in **both** arms, so
+the gain is efficiency and fewer fabricated claims, not capability. The 23 tool
+schemas cost ~6,800 tokens on every request whether used or not. Method,
+per-task numbers and limitations: `Tests/Benchmark/results/final-report.md`.
+
 ## 0.1.0-alpha.5 — 2026-08-10
 
 ### Added
