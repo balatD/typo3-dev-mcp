@@ -10,6 +10,35 @@ from files, the AI reads them from the running application. Inspired by
 > **Status: alpha** — verified live against TYPO3 13.4 and 14.3, but APIs and
 > tool output formats may still change between releases.
 
+## Does it actually help?
+
+Measured, not asserted. 170 benchmark runs on `claude-opus-5` against a real TYPO3 13.4
+installation, comparing a plain Claude Code session against the same session after
+`devmcp:install`:
+
+| Task family | Baseline | With typo3-dev-mcp |
+|---|---|---|
+| **Live-state questions** (TCA, compiled TypoScript, FlexForm, site sets) | $0.208 · 10 turns | **$0.097 · 4 turns** |
+| Code changes | $0.236 · 13 turns | $0.212 · 13 turns |
+| Debugging a seeded fault | $0.164 · 8 turns · 7% hallucination | $0.205 · 9 turns · **0% hallucination** |
+| Control (pure refactoring, no live state) | $0.107 · 5.5 turns | $0.088 · 4 turns |
+
+**On questions about the running installation: 53% cheaper, 60% fewer turns.** The largest
+single case was resolving `lib.contentElement.templateRootPaths` after site-set merging —
+a value that exists in no single file — where the baseline burned **458,000 more tokens**
+reconstructing it by reading across extensions.
+
+Two things this benchmark does **not** show, stated plainly:
+
+- **Task success was 100% in both arms, on all 17 tasks.** A competent agent with grep and
+  a shell solved everything. This is a measure of efficiency and reliability, not
+  capability — the tools make the agent faster and steadier, not smarter.
+- The tool schemas cost **~6,800 tokens on every request**, whether or not a tool is used.
+  On short, non-TYPO3 work that is pure overhead.
+
+Full methodology, per-task results, per-tool usage and limitations:
+**[Tests/Benchmark/README.md](Tests/Benchmark/README.md)**.
+
 ## Installation
 
 ```bash
@@ -184,6 +213,20 @@ printf '%s\n' \
   '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
   | ddev exec -d /var/www/html/v13 vendor/bin/typo3 devmcp:serve
+```
+
+### Benchmark
+
+`Tests/Benchmark/` holds the A/B harness behind the numbers above — a separate,
+host-mounted TYPO3 project, a fixture extension seeding the live state the tasks
+interrogate, 17 graded tasks, and a blind judge. See
+[Tests/Benchmark/README.md](Tests/Benchmark/README.md).
+
+```bash
+composer bench:setup     # build the benchmark TYPO3 project (once)
+composer bench:verify    # prove the two arms differ only as intended
+composer bench:tax       # measure the fixed context cost of the tool schemas
+composer bench           # run the sweep
 ```
 
 ## License
