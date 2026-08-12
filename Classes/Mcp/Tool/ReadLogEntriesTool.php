@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Mcp\Tool;
 
+use BalatD\DevMcp\Mcp\Support\LogEntryParser;
 use BalatD\DevMcp\Mcp\Support\LogReader;
 use BalatD\DevMcp\Mcp\ToolInterface;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -18,6 +19,7 @@ final class ReadLogEntriesTool implements ToolInterface
 
     public function __construct(
         private readonly LogReader $logReader,
+        private readonly LogEntryParser $logEntryParser,
         private readonly ConnectionPool $connectionPool,
     ) {
     }
@@ -32,7 +34,8 @@ final class ReadLogEntriesTool implements ToolInterface
         return 'Read the most recent TYPO3 log entries, newest first. Source "file" (default) reads '
             . 'var/log/typo3_*.log, "deprecations" reads the deprecation log (useful when preparing '
             . 'upgrades), "syslog" reads backend errors/actions from the sys_log database table. '
-            . 'Use "level" to only get entries of that severity or worse (e.g. "warning").';
+            . 'Use "level" to only get entries of that severity or worse (e.g. "warning"). Exceptions are '
+            . 'returned structured with a shortened stack trace; pass "full" for complete raw entries.';
     }
 
     public function getInputSchema(): array
@@ -55,6 +58,10 @@ final class ReadLogEntriesTool implements ToolInterface
                     'type' => 'string',
                     'enum' => ['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'],
                     'description' => 'Minimum severity; only entries at this level or worse are returned',
+                ],
+                'full' => [
+                    'type' => 'boolean',
+                    'description' => 'Return raw log entries including complete stack traces (very large)',
                 ],
             ],
             'additionalProperties' => false,
@@ -88,10 +95,20 @@ final class ReadLogEntriesTool implements ToolInterface
 
         $entries = $this->logReader->readEntries($files, $limit, $level);
 
+        // Unparsed, a single TYPO3 exception entry measures ~16 KB, of which 96%
+        // is stack trace. At the default limit of 20 that is a third of a
+        // megabyte for one call, so trimming matters far more here than it does
+        // for last_error.
+        $full = (bool)($arguments['full'] ?? false);
+        $parsed = array_map(
+            fn (array $entry): array => $this->logEntryParser->parse($entry, $full),
+            $entries,
+        );
+
         return [
             'source' => $source,
-            'entryCount' => \count($entries),
-            'entries' => $entries,
+            'entryCount' => \count($parsed),
+            'entries' => $parsed,
         ];
     }
 

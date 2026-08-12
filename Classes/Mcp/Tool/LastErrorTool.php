@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Mcp\Tool;
 
+use BalatD\DevMcp\Mcp\Support\LogEntryParser;
 use BalatD\DevMcp\Mcp\Support\LogReader;
 use BalatD\DevMcp\Mcp\ToolInterface;
 
@@ -14,6 +15,7 @@ final class LastErrorTool implements ToolInterface
 {
     public function __construct(
         private readonly LogReader $logReader,
+        private readonly LogEntryParser $logEntryParser,
     ) {
     }
 
@@ -26,14 +28,20 @@ final class LastErrorTool implements ToolInterface
     {
         return 'Get the most recent error-level entry from the TYPO3 file logs. Call this right after '
             . 'something failed (a 500 page, a broken backend module, a failed request) to see the actual '
-            . 'exception instead of guessing.';
+            . 'exception instead of guessing. Returns the exception class, code, file, line, message and the '
+            . 'first few stack frames; pass "full" for the complete raw entry.';
     }
 
     public function getInputSchema(): array
     {
         return [
             'type' => 'object',
-            'properties' => new \stdClass(),
+            'properties' => [
+                'full' => [
+                    'type' => 'boolean',
+                    'description' => 'Return the raw log entry including the complete stack trace (large)',
+                ],
+            ],
             'additionalProperties' => false,
         ];
     }
@@ -55,6 +63,6 @@ final class LastErrorTool implements ToolInterface
             ];
         }
 
-        return ['error' => $entries[0]];
+        return ['error' => $this->logEntryParser->parse($entries[0], (bool)($arguments['full'] ?? false))];
     }
 }

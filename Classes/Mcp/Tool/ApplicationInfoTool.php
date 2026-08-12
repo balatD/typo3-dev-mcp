@@ -30,16 +30,21 @@ final class ApplicationInfoTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Read TYPO3 version, PHP version, application context, database platform, active TYPO3 '
-            . 'extensions and installed Composer packages of this installation. Call this once at the start '
-            . 'of a session to ground yourself before using other tools or writing code.';
+        return 'Read TYPO3 version, PHP version, application context, database platform and active TYPO3 '
+            . 'extensions of this installation. Call it when you need version, extension or platform facts. '
+            . 'Pass "packages" to also list every installed Composer package.';
     }
 
     public function getInputSchema(): array
     {
         return [
             'type' => 'object',
-            'properties' => new \stdClass(),
+            'properties' => [
+                'packages' => [
+                    'type' => 'boolean',
+                    'description' => 'Also return every installed Composer package with its version (large)',
+                ],
+            ],
             'additionalProperties' => false,
         ];
     }
@@ -61,13 +66,7 @@ final class ApplicationInfoTool implements ToolInterface
             ];
         }
 
-        $packages = [];
-        foreach (InstalledVersions::getInstalledPackages() as $packageName) {
-            $packages[$packageName] = InstalledVersions::getPrettyVersion($packageName);
-        }
-        ksort($packages);
-
-        return [
+        $info = [
             'typo3Version' => $typo3Version->getVersion(),
             'typo3Branch' => $typo3Version->getBranch(),
             'phpVersion' => PHP_VERSION,
@@ -77,8 +76,25 @@ final class ApplicationInfoTool implements ToolInterface
             'os' => PHP_OS_FAMILY,
             'database' => $this->getDatabaseInfo(),
             'activeExtensions' => $extensions,
-            'composerPackages' => $packages,
         ];
+
+        // Every transitive dependency, which measured as 52% of this response
+        // while answering a question almost nothing asks. `activeExtensions`
+        // covers "is extension X installed"; `extension_info` covers versions
+        // and compatibility of a specific package.
+        if ($arguments['packages'] ?? false) {
+            $packages = [];
+            foreach (InstalledVersions::getInstalledPackages() as $packageName) {
+                $packages[$packageName] = InstalledVersions::getPrettyVersion($packageName);
+            }
+            ksort($packages);
+            $info['composerPackages'] = $packages;
+        } else {
+            $info['composerPackageCount'] = \count(InstalledVersions::getInstalledPackages());
+            $info['hint'] = 'Pass {"packages": true} for the full Composer package list.';
+        }
+
+        return $info;
     }
 
     /**

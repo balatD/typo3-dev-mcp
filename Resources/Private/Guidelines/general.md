@@ -4,7 +4,8 @@ This project runs TYPO3 {{typo3Version}} on PHP {{phpVersion}}.
 
 ## Use the typo3-dev-mcp MCP tools instead of guessing
 
-- Call `application_info` once at the start of a session: exact versions, active extensions, installed packages.
+- These tools answer questions about the *live installation*. If a task is pure code work — renaming a symbol, refactoring, reading or explaining a file, writing a test — none of them have anything to add; do it with the normal file tools.
+- Call `application_info` when you need exact versions, the application context or the list of active extensions — not reflexively at the start of every session.
 - Never invent table columns, CTypes or configuration keys. Read the real ones: `tca_schema` (semantic model, relations), `database_schema` (physical schema), `content_elements` (registered CTypes), `content_blocks` (Content Block YAML fields), `flexform_schema` (FlexForm sheets and fields), `get_config` (TYPO3_CONF_VARS / extension configuration).
 - Never invent ViewHelper names or arguments — `viewhelper_lookup` returns the real signature of every ViewHelper in this installation. Check it before writing Fluid.
 - Never guess resolved configuration; there is no CLI for it: `typoscript` (compiled setup/constants), `page_tsconfig` (`mod.*`, `TCEFORM`, `TCEMAIN`), `site_sets` (sets, settings definitions, effective settings), `middleware_stack` (PSR-15 order).
