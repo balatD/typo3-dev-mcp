@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<T3DataStructure>
+    <sheets>
+        <sDEF>
+            <ROOT>
+                <sheetTitle>Listing</sheetTitle>
+                <el>
+                    <settings.source>
+                        <label>Record source</label>
+                        <config>
+                            <type>select</type>
+                            <renderType>selectSingle</renderType>
+                            <items>
+                                <numIndex index="0">
+                                    <label>Manual selection</label>
+                                    <value>manual</value>
+                                </numIndex>
+                                <numIndex index="1">
+                                    <label>Latest by date</label>
+                                    <value>latest</value>
+                                </numIndex>
+                                <numIndex index="2">
+                                    <label>Featured only</label>
+                                    <value>featured</value>
+                                </numIndex>
+                            </items>
+                            <default>latest</default>
+                        </config>
+                    </settings.source>
+                    <settings.limit>
+                        <label>Maximum items</label>
+                        <config>
+                            <type>number</type>
+                            <default>6</default>
+                            <range>
+                                <lower>1</lower>
+                                <upper>50</upper>
+                            </range>
+                        </config>
+                    </settings.limit>
+                    <settings.startingPoint>
+                        <label>Starting point</label>
+                        <config>
+                            <type>group</type>
+                            <allowed>pages</allowed>
+                            <size>3</size>
+                        </config>
+                    </settings.startingPoint>
+                </el>
+            </ROOT>
+        </sDEF>
+        <sAppearance>
+            <ROOT>
+                <sheetTitle>Appearance</sheetTitle>
+                <el>
+                    <settings.layout>
+                        <label>Layout</label>
+                        <config>
+                            <type>select</type>
+                            <renderType>selectSingle</renderType>
+                            <items>
+                                <numIndex index="0">
+                                    <label>Grid</label>
+                                    <value>grid</value>
+                                </numIndex>
+                                <numIndex index="1">
+                                    <label>List</label>
+                                    <value>list</value>
+                                </numIndex>
+                            </items>
+                            <default>grid</default>
+                        </config>
+                    </settings.layout>
+                    <settings.showTeaser>
+                        <label>Show teaser</label>
+                        <config>
+                            <type>check</type>
+                            <renderType>checkboxToggle</renderType>
+                            <default>1</default>
+                        </config>
+                    </settings.showTeaser>
+                </el>
+            </ROOT>
+        </sAppearance>
+    </sheets>
+</T3DataStructure>

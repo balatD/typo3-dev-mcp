@@ -1,0 +1,18 @@
+settings:
+  benchFixture.headerColor:
+    label: 'Header colour'
+    description: 'Applied to the card header background.'
+    type: string
+    default: '#336699'
+  benchFixture.itemsPerPage:
+    label: 'Items per page'
+    type: int
+    default: 12
+  benchFixture.showTeaser:
+    label: 'Show teaser text'
+    type: bool
+    default: true
+  benchFixture.apiEndpoint:
+    label: 'Listing API endpoint'
+    type: string
+    default: 'https://example.org/api/items'

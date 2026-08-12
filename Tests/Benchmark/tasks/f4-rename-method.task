@@ -1,0 +1,17 @@
+family: F4
+grade: deterministic
+
+--- prompt ---
+In packages/bench_fixture, rename the method BenchModuleController::overviewAction to
+indexAction, and update every reference to it so the backend module still routes
+correctly.
+
+--- oracle ---
+echo "expect: method renamed in the controller and the route target updated in Configuration/Backend/Modules.php; no stale references to overviewAction"
+
+--- check ---
+# Pure refactoring — the MCP has nothing to contribute. Cost here is the tax.
+grep -qF 'indexAction' packages/bench_fixture/Classes/Controller/BenchModuleController.php || exit 1
+grep -qF 'indexAction' packages/bench_fixture/Configuration/Backend/Modules.php || exit 1
+! grep -rqF 'overviewAction' packages/bench_fixture/ || exit 1
+ddev exec php -l /var/www/html/packages/bench_fixture/Classes/Controller/BenchModuleController.php >/dev/null 2>&1

@@ -1,0 +1,19 @@
+family: F1
+grade: deterministic
+
+--- prompt ---
+List every column on the tt_content database table that is NOT part of a vanilla
+TYPO3 core installation — i.e. columns added by installed extensions.
+
+Answer with just the column names, one per line.
+
+--- oracle ---
+ddev exec bash -c "mysql -h db -u db -pdb db -N -e \"SHOW COLUMNS FROM tt_content\"" 2>/dev/null \
+    | awk '{print $1}' | grep '^tx_'
+
+--- check ---
+for col in tx_benchfixture_teaser tx_benchfixture_level tx_benchfixture_related; do
+    grep -qF "$col" "$RESPONSE_FILE" || exit 1
+done
+# Naming a column that does not exist is a hallucination, not a near miss.
+! grep -qE 'tx_benchfixture_(title|subtitle|image|headline)' "$RESPONSE_FILE"

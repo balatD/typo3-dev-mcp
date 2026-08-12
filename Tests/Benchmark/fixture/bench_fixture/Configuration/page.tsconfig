@@ -1,0 +1,36 @@
+mod.web_layout.BackendLayouts.benchTwoColumn {
+    title = Benchmark two column
+    icon = EXT:bench_fixture/Resources/Public/Icons/Extension.svg
+    config {
+        backend_layout {
+            colCount = 2
+            rowCount = 1
+            rows {
+                1 {
+                    columns {
+                        1 {
+                            name = Main
+                            colPos = 0
+                        }
+                        2 {
+                            name = Sidebar
+                            colPos = 2
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+TCEFORM.tt_content.tx_benchfixture_level {
+    altLabels.0 = Muted (fixture override)
+    altLabels.30 = Hero (fixture override)
+    removeItems = 20
+}
+
+TCEFORM.tt_content.CType.removeItems = html
+
+TCEMAIN.table.tt_content {
+    disablePrependAtCopy = 1
+}

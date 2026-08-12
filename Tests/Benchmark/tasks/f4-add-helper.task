@@ -1,0 +1,18 @@
+family: F4
+grade: deterministic
+
+--- prompt ---
+In packages/bench_fixture/Classes/Controller/BenchModuleController.php, add a private
+helper method formatTitle(string $title): string that trims the input and upper-cases
+its first character. Use it for the heading rendered by overviewAction.
+
+--- oracle ---
+echo "expect: private formatTitle(string): string added and called from overviewAction; file still parses"
+
+--- check ---
+F=packages/bench_fixture/Classes/Controller/BenchModuleController.php
+grep -qE 'private function formatTitle\(string \$title\): string' "$F" || exit 1
+grep -qE 'formatTitle\(' "$F" || exit 1
+# Called, not merely defined.
+test "$(grep -c 'formatTitle' "$F")" -ge 2 || exit 1
+ddev exec php -l "/var/www/html/$F" >/dev/null 2>&1

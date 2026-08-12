@@ -1,0 +1,17 @@
+family: F1
+grade: deterministic
+
+--- prompt ---
+Which tt_content CTypes are registered by non-core extensions in this installation?
+
+For each one, give its CType value and the fields shown in its backend form.
+
+--- oracle ---
+grep -oE "'value' => '[a-z_]+'" packages/bench_fixture/Configuration/TCA/Overrides/tt_content.php
+grep -A12 -F "['benchfixture_card'] = [" packages/bench_fixture/Configuration/TCA/Overrides/tt_content.php
+
+--- check ---
+grep -qF 'benchfixture_card' "$RESPONSE_FILE" || exit 1
+grep -qF 'benchfixture_listing' "$RESPONSE_FILE" || exit 1
+grep -qF 'tx_benchfixture_teaser' "$RESPONSE_FILE" || exit 1
+grep -qF 'pi_flexform' "$RESPONSE_FILE"

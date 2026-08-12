@@ -1,0 +1,20 @@
+lib.contentElement {
+    templateRootPaths.200 = EXT:bench_fixture/Resources/Private/Templates/
+    partialRootPaths.200 = EXT:bench_fixture/Resources/Private/Partials/
+    layoutRootPaths.200 = EXT:bench_fixture/Resources/Private/Layouts/
+}
+
+lib.benchFixture = COA
+lib.benchFixture {
+    10 = TEXT
+    10.value = {$benchFixture.headerColor}
+
+    20 = TEXT
+    20.value = {$benchFixture.itemsPerPage}
+    20.wrap = <span class="bench-count">|</span>
+}
+
+tt_content.benchfixture_card =< lib.contentElement
+tt_content.benchfixture_card {
+    templateName = BenchCard
+}

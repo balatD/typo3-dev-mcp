@@ -1,0 +1,18 @@
+family: F1
+grade: deterministic
+
+--- prompt ---
+The site set "balatd/bench-fixture" defines a setting called benchFixture.itemsPerPage.
+
+What is its default value in the set definition, and what is the effective value for
+the site "main"? Answer with just the two numbers, labelled.
+
+--- oracle ---
+echo "default=$(grep -A4 'itemsPerPage' packages/bench_fixture/Configuration/Sets/BenchFixture/settings.definitions.yaml | grep 'default:' | head -1 | awk '{print $2}')"
+echo "effective=$(grep -A3 'benchFixture:' config/sites/main/config.yaml | grep 'itemsPerPage:' | awk '{print $2}')"
+
+--- check ---
+# The site config overrides the set default. Reporting only the default (12) is
+# the characteristic failure: it is what the set file says in isolation.
+grep -qE '(^|[^0-9])12([^0-9]|$)' "$RESPONSE_FILE" || exit 1
+grep -qE '(^|[^0-9])24([^0-9]|$)' "$RESPONSE_FILE"

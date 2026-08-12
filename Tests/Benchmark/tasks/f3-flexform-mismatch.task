@@ -1,0 +1,25 @@
+family: F3
+grade: judge
+
+--- prompt ---
+The "Software listing" plugin (tt_content uid 6) was configured to show 9 items, but
+the configured limit no longer reaches the plugin — reading the record's settings
+returns nothing for it.
+
+Diagnose why. Name the exact cause. Do not fix it.
+
+--- setup ---
+# The stored FlexForm XML still says settings.limit, but the data structure now calls
+# the field settings.maxItems, so the stored value no longer maps to any field.
+sed -i.bak 's|<settings.limit>|<settings.maxItems>|; s|</settings.limit>|</settings.maxItems>|' \
+    packages/bench_fixture/Configuration/FlexForms/BenchPlugin.xml
+rm -f packages/bench_fixture/Configuration/FlexForms/BenchPlugin.xml.bak
+ddev exec vendor/bin/typo3 cache:flush >/dev/null 2>&1
+
+--- oracle ---
+echo "Root cause: the FlexForm data structure renamed the field settings.limit to settings.maxItems."
+echo "File: packages/bench_fixture/Configuration/FlexForms/BenchPlugin.xml"
+echo "The stored XML on tt_content uid 6 still carries settings.limit=9, which no longer matches any field in the DS, so it is dropped when the FlexForm is read."
+
+--- check ---
+exit 2

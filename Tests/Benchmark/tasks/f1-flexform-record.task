@@ -1,0 +1,22 @@
+family: F1
+grade: deterministic
+
+--- prompt ---
+The tt_content record with uid 6 is a plugin that stores its configuration in a
+FlexForm.
+
+Which sheets does that FlexForm data structure define, and what value is actually
+stored for settings.limit on that record?
+
+--- oracle ---
+echo "sheets: $(grep -oE '^[[:space:]]+<(sDEF|s[A-Z][A-Za-z]*)>' packages/bench_fixture/Configuration/FlexForms/BenchPlugin.xml | tr -d ' <>' | sort -u | tr '\n' ' ')"
+echo -n "stored settings.limit on uid 6: "
+ddev exec bash -c "mysql -h db -u db -pdb db -N -e \"SELECT pi_flexform FROM tt_content WHERE uid=6\"" 2>/dev/null \
+    | grep -oE 'settings.limit.*?vDEF">[0-9]+' | grep -oE '[0-9]+$'
+
+--- check ---
+grep -qF 'sDEF' "$RESPONSE_FILE" || exit 1
+grep -qF 'sAppearance' "$RESPONSE_FILE" || exit 1
+# 9 is the stored value; 6 is the data structure's default. Answering 6 means the
+# agent read the DS and never looked at the record.
+grep -qE '(^|[^0-9])9([^0-9]|$)' "$RESPONSE_FILE"

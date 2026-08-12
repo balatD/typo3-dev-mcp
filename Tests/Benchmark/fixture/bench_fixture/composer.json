@@ -1,0 +1,19 @@
+{
+    "name": "balatd/bench-fixture",
+    "description": "Benchmark fixture — seeds enough live state to exercise the typo3-dev-mcp tool surface.",
+    "license": "MIT",
+    "type": "typo3-cms-extension",
+    "require": {
+        "typo3/cms-core": "^13.4 || ^14.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "BalatD\\BenchFixture\\": "Classes/"
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "bench_fixture"
+        }
+    }
+}

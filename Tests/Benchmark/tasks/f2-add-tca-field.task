@@ -1,0 +1,44 @@
+family: F2
+grade: deterministic
+
+--- prompt ---
+Add a new field tx_benchfixture_subtitle to tt_content in the bench_fixture extension
+(packages/bench_fixture):
+
+- a plain text input, maximum 255 characters, trimmed
+- shown in the "Benchmark card" content element's backend form, directly after the
+  existing teaser field
+- with the matching database column
+
+Apply the database change so the column actually exists.
+
+--- oracle ---
+echo "expect: TCA column tx_benchfixture_subtitle present on tt_content, in the benchfixture_card showitem, and a DB column of the same name"
+
+--- check ---
+# Graded against the live install, not the response text: the claim "I added it"
+# is worth nothing if TYPO3 never picked the field up.
+grep -qF 'tx_benchfixture_subtitle' packages/bench_fixture/ext_tables.sql || exit 1
+grep -qF 'tx_benchfixture_subtitle' packages/bench_fixture/Configuration/TCA/Overrides/tt_content.php || exit 1
+
+ddev exec bash -c "mysql -h db -u db -pdb db -N -e \"SHOW COLUMNS FROM tt_content LIKE 'tx_benchfixture_subtitle'\"" 2>/dev/null \
+    | grep -q tx_benchfixture_subtitle || exit 1
+
+# Registered in the card's showitem, after the teaser. Run through `ddev exec`:
+# there is no PHP on the host, so a bare `php -r` here fails open and reports
+# every run as incorrect.
+cat > .check-order.php <<'PHP'
+<?php
+$file = "packages/bench_fixture/Configuration/TCA/Overrides/tt_content.php";
+$src = file_get_contents($file);
+if (!preg_match('/benchfixture_card.*?showitem.*?=>\s*\'(.*?)\'/s', $src, $m)) {
+    exit(1);
+}
+$teaser = strpos($m[1], 'tx_benchfixture_teaser');
+$sub = strpos($m[1], 'tx_benchfixture_subtitle');
+exit(($teaser !== false && $sub !== false && $sub > $teaser) ? 0 : 1);
+PHP
+ddev exec php /var/www/html/.check-order.php </dev/null
+rc=$?
+rm -f .check-order.php
+exit $rc

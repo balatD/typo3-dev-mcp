@@ -22,3 +22,18 @@
 .DS_Store
 /.idea/
 /.vscode/
+
+# Benchmark run output — the curated .md reports are the committed record.
+# Raw ledgers stay local: they are large, superseded by each new sweep, and
+# include runs discarded for broken fixtures or checkers.
+/Tests/Benchmark/results/**/*.jsonl
+/Tests/Benchmark/results/*.jsonl
+/Tests/Benchmark/results/*.txt
+# …except the tool roster: report.php needs it to list tools that were never
+# called, and that section silently disappears when the file is absent.
+!/Tests/Benchmark/results/tool-names.txt
+/Tests/Benchmark/results/runs/
+/Tests/Benchmark/results/archive/
+/Tests/Benchmark/results/invalid/
+/Tests/Benchmark/oracle/*.txt
+/Tests/Benchmark/.bench-env

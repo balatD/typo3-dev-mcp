@@ -1,0 +1,23 @@
+family: F1
+grade: deterministic
+
+--- prompt ---
+Describe the site "main" in this installation: its base URL, its rootPageId, every
+configured language (id, title, base path), and how 404 errors are handled.
+
+--- oracle ---
+cat config/sites/main/config.yaml
+
+--- check ---
+# All matching is case-insensitive: the two arms phrase the same correct answer
+# differently — arm A echoes the YAML key ("rootPageId"), arm B writes prose from
+# site_info ("Root page ID"). A case-sensitive check scores that as a wrong answer
+# and silently penalises whichever arm happens to reformat.
+grep -qiF 'typo3-dev-mcp-bench.ddev.site' "$RESPONSE_FILE" || exit 1
+# The separator allowance is generous because answers arrive as markdown:
+# "rootPageId:** `1`" puts five formatting characters between key and value.
+grep -qiE 'root[ _-]?page[ _-]?(id)?[^0-9]{0,12}1' "$RESPONSE_FILE" || exit 1
+grep -qiF 'german' "$RESPONSE_FILE" || exit 1
+grep -qiF '/de/' "$RESPONSE_FILE" || exit 1
+# 404 routes to page 6 via a Page error handler.
+grep -qE '404' "$RESPONSE_FILE"

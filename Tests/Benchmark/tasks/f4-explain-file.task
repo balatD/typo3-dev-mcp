@@ -1,0 +1,13 @@
+family: F4
+grade: judge
+
+--- prompt ---
+Read packages/bench_fixture/Classes/EventListener/ClearCacheActionListener.php and
+explain in at most three sentences what it does and when it runs.
+
+--- oracle ---
+cat packages/bench_fixture/Classes/EventListener/ClearCacheActionListener.php
+
+--- check ---
+# Judge-graded: correctness here is about reading comprehension, not lookup.
+exit 2

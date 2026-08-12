@@ -1,0 +1,31 @@
+family: F2
+grade: deterministic
+
+--- prompt ---
+Add a new setting benchFixture.cardColumns to the bench-fixture site set
+(packages/bench_fixture): an integer with a default of 3.
+
+Override it to 4 for the site "main", and expose the effective value in TypoScript as
+lib.benchFixture.30 (a TEXT object whose value is the setting).
+
+--- oracle ---
+echo "expect: cardColumns defined with default 3 in settings.definitions.yaml, overridden to 4 in config/sites/main/config.yaml, referenced as a constant in the set's setup.typoscript under lib.benchFixture.30"
+
+--- check ---
+DEFS=packages/bench_fixture/Configuration/Sets/BenchFixture/settings.definitions.yaml
+TS=packages/bench_fixture/Configuration/Sets/BenchFixture/setup.typoscript
+
+grep -qF 'cardColumns' "$DEFS" || exit 1
+# -A6, not -A3: a definition may legitimately carry a description line, which
+# pushes `default:` out of a tighter window.
+grep -A6 'cardColumns' "$DEFS" | grep -qE 'default:[[:space:]]*3' || exit 1
+grep -qE 'cardColumns:[[:space:]]*4' config/sites/main/config.yaml || exit 1
+
+# Searched across the whole file rather than in a window after the first
+# "lib.benchFixture" match: that match is the `= COA` line, and any window short
+# enough to be meaningful stops before the appended 30 entry — which scored ten
+# correct answers as wrong.
+grep -qE '^[[:space:]]*(lib\.benchFixture\.)?30[[:space:]]*=[[:space:]]*TEXT' "$TS" || exit 1
+grep -qF '{$benchFixture.cardColumns}' "$TS" || exit 1
+# The site must still boot after the edit.
+ddev exec vendor/bin/typo3 cache:flush >/dev/null 2>&1

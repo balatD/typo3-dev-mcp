@@ -1,0 +1,26 @@
+family: F3
+grade: judge
+
+--- prompt ---
+Content elements on https://typo3-dev-mcp-bench.ddev.site/products render without any
+of the bench_fixture markup — the custom card template is being ignored, and the page
+falls back to default output.
+
+Diagnose the root cause. Name the exact file and what is wrong with it. Do not fix it.
+
+--- setup ---
+# Drop the set dependency from the site. Nothing errors; the fixture's TypoScript
+# simply never loads, so lib.contentElement.templateRootPaths.200 disappears.
+# There is no log entry for this — it has to be found in configuration.
+sed -i.bak '/^dependencies:/,/^errorHandling:/{/^dependencies:/d; /balatd\/bench-fixture/d;}' \
+    config/sites/main/config.yaml
+rm -f config/sites/main/config.yaml.bak
+ddev exec vendor/bin/typo3 cache:flush >/dev/null 2>&1
+
+--- oracle ---
+echo "Root cause: config/sites/main/config.yaml no longer lists the site set balatd/bench-fixture under 'dependencies'."
+echo "Without the set, the fixture's setup.typoscript is never loaded, so lib.contentElement.templateRootPaths.200 (EXT:bench_fixture/Resources/Private/Templates/) is missing and tt_content.benchfixture_card falls back to default rendering."
+echo "Silent failure: nothing is written to any log."
+
+--- check ---
+exit 2

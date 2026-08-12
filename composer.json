@@ -51,6 +51,11 @@
         "sort-packages": true
     },
     "scripts": {
+        "bench": "Tests/Benchmark/bin/run.sh",
+        "bench:report": "php Tests/Benchmark/bin/report.php",
+        "bench:setup": "Tests/Benchmark/bin/setup-bench.sh",
+        "bench:tax": "Tests/Benchmark/bin/tax.sh",
+        "bench:verify": "Tests/Benchmark/bin/verify-arms.sh",
         "cgl": "php-cs-fixer fix",
         "stan": "phpstan analyse Classes --level=8",
         "test:unit": "phpunit -c Tests/UnitTests.xml"

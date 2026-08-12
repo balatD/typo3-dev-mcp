@@ -1,0 +1,16 @@
+family: F1
+grade: deterministic
+
+--- prompt ---
+What entries does lib.contentElement.templateRootPaths have in the compiled
+TypoScript of this installation? List every key with its path.
+
+--- oracle ---
+grep -rn 'templateRootPaths' \
+    packages/bench_fixture/Configuration/Sets/BenchFixture/setup.typoscript \
+    vendor/typo3/cms-fluid-styled-content/Configuration/Sets/FluidStyledContent/setup.typoscript 2>/dev/null
+
+--- check ---
+grep -qF '200' "$RESPONSE_FILE" || exit 1
+grep -qF 'EXT:bench_fixture/Resources/Private/Templates' "$RESPONSE_FILE" || exit 1
+grep -qF 'EXT:fluid_styled_content/Resources/Private/Templates' "$RESPONSE_FILE"

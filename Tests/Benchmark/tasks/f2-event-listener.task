@@ -1,0 +1,25 @@
+family: F2
+grade: deterministic
+
+--- prompt ---
+In the bench_fixture extension (packages/bench_fixture), register a PSR-14 event
+listener for the event that TYPO3 dispatches after TCA has been compiled.
+
+Make it an invokable class named TcaCompilationListener in the extension's
+EventListener namespace. It does not need to modify anything.
+
+--- oracle ---
+echo "expect: TYPO3\\\\CMS\\\\Core\\\\Configuration\\\\Event\\\\AfterTcaCompilationEvent"
+
+--- check ---
+F=packages/bench_fixture/Classes/EventListener/TcaCompilationListener.php
+test -f "$F" || exit 1
+# The exact event class is the point of the task — a plausible-looking wrong name
+# (AfterTcaLoadedEvent, TcaCompiledEvent) is the failure this measures.
+grep -qF 'AfterTcaCompilationEvent' "$F" || exit 1
+grep -qF '__invoke' "$F" || exit 1
+ddev exec php -l "/var/www/html/$F" >/dev/null 2>&1 || exit 1
+# Must actually register, not just exist on disk.
+ddev exec vendor/bin/typo3 cache:flush >/dev/null 2>&1 || exit 1
+grep -qE 'AsEventListener|Services\.(yaml|php)' "$F" \
+    || grep -qF 'TcaCompilationListener' packages/bench_fixture/Configuration/Services.yaml

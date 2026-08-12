@@ -1,0 +1,4 @@
+name: balatd/bench-fixture
+label: Benchmark Fixture
+dependencies:
+  - typo3/fluid-styled-content
