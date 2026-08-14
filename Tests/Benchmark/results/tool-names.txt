@@ -7,7 +7,6 @@ extension_info
 flexform_schema
 flush_cache
 get_config
-get_url
 last_error
 list_commands
 list_events

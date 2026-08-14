@@ -73,7 +73,6 @@ Then restart your AI assistant (or run `/mcp` in Claude Code).
 | `tca_schema` | The TCA: tables, columns, types, relations, record types, palettes |
 | `content_elements` | Registered CTypes (+ legacy `list_type` plugins where present) |
 | `content_blocks` | Registered Content Blocks with type name, table and YAML field definitions |
-| `get_url` | Real routed frontend URL for a page + backend login URL |
 
 ### Resolved configuration
 
