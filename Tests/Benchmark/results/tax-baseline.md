@@ -63,3 +63,26 @@ the three log tools, behind one dispatching tool).
 Whether 6,620 tokens is *worth paying* is the question the task sweep answers. This file is
 only the denominator. Pair it with the F4 negative-control results: if arm B costs more on
 tasks where the tools are irrelevant, this tax is what's showing up.
+
+## Update — alpha.7, measured 2026-08-14
+
+| | tokens |
+|---|---|
+| baseline prompt, no MCP | 9,989 |
+| with typo3-dev-mcp attached | 16,259 |
+| **fixed tax** | **6,270** |
+
+22 tools (`get_url` deleted), all descriptions trimmed, cross-tool policy moved into the
+server `instructions` string. Again zero variance across 3 reps. Reproduce with
+`bin/schema-cost.sh 6270`.
+
+The baseline prompt itself grew from 9,250 to 9,989 tokens between the two measurements —
+the Claude Code system prompt is not a fixed quantity, so only the *delta* is comparable
+across dates, never the `on` figure.
+
+**6,807 → 6,270 is −537, not the ~2,000 predicted above.** The "30% cut" estimate treated
+the whole serialized schema as prose; in reality descriptions are roughly a third of it,
+and property names, types, enums and JSON structure are not compressible. Trimming every
+description as far as it goes without losing argument semantics bought ~300 tokens, and
+deleting a tool ~235. The flat-distribution conclusion is unchanged and now better
+supported: meaningful reduction needs fewer *tools*, not shorter prose.

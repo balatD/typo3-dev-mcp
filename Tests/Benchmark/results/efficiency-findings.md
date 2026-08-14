@@ -169,6 +169,72 @@ bin/run.sh --tasks f4-rename-method --reps 3   # the negative control, most sens
 `f4-rename-method` is the sharpest regression detector: any change that reduces induced
 tool-calling shows up there first, because the correct behaviour is to call nothing.
 
+## Round 2 — alpha.7, measured 2026-08-14
+
+Acting on findings 3 and 4, plus the `get_config` defect the 170-run sweep exposed but
+this document predates. Payloads measured on the bench project with `bin/mcp-call.sh`,
+HEAD versions of the two tools restored for the "before" column so both are the same
+project state — the project has drifted since the sweep, so the sweep's recorded
+`get_config` figure of 43,288 chars is no longer the right baseline.
+
+| payload (text chars) | before | after | |
+|---|---|---|---|
+| `get_config {"path":"SYS"}` | 73,792 | **10,127** | −86% |
+| `get_config {"path":"SYS/trustedHostsPattern"}` | 195 | 195 | unchanged |
+| `list_commands {}` | 13,597 | **4,580** | −66% |
+| `list_commands {"search":"cache"}` | n/a | 336 | new |
+| schema tax (`bin/tax.sh`, 3 reps, zero variance) | 6,807 | **6,270** | −537 |
+
+`get_config` now collapses arrays below depth 2 to a `key => "tree"|"value"` map, with
+`{"full": true}` restoring the old behaviour. `list_commands` gained `search`/`name` and
+drops synopses from the list view. `get_url` was deleted. All 22 remaining descriptions
+were trimmed of usage advice that duplicates the guidelines, and the cross-tool policy
+moved into the server-level `instructions` string.
+
+**The −537 token result falsifies this document's own estimate.** Section 3 projected
+"~2,000 tokens for a 30% prose cut", but that was 30% of the *entire* serialized schema —
+and descriptions are only part of it, alongside property names, types, enums and JSON
+structure that cannot be cut. Trimming every tool description as far as it can go without
+losing argument semantics is worth ~300 tokens; `get_url` was another ~235. The flat
+distribution finding stands, and so does its conclusion: **there is no 80/20 cut here.**
+
+### `f1-trusted-hosts` — fixed
+
+Arm b, 3 reps, against the 5 recorded reps of sweep `20260812T111429Z`:
+
+| | before (n=5) | after (n=3) |
+|---|---|---|
+| `tool_bytes`, median | 43,560 | **85** |
+| cost, median | $0.321 | **$0.053** |
+| input tokens, median | 149,572 | **72,594** |
+| turns, median | 5 | 4 |
+| check | 5/5 pass | 3/3 pass |
+
+4 of the 5 old runs called `{"path":"SYS"}` and paid ~43 KB for it; none of the 3 new runs
+did. The worst F1 regression in the sweep (+$0.192 against baseline) is gone. Note that the
+fix does not depend on the agent choosing a narrow path — the wide call now costs 10 KB
+instead of 74 KB either way.
+
+### `f4-rename-method` — no change, and the premise was wrong
+
+| | before (n=5) | after (n=3) |
+|---|---|---|
+| MCP calls, median | 1 | 1 |
+| cost, median | $0.203 | $0.259 |
+| input tokens, median | 179,017 | 237,119 |
+
+Tightening the `flush_cache` guideline did not reduce induced tool-calling here. n=3 against
+a before-spread of $0.145–$0.251 does not support calling this a regression either; the
+honest reading is no measurable effect.
+
+More importantly, **this task is not the clean negative control section 4 assumed.** It
+renames a method *and* updates `Configuration/Backend/Modules.php` — a cached backend-module
+registration. `flush_cache` after editing that file is defensible, and so is a
+`backend_modules` call to confirm the route still resolves. The claim above that "the
+correct number of tool calls on that task is zero" is wrong, which means F4 is a weaker
+regression detector than this document claims. A genuine control would touch only a method
+body and no configuration file.
+
 ## Confidence
 
 n=2 per cell, 4 of 17 tasks, one project. The payload sizes are measurements and are
