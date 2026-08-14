@@ -50,8 +50,9 @@ vendor/bin/typo3 devmcp:install        # or: ddev exec vendor/bin/typo3 devmcp:i
 
 - registers the MCP server in the project's `.mcp.json` — when DDEV is detected the
   server is started via `ddev exec vendor/bin/typo3 devmcp:serve`, otherwise via local PHP;
-- composes version-specific AI guidelines into `.ai/guidelines/typo3.md` and links them
-  from `CLAUDE.md` / `AGENTS.md` (between idempotent markers, existing content is kept).
+- writes a tool reference into `.ai/guidelines/typo3.md` and links it from `CLAUDE.md` /
+  `AGENTS.md` (between idempotent markers, existing content is kept). It lists what each
+  tool reports and nothing else — no framework advice.
 
 Then restart your AI assistant (or run `/mcp` in Claude Code).
 
