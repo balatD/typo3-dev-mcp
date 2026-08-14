@@ -11,11 +11,11 @@ This project runs TYPO3 {{typo3Version}} on PHP {{phpVersion}}.
 - Never guess resolved configuration; there is no CLI for it: `typoscript` (compiled setup/constants), `page_tsconfig` (`mod.*`, `TCEFORM`, `TCEMAIN`), `site_sets` (sets, settings definitions, effective settings), `middleware_stack` (PSR-15 order).
 - Before wiring an extension point, look it up with `list_events` — it shows the real event classes and who already listens. Use PSR-14 events, not legacy hooks.
 - Backend module identifiers changed in TYPO3 v14 (Web → Content, File → Media, Admin Tools → Administration). Resolve them with `backend_modules` instead of from memory.
-- Site identifiers, root pages, base URLs and languages come from `site_info`; build frontend links with `get_url`.
+- Site identifiers, root pages, base URLs and languages come from `site_info`.
 - When something fails, read the actual error before theorizing: `last_error`, then `read_log_entries` (sources: file, deprecations, syslog).
 - Before using a core API that might have changed between versions, check `search_changelog` — it searches the changelog of the exact installed core version, including the migration path. For "how does X work", use `search_docs`; it is pinned to the installed major version.
 - Before adding or upgrading an extension, check `extension_info` for a release compatible with this TYPO3 version.
-- After changing TCA, TypoScript, Services.yaml, site configuration or templates: `flush_cache` (group `system` for configuration/DI, `pages` for content/rendering).
+- After changing TCA, TypoScript, Services.yaml, site configuration or templates: `flush_cache` (group `system` for configuration/DI, `pages` for content/rendering). Editing PHP *inside* a class — renaming a method, refactoring a body, adding a test — changes nothing that is cached; do not flush.
 - Discover CLI commands with `list_commands` instead of assuming Symfony/Laravel-style names.
 
 ## Conventions
