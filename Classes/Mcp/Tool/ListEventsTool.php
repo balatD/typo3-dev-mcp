@@ -37,10 +37,9 @@ final class ListEventsTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'List PSR-14 events of this installation and the listeners actually registered for them '
-            . '(class, method, identifier). Pass "event" to filter by event class, "listener" to find what '
-            . 'a class listens to, or "withListenersOnly" to see only events that are hooked. Use this '
-            . 'before adding an event listener instead of guessing event class names.';
+        return 'PSR-14 events of this installation and the listeners actually registered for them '
+            . '(class, method, identifier). "event" filters by event class, "listener" finds what a '
+            . 'class listens to, "withListenersOnly" shows only events that are hooked.';
     }
 
     public function getInputSchema(): array

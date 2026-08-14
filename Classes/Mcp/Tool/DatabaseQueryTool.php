@@ -31,11 +31,12 @@ final class DatabaseQueryTool implements ToolInterface
     {
         $writeEnabled = $this->isWriteAllowed();
 
-        return 'Execute a single SQL query against the TYPO3 database and get the result rows. '
+        return 'Execute one SQL query against the TYPO3 database and get the result rows. '
             . ($writeEnabled
                 ? 'Write statements are ENABLED via DEV_MCP_ALLOW_WRITE. '
                 : 'Read-only: only SELECT/SHOW/EXPLAIN/DESCRIBE/WITH are accepted (set DEV_MCP_ALLOW_WRITE=1 to allow writes). ')
-            . 'Remember TYPO3 soft-delete semantics: filter deleted=0 (and hidden=0 for live records) yourself.';
+            . 'TYPO3 soft-delete semantics are not applied for you: filter deleted=0 (and hidden=0 for '
+            . 'live records) yourself.';
     }
 
     public function getInputSchema(): array

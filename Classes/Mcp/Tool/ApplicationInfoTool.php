@@ -30,9 +30,8 @@ final class ApplicationInfoTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Read TYPO3 version, PHP version, application context, database platform and active TYPO3 '
-            . 'extensions of this installation. Call it when you need version, extension or platform facts. '
-            . 'Pass "packages" to also list every installed Composer package.';
+        return 'TYPO3 and PHP version, application context, database platform and active extensions of '
+            . 'this installation. "packages" adds every installed Composer package.';
     }
 
     public function getInputSchema(): array

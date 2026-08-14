@@ -37,9 +37,9 @@ final class FlexFormSchemaTool implements ToolInterface
     public function getDescription(): string
     {
         return 'Resolve the FlexForm data structure of a TCA field into sheets and fields with their TCA '
-            . 'configuration — the actual field names a plugin stores in its FlexForm XML. Defaults to '
-            . 'tt_content.pi_flexform; pass "type" (the CType or, on TYPO3 v13, the list_type of the plugin) '
-            . 'to select the right structure. Use this before reading or writing FlexForm values.';
+            . 'configuration — the field names a plugin actually stores in its FlexForm XML. Defaults to '
+            . 'tt_content.pi_flexform; "type" selects the structure (the CType, or on TYPO3 v13 the '
+            . 'list_type of the plugin).';
     }
 
     public function getInputSchema(): array
@@ -57,8 +57,8 @@ final class FlexFormSchemaTool implements ToolInterface
                 ],
                 'type' => [
                     'type' => 'string',
-                    'description' => 'Record type selecting the structure, e.g. a CType like "textmedia" or a '
-                        . 'v13 plugin list_type — omit for the default structure',
+                    'description' => 'Record type selecting the structure — a CType like "textmedia", or a '
+                        . 'v13 plugin list_type. Omit for the default structure.',
                 ],
                 'record' => [
                     'type' => 'object',

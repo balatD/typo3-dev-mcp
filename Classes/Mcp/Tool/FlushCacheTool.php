@@ -27,9 +27,9 @@ final class FlushCacheTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Flush TYPO3 caches. Without arguments all caches are flushed. With "group" only that '
-            . 'cache group is flushed (typically "pages" after content/TypoScript changes, "system" '
-            . 'after configuration/DI changes).';
+        return 'Flush TYPO3 caches. No arguments: all caches. "group": just that group — "pages" after '
+            . 'content/TypoScript changes, "system" after configuration/DI changes. Editing PHP inside a '
+            . 'class (renaming, refactoring) needs no flush.';
     }
 
     public function getInputSchema(): array

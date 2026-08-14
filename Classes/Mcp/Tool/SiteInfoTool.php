@@ -24,9 +24,8 @@ final class SiteInfoTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'List all configured sites (config/sites/*/config.yaml) with base URL, root page ID, '
-            . 'languages and error handling. Use this to find valid page URLs, language IDs and site '
-            . 'identifiers before generating links or writing site-dependent code.';
+        return 'All configured sites (config/sites/*/config.yaml) with base URL, root page ID, '
+            . 'languages, site sets and error handling.';
     }
 
     public function getInputSchema(): array

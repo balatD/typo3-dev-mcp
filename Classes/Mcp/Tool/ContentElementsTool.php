@@ -25,9 +25,8 @@ final class ContentElementsTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'List all registered content element types (tt_content CTypes) with label and group, plus '
-            . 'legacy list_type plugins where present (removed in TYPO3 v14). Use this before creating '
-            . 'content elements or Fluid templates to see what exists and avoid inventing CTypes.';
+        return 'Registered content element types (tt_content CTypes) with label and group, plus legacy '
+            . 'list_type plugins where present (removed in TYPO3 v14).';
     }
 
     public function getInputSchema(): array

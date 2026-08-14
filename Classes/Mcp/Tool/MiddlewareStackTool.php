@@ -34,10 +34,9 @@ final class MiddlewareStackTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Get the resolved PSR-15 middleware stack ("frontend", "backend" or "core") in the order it '
+        return 'The resolved PSR-15 middleware stack ("frontend", "backend" or "core") in the order it '
             . 'actually executes, with each middleware\'s identifier, class, declaring package and its '
-            . 'before/after constraints. Use this before adding a middleware, to find where a request is '
-            . 'modified, or to check whether a middleware is disabled.';
+            . 'before/after constraints. Disabled middlewares are reported too.';
     }
 
     public function getInputSchema(): array

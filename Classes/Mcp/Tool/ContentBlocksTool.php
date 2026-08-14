@@ -32,10 +32,9 @@ final class ContentBlocksTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'List the Content Blocks registered in this installation with their vendor/name, generated '
-            . 'type name, table, host extension and field definitions. Pass "name" for one block in full '
-            . 'detail. Use this before editing a Content Block or its templates — the YAML field '
-            . 'identifiers here are what ends up in TCA and in the database.';
+        return 'Registered Content Blocks with vendor/name, generated type name, table, host extension '
+            . 'and field definitions. "name" for one block in full detail. The YAML field identifiers '
+            . 'here are what ends up in TCA and in the database.';
     }
 
     public function getInputSchema(): array

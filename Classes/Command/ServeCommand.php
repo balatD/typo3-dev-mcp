@@ -26,10 +26,16 @@ use BalatD\DevMcp\Mcp\ToolRegistry;
  */
 final class ServeCommand extends Command
 {
-    private const INSTRUCTIONS = 'Development helper for this TYPO3 installation. '
-        . 'Call application_info once at the start of a session to learn the TYPO3/PHP versions and '
-        . 'installed extensions, then prefer these tools over guessing: they reflect the live '
-        . 'installation (TCA, database, sites, TypoScript, logs), not just the files on disk.';
+    /**
+     * The cross-tool policy lives here, not repeated in 23 tool descriptions:
+     * the instructions reach every MCP client once, whereas each description is
+     * schema that is re-sent on every request.
+     */
+    private const INSTRUCTIONS = 'Development helper for this TYPO3 installation. These tools report the '
+        . 'live state — TCA, database, sites, compiled TypoScript, resolved configuration, logs — not just '
+        . 'the files on disk. Prefer them over guessing table columns, CTypes, ViewHelper arguments or '
+        . 'configuration keys. For pure code work (renaming, refactoring, reading or explaining a file) '
+        . 'they have nothing to add; use the normal file tools.';
 
     public function __construct(
         private readonly ToolRegistry $toolRegistry,

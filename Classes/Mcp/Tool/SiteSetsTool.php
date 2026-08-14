@@ -37,10 +37,10 @@ final class SiteSetsTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Inspect TYPO3 site sets: which sets are registered, their dependency-resolved order, the '
-            . 'settings they define (key, type, default, category) and the TypoScript / page TSconfig they '
-            . 'contribute. Pass "set" for one set in detail, "site" for the sets a site uses plus its '
-            . 'effective settings. Broken sets are reported too — check here when a set seems to be ignored.';
+        return 'TYPO3 site sets: which are registered, their dependency-resolved order, the settings they '
+            . 'define (key, type, default, category) and the TypoScript / page TSconfig they contribute. '
+            . '"set" for one in detail, "site" for a site\'s sets plus effective settings. Broken sets are '
+            . 'reported too — check here when a set seems to be ignored.';
     }
 
     public function getInputSchema(): array

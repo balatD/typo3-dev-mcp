@@ -30,10 +30,9 @@ final class PageTsConfigTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Get the resolved Page TSconfig for a page (all TSconfig of the rootline plus site sets, '
-            . 'merged). Without "path" only the top-level keys are returned — pass a dot-path like '
-            . '"mod.web_layout", "TCEFORM.tt_content" or "TCEMAIN" to drill into the subtree. Covers page '
-            . 'TSconfig only; user TSconfig needs a backend user and is not available here.';
+        return 'Resolved Page TSconfig for a page (the whole rootline plus site sets, merged). Without '
+            . '"path": top-level keys only — pass a dot-path like "mod.web_layout", "TCEFORM.tt_content" '
+            . 'or "TCEMAIN" to drill in. Page TSconfig only; user TSconfig needs a backend user.';
     }
 
     public function getInputSchema(): array

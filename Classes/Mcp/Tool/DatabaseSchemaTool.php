@@ -24,10 +24,9 @@ final class DatabaseSchemaTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Inspect the live database schema. Without arguments: all table names with their column '
-            . 'count. With "table": full column, index and foreign key details for that table. With '
-            . '"filter": only tables whose name contains the given substring. Note that TYPO3 table '
-            . 'structure is defined by TCA + ext_tables.sql — use tca_schema for the semantic model.';
+        return 'The live database schema. No arguments: all table names with their column count. '
+            . '"table": columns, indexes and foreign keys. "filter": only tables matching a substring. '
+            . 'For relations, enable-fields and record types use tca_schema instead.';
     }
 
     public function getInputSchema(): array

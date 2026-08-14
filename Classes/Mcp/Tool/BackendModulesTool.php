@@ -32,10 +32,9 @@ final class BackendModulesTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'List the registered TYPO3 backend modules with identifier, parent, path, access level and '
-            . 'routes. Pass "identifier" for one module in detail or "search" to find one. Use this when '
-            . 'registering a module, linking to one, or resolving a module identifier — do not rely on '
-            . 'names from older TYPO3 versions, v14 renamed most of them.';
+        return 'Registered backend modules with identifier, parent, path, access level and routes. '
+            . '"identifier" for one module in detail, "search" to find one. Identifiers changed in '
+            . 'TYPO3 v14 — resolve them here rather than from memory.';
     }
 
     public function getInputSchema(): array

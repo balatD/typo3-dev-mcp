@@ -34,11 +34,9 @@ final class TcaSchemaTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Inspect TYPO3\'s semantic data model (TCA) via the official Schema API. '
-            . 'Without arguments: all tables with their key capabilities. With "table": per-field '
-            . 'summary (type, relations), record types and capabilities. With "table" and "field": the '
-            . 'complete field configuration. Prefer this over database_schema to understand relations, '
-            . 'enable-fields and record types.';
+        return 'TYPO3\'s semantic data model (TCA) via the official Schema API. No arguments: all tables '
+            . 'with their key capabilities. "table": per-field summary (type, relations), record types '
+            . 'and capabilities. "table" plus "field": the complete field configuration.';
     }
 
     public function getInputSchema(): array

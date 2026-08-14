@@ -26,10 +26,9 @@ final class LastErrorTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Get the most recent error-level entry from the TYPO3 file logs. Call this right after '
-            . 'something failed (a 500 page, a broken backend module, a failed request) to see the actual '
-            . 'exception instead of guessing. Returns the exception class, code, file, line, message and the '
-            . 'first few stack frames; pass "full" for the complete raw entry.';
+        return 'The most recent error-level entry from the TYPO3 file logs: exception class, code, file, '
+            . 'line, message and the first few stack frames. Call it after something failed (a 500 page, '
+            . 'a broken module) instead of theorising. "full" returns the complete raw entry.';
     }
 
     public function getInputSchema(): array

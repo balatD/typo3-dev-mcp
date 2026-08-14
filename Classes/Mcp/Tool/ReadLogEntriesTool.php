@@ -31,11 +31,10 @@ final class ReadLogEntriesTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Read the most recent TYPO3 log entries, newest first. Source "file" (default) reads '
-            . 'var/log/typo3_*.log, "deprecations" reads the deprecation log (useful when preparing '
-            . 'upgrades), "syslog" reads backend errors/actions from the sys_log database table. '
-            . 'Use "level" to only get entries of that severity or worse (e.g. "warning"). Exceptions are '
-            . 'returned structured with a shortened stack trace; pass "full" for complete raw entries.';
+        return 'Recent TYPO3 log entries, newest first. Source "file" (default) reads var/log/typo3_*.log, '
+            . '"deprecations" the deprecation log, "syslog" backend errors/actions from the sys_log table. '
+            . '"level" filters to that severity or worse. Exceptions come back structured with a shortened '
+            . 'stack trace; "full" returns complete raw entries.';
     }
 
     public function getInputSchema(): array

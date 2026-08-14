@@ -39,10 +39,9 @@ final class ViewHelperLookupTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Look up Fluid ViewHelpers available in this installation with their exact arguments '
-            . '(name, type, required, default, description). Pass "name" for one ViewHelper in full detail '
-            . '(e.g. "f:link.page"), "search" to find candidates, or nothing to list the registered Fluid '
-            . 'namespaces. Always check here before writing Fluid instead of guessing argument names.';
+        return 'Fluid ViewHelpers available in this installation with their exact arguments (name, type, '
+            . 'required, default, description). "name" for one ViewHelper in full detail (e.g. '
+            . '"f:link.page"), "search" to find candidates, nothing to list the registered Fluid namespaces.';
     }
 
     public function getInputSchema(): array

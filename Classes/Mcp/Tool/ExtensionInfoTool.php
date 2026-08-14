@@ -40,9 +40,8 @@ final class ExtensionInfoTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Look up a TYPO3 extension: the version installed here plus the latest release in the TER '
-            . 'and on Packagist, including which TYPO3 majors it supports. Use this before an upgrade or '
-            . 'before suggesting an extension, instead of guessing whether a compatible release exists.';
+        return 'Look up a TYPO3 extension: the version installed here plus the latest TER and Packagist '
+            . 'releases, including which TYPO3 majors they support.';
     }
 
     public function getInputSchema(): array

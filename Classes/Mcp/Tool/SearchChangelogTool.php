@@ -30,10 +30,9 @@ final class SearchChangelogTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Search the official TYPO3 core changelog (Breaking changes, Deprecations, Features, '
-            . 'Important notes) shipped with the installed core version. Use this when code uses a '
-            . 'possibly deprecated/removed API, when planning upgrades, or to find the migration path '
-            . 'for a changed API. All words of "query" must match (filename or content).';
+        return 'Search the core changelog shipped with the installed version (Breaking, Deprecation, '
+            . 'Feature, Important) — including the migration path for a changed or removed API. '
+            . 'All words of "query" must match, in filename or content.';
     }
 
     public function getInputSchema(): array

@@ -36,10 +36,10 @@ final class TypoScriptTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Get the compiled frontend TypoScript for a page (site sets + sys_template resolved, '
-            . 'conditions evaluated without request context). Section "setup" (default), "constants" '
-            . '(flat settings) or "config". Without "path" only the top-level keys are returned — pass a '
-            . 'dot-path like "page.10" or "plugin.tx_myext" to drill into the subtree.';
+        return 'Compiled frontend TypoScript for a page (site sets + sys_template resolved, conditions '
+            . 'evaluated without request context). Section "setup" (default), "constants" (flat settings) '
+            . 'or "config". Without "path": top-level keys only — pass a dot-path like "page.10" or '
+            . '"plugin.tx_myext" to drill in.';
     }
 
     public function getInputSchema(): array

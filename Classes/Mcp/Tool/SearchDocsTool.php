@@ -41,10 +41,9 @@ final class SearchDocsTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Search the official TYPO3 documentation on docs.typo3.org, filtered to the installed major '
-            . 'version by default, and get titles, excerpts and permalinks back. Use this for "how does X '
-            . 'work" and for third-party extension manuals; use search_changelog instead for "what changed" '
-            . 'or "how do I migrate away from this deprecated API".';
+        return 'Search docs.typo3.org, filtered to the installed major version by default; returns '
+            . 'titles, excerpts and permalinks. Covers "how does X work" and third-party extension '
+            . 'manuals. For "what changed" or "how do I migrate off this API" use search_changelog.';
     }
 
     public function getInputSchema(): array
@@ -63,8 +62,8 @@ final class SearchDocsTool implements ToolInterface
                 ],
                 'scope' => [
                     'type' => 'string',
-                    'description' => 'Restrict to one manual by its slug, e.g. "m/typo3/reference-coreapi/14.3/en-us" '
-                        . '— take it from the "manual" field of an earlier result',
+                    'description' => 'Restrict to one manual by its slug, taken from the "manual" field of '
+                        . 'an earlier result, e.g. "m/typo3/reference-coreapi/14.3/en-us"',
                 ],
                 'page' => [
                     'type' => 'integer',
