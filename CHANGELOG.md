@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.1.0-alpha.7 — 2026-08-14
+
+### Changed
+
+The second pass over the benchmark findings, aimed at the one defect the 170-run
+sweep exposed but alpha.6 did not fix.
+
+- `get_config` returned whatever subtree you asked for, verbatim and unbounded.
+  `{"path": "SYS"}` — the obvious call, and the one four of its six recorded uses
+  made — cost 74 KB, more than the entire tool-schema tax several times over. It
+  now collapses arrays below depth 2 to a `key => "tree"|"value"` map and reports
+  `truncated` plus a drill-down hint (10 KB, −86%). Scalars are never collapsed,
+  so `{"path": "SYS/trustedHostsPattern"}` and friends are unchanged, and
+  `{"full": true}` returns the whole subtree. Secrets are masked before the
+  collapse, not after.
+- `list_commands` took no arguments and returned every command with its full
+  synopsis — 13.6 KB for a call that exists to answer "what is this command
+  called". The list is now names and descriptions only, `{"search": "cache"}`
+  filters it (336 bytes), and `{"name": "cache:flush"}` returns one command with
+  synopsis, aliases and help (4.6 KB unfiltered, −66%).
+- Tool descriptions no longer repeat the usage policy that the guidelines file
+  and the server `instructions` string already carry. The fixed schema tax went
+  from 6,807 to 6,270 tokens per request — a real cut, but far short of the
+  ~2,000 the benchmark notes projected, because descriptions are only about a
+  third of a serialized schema. `Tests/Benchmark/results/tax-baseline.md` records
+  the corrected arithmetic.
+
+### Removed
+
+- `get_url`, the one tool the benchmark evidence actually supports cutting: never
+  called across 170 runs, ~200 bytes of payload, and `site_info` already returns
+  every site's base URL. The five other never-called tools stay — `search_docs`
+  and `extension_info` were disabled by the harness's `DEV_MCP_NO_NETWORK=1`,
+  `read_log_entries` was simply covered by `last_error`, and neither
+  `search_changelog` nor `middleware_stack` has an upgrade or PSR-15 task in the
+  17-task set to call it. Zero calls there is a gap in the task set, not evidence.
+
+Projects that want a smaller surface can drop tools without patching this
+extension, via a `CollectToolsEvent` listener calling `$event->removeTool()`.
+
 ## 0.1.0-alpha.6 — 2026-08-12
 
 ### Changed
