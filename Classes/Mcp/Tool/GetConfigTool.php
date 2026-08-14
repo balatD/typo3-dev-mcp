@@ -14,6 +14,15 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
  */
 final class GetConfigTool implements ToolInterface
 {
+    /**
+     * Subtrees below this depth collapse to a key => "tree"|"value" map.
+     * TYPO3_CONF_VARS is deep and wide: {"path": "SYS"} returned 43 KB
+     * verbatim, which outweighed every other payload in the benchmark. At
+     * depth 2 the scalars people actually ask for (SYS/trustedHostsPattern)
+     * still come back whole, while cacheConfigurations and friends do not.
+     */
+    private const DEFAULT_DEPTH = 2;
+
     public function __construct(
         private readonly ExtensionConfiguration $extensionConfiguration,
         private readonly SecretMasker $secretMasker,
@@ -27,10 +36,10 @@ final class GetConfigTool implements ToolInterface
 
     public function getDescription(): string
     {
-        return 'Read TYPO3 system configuration ($GLOBALS[\'TYPO3_CONF_VARS\'], from settings.php / '
-            . 'additional.php). Without arguments: top-level keys and configured feature toggles. With '
-            . '"path" (slash-separated, e.g. "SYS/caching" or "MAIL"): that configuration subtree. With '
-            . '"extension": the extension configuration of that extension key. Secrets are masked.';
+        return 'Resolved TYPO3 system configuration ($GLOBALS[\'TYPO3_CONF_VARS\']). No arguments: '
+            . 'top-level keys and configured feature toggles. "path" (slash-separated, e.g. "SYS/caching"): '
+            . 'that subtree, nested values collapsed below depth ' . self::DEFAULT_DEPTH . '. "extension": '
+            . 'that extension\'s configuration. Secrets are masked.';
     }
 
     public function getInputSchema(): array
@@ -45,6 +54,10 @@ final class GetConfigTool implements ToolInterface
                 'extension' => [
                     'type' => 'string',
                     'description' => 'Extension key to read the extension configuration for, e.g. "backend"',
+                ],
+                'full' => [
+                    'type' => 'boolean',
+                    'description' => 'Return the whole subtree uncollapsed. Can be very large.',
                 ],
             ],
             'additionalProperties' => false,
@@ -94,14 +107,49 @@ final class GetConfigTool implements ToolInterface
         }
 
         if (\is_array($value)) {
+            // mask before collapsing so a masked key is never skipped by the cut
             $value = $this->secretMasker->mask($value);
         } elseif ($this->secretMasker->isSecretKey(basename($path))) {
             $value = '***MASKED***';
         }
 
-        return [
+        $collapsed = false;
+        if (($arguments['full'] ?? false) !== true) {
+            $value = $this->summarize($value, 0, $collapsed);
+        }
+
+        return array_filter([
             'path' => $path,
             'value' => $value,
-        ];
+            'truncated' => $collapsed ?: null,
+            'hint' => $collapsed
+                ? 'Nested values collapsed below depth ' . self::DEFAULT_DEPTH
+                    . '. Pass {"path": "' . $path . '/<key>"} to drill in, or {"full": true} for everything.'
+                : null,
+        ], static fn (mixed $entry): bool => $entry !== null);
+    }
+
+    private function summarize(mixed $value, int $depth, bool &$collapsed): mixed
+    {
+        if (!\is_array($value)) {
+            return $value;
+        }
+
+        if ($depth >= self::DEFAULT_DEPTH) {
+            $collapsed = $collapsed || $value !== [];
+            $keys = [];
+            foreach ($value as $key => $child) {
+                $keys[(string)$key] = \is_array($child) ? 'tree' : 'value';
+            }
+
+            return $keys;
+        }
+
+        $summarized = [];
+        foreach ($value as $key => $child) {
+            $summarized[$key] = $this->summarize($child, $depth + 1, $collapsed);
+        }
+
+        return $summarized;
     }
 }
