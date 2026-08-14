@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.1.0-alpha.8 — 2026-08-14
+
+### Changed
+
+- The composed AI guidelines are now a tool reference and nothing else: which
+  tools exist, and what each one reports. The seven files of framework advice —
+  `core-13`, `core-14`, `fluid`, `tca`, `extbase`, `testing`, `ddev` — are
+  removed. They told a competent agent things it already knows (use PSR-14 events,
+  don't hardcode fileadmin paths, escape output) and were paid for as context on
+  every request. `.ai/guidelines/typo3.md` drops from 9,806 to 2,304 characters.
+
+  Re-run `devmcp:install` to refresh the file; the old content stays in place
+  until you do.
+
+### Removed
+
+- `GuidelineComposer::selectGuidelines()`. With one guideline file left there is
+  nothing to select by TYPO3 version or DDEV presence, and `compose()` reads it
+  directly. The `{{typo3Major}}` placeholder is gone with it; `{{typo3Version}}`
+  and `{{phpVersion}}` still resolve.
+
 ## 0.1.0-alpha.7 — 2026-08-14
 
 ### Changed
