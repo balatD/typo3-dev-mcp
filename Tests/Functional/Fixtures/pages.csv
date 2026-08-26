@@ -1,0 +1,4 @@
+"pages"
+,"uid","pid","sorting","deleted","hidden","is_siteroot","doktype","slug","title"
+,1,0,256,0,0,1,1,"/","Root Page"
+,2,1,256,0,0,0,1,"/subpage","Subpage"

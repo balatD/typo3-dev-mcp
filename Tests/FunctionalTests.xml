@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+         bootstrap="FunctionalTestsBootstrap.php"
+         cacheDirectory="../.phpunit.cache"
+         cacheResult="false"
+         backupGlobals="true"
+         colors="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         requireCoverageMetadata="false">
+    <testsuites>
+        <testsuite name="functional">
+            <directory>Functional</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>../Classes</directory>
+        </include>
+    </source>
+    <php>
+        <ini name="display_errors" value="1"/>
+        <env name="TYPO3_CONTEXT" value="Testing"/>
+        <!--
+            The two network tools are exercised through their documented offline
+            flag instead of reaching docs.typo3.org and Packagist from CI.
+        -->
+        <env name="DEV_MCP_NO_NETWORK" value="1"/>
+    </php>
+</phpunit>
