@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp\Support;
 
+use BalatD\DevMcp\Mcp\Support\LabelTranslator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use BalatD\DevMcp\Mcp\Support\LabelTranslator;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 

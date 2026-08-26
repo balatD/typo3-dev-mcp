@@ -19,8 +19,7 @@ final class CallableTool implements ToolInterface
     public function __construct(
         private readonly string $name,
         private readonly ?\Closure $behavior = null,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {

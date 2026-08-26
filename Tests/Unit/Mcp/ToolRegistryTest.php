@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp;
 
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use BalatD\DevMcp\Mcp\ToolInterface;
 use BalatD\DevMcp\Mcp\ToolRegistry;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 final class ToolRegistryTest extends TestCase
 {
@@ -26,10 +26,8 @@ final class ToolRegistryTest extends TestCase
 
     private function createTool(string $name): ToolInterface
     {
-        return new class($name) implements ToolInterface {
-            public function __construct(private readonly string $name)
-            {
-            }
+        return new class ($name) implements ToolInterface {
+            public function __construct(private readonly string $name) {}
 
             public function getName(): string
             {

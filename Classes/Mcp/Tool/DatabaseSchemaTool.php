@@ -14,8 +14,7 @@ final class DatabaseSchemaTool implements ToolInterface
 {
     public function __construct(
         private readonly ConnectionPool $connectionPool,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {

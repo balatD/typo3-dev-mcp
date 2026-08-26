@@ -25,8 +25,7 @@ final class LabelTranslator
 
     public function __construct(
         private readonly LanguageServiceFactory $languageServiceFactory,
-    ) {
-    }
+    ) {}
 
     public function translate(?string $label): ?string
     {

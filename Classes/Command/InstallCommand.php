@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Command;
 
+use BalatD\DevMcp\Install\DdevDetector;
+use BalatD\DevMcp\Install\GuidelineComposer;
+use BalatD\DevMcp\Install\McpJsonWriter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use BalatD\DevMcp\Install\DdevDetector;
-use BalatD\DevMcp\Install\GuidelineComposer;
-use BalatD\DevMcp\Install\McpJsonWriter;
 use TYPO3\CMS\Core\Core\Environment;
 
 /**

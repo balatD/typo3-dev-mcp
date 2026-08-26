@@ -20,8 +20,7 @@ final class HttpFetcher
 
     public function __construct(
         private readonly RequestFactory $requestFactory,
-    ) {
-    }
+    ) {}
 
     public function isDisabled(): bool
     {

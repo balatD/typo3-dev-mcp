@@ -14,8 +14,7 @@ final class ListCommandsTool implements ToolInterface
 {
     public function __construct(
         private readonly CommandRegistry $commandRegistry,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -74,7 +73,7 @@ final class ListCommandsTool implements ToolInterface
                 'help' => $command->getProcessedHelp(),
                 'aliases' => $command->getAliases() ?: null,
                 'hidden' => $command->isHidden() ?: null,
-            ], static fn (mixed $value): bool => $value !== null && $value !== '');
+            ], static fn(mixed $value): bool => $value !== null && $value !== '');
         }
 
         // the list is for discovery — a name and a description are enough to

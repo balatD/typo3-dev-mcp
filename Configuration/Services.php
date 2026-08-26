@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use BalatD\DevMcp\Mcp\Tool\ContentBlocksTool;
 use BalatD\DevMcp\Mcp\ToolInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use TYPO3\CMS\ContentBlocks\Registry\ContentBlockRegistry;
 
 // Loaded by TYPO3 in addition to Services.yaml — do not import the yaml here.

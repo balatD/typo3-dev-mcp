@@ -20,8 +20,7 @@ final class SearchChangelogTool implements ToolInterface
 
     public function __construct(
         private readonly PackageManager $packageManager,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -93,7 +92,7 @@ final class SearchChangelogTool implements ToolInterface
             }
         }
 
-        usort($matches, static fn (array $a, array $b): int => $b['score'] <=> $a['score']);
+        usort($matches, static fn(array $a, array $b): int => $b['score'] <=> $a['score']);
         $matches = \array_slice($matches, 0, $limit);
 
         $results = [];
@@ -195,7 +194,7 @@ final class SearchChangelogTool implements ToolInterface
             'title' => $this->extractTitle($lines),
             'excerpt' => $this->extractExcerpt($lines, $words),
             'file' => $relativePath,
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**

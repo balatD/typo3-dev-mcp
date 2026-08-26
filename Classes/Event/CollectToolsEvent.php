@@ -18,8 +18,7 @@ final class CollectToolsEvent
      */
     public function __construct(
         private array $tools,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, ToolInterface> keyed by tool name

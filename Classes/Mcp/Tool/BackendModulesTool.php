@@ -22,8 +22,7 @@ final class BackendModulesTool implements ToolInterface
     public function __construct(
         private readonly ModuleProvider $moduleProvider,
         private readonly LabelTranslator $labelTranslator,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -115,7 +114,7 @@ final class BackendModulesTool implements ToolInterface
             'access' => $module->getAccess(),
             'standalone' => $module->isStandalone() ?: null,
             'subModules' => array_keys($module->getSubModules()) ?: null,
-        ], static fn (mixed $value): bool => $value !== null && $value !== '');
+        ], static fn(mixed $value): bool => $value !== null && $value !== '');
 
         if (!$detailed) {
             return $description;
@@ -126,7 +125,7 @@ final class BackendModulesTool implements ToolInterface
             $routes[(string)$routeName] = array_filter([
                 'target' => \is_array($options) ? ($options['target'] ?? null) : null,
                 'path' => \is_array($options) ? ($options['path'] ?? null) : null,
-            ], static fn (mixed $value): bool => $value !== null);
+            ], static fn(mixed $value): bool => $value !== null);
         }
 
         return array_filter([
@@ -141,6 +140,6 @@ final class BackendModulesTool implements ToolInterface
             'position' => $module->getPosition() ?: null,
             'aliases' => $module->getAliases() ?: null,
             'routes' => $routes !== [] ? $routes : null,
-        ], static fn (mixed $value): bool => $value !== null && $value !== '');
+        ], static fn(mixed $value): bool => $value !== null && $value !== '');
     }
 }

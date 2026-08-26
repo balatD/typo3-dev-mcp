@@ -20,8 +20,7 @@ final class AfterToolExecutionEvent
         private readonly ToolInterface $tool,
         private readonly array $arguments,
         private mixed $result,
-    ) {
-    }
+    ) {}
 
     public function getTool(): ToolInterface
     {

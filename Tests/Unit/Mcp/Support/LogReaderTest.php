@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp\Support;
 
+use BalatD\DevMcp\Mcp\Support\LogReader;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use BalatD\DevMcp\Mcp\Support\LogReader;
 
 final class LogReaderTest extends TestCase
 {

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp\Tool;
 
+use BalatD\DevMcp\Mcp\Support\HttpFetcher;
+use BalatD\DevMcp\Mcp\Tool\SearchDocsTool;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use BalatD\DevMcp\Mcp\Support\HttpFetcher;
-use BalatD\DevMcp\Mcp\Tool\SearchDocsTool;
 use TYPO3\CMS\Core\Http\RequestFactory;
 use TYPO3\CMS\Core\Information\Typo3Version;
 

@@ -16,8 +16,7 @@ final class LastErrorTool implements ToolInterface
     public function __construct(
         private readonly LogReader $logReader,
         private readonly LogEntryParser $logEntryParser,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {

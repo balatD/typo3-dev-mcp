@@ -27,8 +27,7 @@ final class SiteSetsTool implements ToolInterface
         private readonly SetRegistry $setRegistry,
         private readonly SiteFinder $siteFinder,
         private readonly LabelTranslator $labelTranslator,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -105,7 +104,7 @@ final class SiteSetsTool implements ToolInterface
             'invalidSets' => $this->describeInvalidSets(),
             'hint' => 'Pass {"set": "<name>"} for the full settings definitions of one set, or '
                 . '{"site": "<identifier>"} for the sets a site actually uses.',
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**
@@ -204,7 +203,7 @@ final class SiteSetsTool implements ToolInterface
             'hidden' => $set->hidden ?: null,
             'settingsDefinitionCount' => \count($set->settingsDefinitions),
             'settingsDefinitions' => $settings !== [] ? $settings : null,
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**
@@ -224,7 +223,7 @@ final class SiteSetsTool implements ToolInterface
             'enum' => $definition->enum !== [] ? $this->translateEnum($definition->enum) : null,
             'readonly' => $definition->readonly ?: null,
             'tags' => $definition->tags !== [] ? $definition->tags : null,
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**

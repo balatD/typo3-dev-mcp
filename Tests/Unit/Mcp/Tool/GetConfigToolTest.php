@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp\Tool;
 
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use BalatD\DevMcp\Mcp\Support\SecretMasker;
 use BalatD\DevMcp\Mcp\Tool\GetConfigTool;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 
 final class GetConfigToolTest extends TestCase

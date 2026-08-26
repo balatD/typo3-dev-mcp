@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Mcp\Tool;
 
-use Composer\Autoload\ClassLoader;
 use BalatD\DevMcp\Mcp\ToolInterface;
+use Composer\Autoload\ClassLoader;
 use TYPO3\CMS\Fluid\Core\ViewHelper\ViewHelperResolverFactoryInterface;
 use TYPO3Fluid\Fluid\Schema\ViewHelperFinder;
 use TYPO3Fluid\Fluid\Schema\ViewHelperMetadata;
@@ -29,8 +29,7 @@ final class ViewHelperLookupTool implements ToolInterface
     public function __construct(
         private readonly ClassLoader $classLoader,
         private readonly ViewHelperResolverFactoryInterface $viewHelperResolverFactory,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -105,7 +104,7 @@ final class ViewHelperLookupTool implements ToolInterface
         // would write those into the project's deprecation log on every lookup,
         // making read_log_entries report deprecations the developer never
         // caused. Swallow them for the duration of the scan only.
-        set_error_handler(static fn (): bool => true, E_USER_DEPRECATED);
+        set_error_handler(static fn(): bool => true, E_USER_DEPRECATED);
 
         try {
             $finder = new ViewHelperFinder();
@@ -184,7 +183,7 @@ final class ViewHelperLookupTool implements ToolInterface
                 'required' => $argument->isRequired() ?: null,
                 'default' => $argument->getDefaultValue(),
                 'description' => $argument->getDescription(),
-            ], static fn (mixed $value): bool => $value !== null && $value !== '');
+            ], static fn(mixed $value): bool => $value !== null && $value !== '');
         }
 
         return array_filter([
@@ -194,7 +193,7 @@ final class ViewHelperLookupTool implements ToolInterface
             'arguments' => $viewHelperArguments,
             'allowsArbitraryArguments' => $viewHelper->allowsArbitraryArguments ?: null,
             'usage' => '<' . $alias . ':' . $tagName . ' … /> or {value -> ' . $alias . ':' . $tagName . '(…)}',
-        ], static fn (mixed $value): bool => $value !== null && $value !== '');
+        ], static fn(mixed $value): bool => $value !== null && $value !== '');
     }
 
     /**
@@ -227,7 +226,7 @@ final class ViewHelperLookupTool implements ToolInterface
                 $matches[$alias . ':' . $tagName] = array_filter([
                     'class' => $viewHelper->className,
                     'summary' => $summary,
-                ], static fn (mixed $value): bool => $value !== null && $value !== '');
+                ], static fn(mixed $value): bool => $value !== null && $value !== '');
             }
         }
 
@@ -243,7 +242,7 @@ final class ViewHelperLookupTool implements ToolInterface
             'truncated' => $totalMatches > \count($matches) ? $totalMatches : null,
             'viewHelpers' => $matches,
             'hint' => 'Pass {"name": "<tag>"} for the full argument list of one of these.',
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**

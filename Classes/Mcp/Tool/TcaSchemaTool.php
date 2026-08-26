@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Mcp\Tool;
 
+use BalatD\DevMcp\Mcp\Support\LabelTranslator;
+use BalatD\DevMcp\Mcp\ToolInterface;
 use TYPO3\CMS\Core\Schema\ActiveRelation;
 use TYPO3\CMS\Core\Schema\Capability\TcaSchemaCapability;
 use TYPO3\CMS\Core\Schema\Field\RelationalFieldTypeInterface;
 use TYPO3\CMS\Core\Schema\TcaSchema;
 use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
-use BalatD\DevMcp\Mcp\Support\LabelTranslator;
-use BalatD\DevMcp\Mcp\ToolInterface;
 
 /**
  * TYPO3's semantic data model, read through the official Schema API
@@ -24,8 +24,7 @@ final class TcaSchemaTool implements ToolInterface
     public function __construct(
         private readonly TcaSchemaFactory $tcaSchemaFactory,
         private readonly LabelTranslator $labelTranslator,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -104,7 +103,7 @@ final class TcaSchemaTool implements ToolInterface
                 'languageAware' => $schema->isLanguageAware() ?: null,
                 'workspaceAware' => $schema->isWorkspaceAware() ?: null,
                 'fieldCount' => \count($schema->getFields()),
-            ], static fn (mixed $value): bool => $value !== null);
+            ], static fn(mixed $value): bool => $value !== null);
         }
         ksort($tables);
 
@@ -129,12 +128,12 @@ final class TcaSchemaTool implements ToolInterface
                 'renderType' => $configuration['renderType'] ?? null,
                 'required' => $schemaField->isRequired() ?: null,
                 'itemCount' => isset($configuration['items']) ? \count($configuration['items']) : null,
-            ], static fn (mixed $value): bool => $value !== null && $value !== '');
+            ], static fn(mixed $value): bool => $value !== null && $value !== '');
 
             if ($schemaField instanceof RelationalFieldTypeInterface) {
                 $entry['relationship'] = $schemaField->getRelationshipType()->name;
                 $entry['relations'] = array_map(
-                    static fn (ActiveRelation $relation): array => array_filter([
+                    static fn(ActiveRelation $relation): array => array_filter([
                         'table' => $relation->toTable(),
                         'field' => $relation->toField(),
                     ]),
@@ -155,7 +154,7 @@ final class TcaSchemaTool implements ToolInterface
         $recordTypes = [];
         if ($schema->supportsSubSchema()) {
             $recordTypes = array_map(
-                static fn (TcaSchema $subSchema): string => $subSchema->getName(),
+                static fn(TcaSchema $subSchema): string => $subSchema->getName(),
                 iterator_to_array($schema->getSubSchemata(), false),
             );
         }
@@ -170,7 +169,7 @@ final class TcaSchemaTool implements ToolInterface
             'recordTypes' => $recordTypes ?: null,
             'fields' => $fields,
             'hint' => 'Pass {"table": "' . $table . '", "field": "<name>"} for a full field configuration.',
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**

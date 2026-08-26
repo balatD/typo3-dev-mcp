@@ -24,8 +24,7 @@ final class BeforeToolExecutionEvent
     public function __construct(
         private readonly ToolInterface $tool,
         private array $arguments,
-    ) {
-    }
+    ) {}
 
     public function getTool(): ToolInterface
     {

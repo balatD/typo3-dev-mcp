@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp\Tool;
 
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use BalatD\DevMcp\Mcp\Support\LogEntryParser;
 use BalatD\DevMcp\Mcp\Support\LogReader;
 use BalatD\DevMcp\Mcp\Tool\ReadLogEntriesTool;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Core\ApplicationContext;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -66,7 +66,7 @@ final class ReadLogEntriesToolTest extends TestCase
             'line' => 17,
             'message' => 'it broke',
             'exception' => "Stack trace:\n" . implode("\n", array_map(
-                static fn (int $i): string => '#' . $i . ' /app/Frame' . $i . '.php(1): C->m()',
+                static fn(int $i): string => '#' . $i . ' /app/Frame' . $i . '.php(1): C->m()',
                 range(0, 59),
             )),
         ], JSON_THROW_ON_ERROR);

@@ -19,8 +19,7 @@ final class DatabaseQueryTool implements ToolInterface
 
     public function __construct(
         private readonly ConnectionPool $connectionPool,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {

@@ -37,10 +37,10 @@ final class LogReader
 
         $files = array_values(array_filter(
             $files,
-            static fn (string $file): bool => str_contains(basename($file), 'deprecations') === $deprecationLogs,
+            static fn(string $file): bool => str_contains(basename($file), 'deprecations') === $deprecationLogs,
         ));
 
-        usort($files, static fn (string $a, string $b): int => filemtime($b) <=> filemtime($a));
+        usort($files, static fn(string $a, string $b): int => filemtime($b) <=> filemtime($a));
 
         return $files;
     }

@@ -31,8 +31,7 @@ final class SearchDocsTool implements ToolInterface
 
     public function __construct(
         private readonly HttpFetcher $httpFetcher,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -115,7 +114,7 @@ final class SearchDocsTool implements ToolInterface
             'hint' => $results === []
                 ? 'No hits. Try fewer or more general words, or {"version": "all"} to search every version.'
                 : 'Pass {"page": ' . ($page + 1) . '} for more, or {"scope": "<manual>"} to stay inside one manual.',
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     private function buildUri(string $query, string $version, string $scope, int $page): string
@@ -157,7 +156,7 @@ final class SearchDocsTool implements ToolInterface
             'type' => $this->decode((string)($hit['manual_type'] ?? '')),
             'isCore' => $hit['is_core'] ?? null,
             'excerpt' => $this->excerpt((string)($hit['snippet_content'] ?? '')),
-        ], static fn (mixed $value): bool => $value !== null && $value !== '');
+        ], static fn(mixed $value): bool => $value !== null && $value !== '');
     }
 
     private function excerpt(string $content): string

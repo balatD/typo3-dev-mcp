@@ -26,8 +26,7 @@ final class TypoScriptTool implements ToolInterface
         private readonly SiteFinder $siteFinder,
         private readonly SysTemplateRepository $sysTemplateRepository,
         private readonly FrontendTypoScriptFactory $frontendTypoScriptFactory,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {

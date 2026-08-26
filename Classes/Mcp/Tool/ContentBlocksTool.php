@@ -22,8 +22,7 @@ final class ContentBlocksTool implements ToolInterface
     public function __construct(
         private readonly ContentBlockRegistry $contentBlockRegistry,
         private readonly LabelTranslator $labelTranslator,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -132,7 +131,7 @@ final class ContentBlocksTool implements ToolInterface
             ),
             'hostExtension' => $contentBlock->getHostExtension(),
             'fieldCount' => \is_array($yaml['fields'] ?? null) ? \count($yaml['fields']) : 0,
-        ], static fn (mixed $value): bool => $value !== null && $value !== '');
+        ], static fn(mixed $value): bool => $value !== null && $value !== '');
 
         if (!$detailed) {
             return $description;
@@ -152,7 +151,7 @@ final class ContentBlocksTool implements ToolInterface
             'prefixType' => $contentBlock->getPrefixType()->value,
             'fields' => $this->describeFields($yaml['fields'] ?? []),
             'hint' => 'Templates live in ' . $contentBlock->getExtPath() . '/templates/.',
-        ], static fn (mixed $value): bool => $value !== null && $value !== '');
+        ], static fn(mixed $value): bool => $value !== null && $value !== '');
     }
 
     /**
@@ -187,7 +186,7 @@ final class ContentBlocksTool implements ToolInterface
                 'default' => $field['default'] ?? null,
                 // Collection and Palette nest further fields
                 'fields' => isset($field['fields']) ? $this->describeFields($field['fields']) : null,
-            ], static fn (mixed $value): bool => $value !== null && $value !== []);
+            ], static fn(mixed $value): bool => $value !== null && $value !== []);
         }
 
         return $described;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp\Tool;
 
+use BalatD\DevMcp\Mcp\Tool\ListCommandsTool;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use BalatD\DevMcp\Mcp\Tool\ListCommandsTool;
 use Symfony\Component\Console\Command\Command;
 use TYPO3\CMS\Core\Console\CommandRegistry;
 

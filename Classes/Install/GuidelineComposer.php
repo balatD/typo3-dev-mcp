@@ -26,8 +26,7 @@ final class GuidelineComposer
 
     public function __construct(
         private readonly PackageManager $packageManager,
-    ) {
-    }
+    ) {}
 
     public function compose(): string
     {

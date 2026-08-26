@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Mcp\Tool;
 
-use Composer\InstalledVersions;
 use BalatD\DevMcp\Mcp\Support\HttpFetcher;
 use BalatD\DevMcp\Mcp\ToolInterface;
+use Composer\InstalledVersions;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Package\Exception\UnknownPackageException;
 use TYPO3\CMS\Core\Package\PackageManager;
@@ -30,8 +30,7 @@ final class ExtensionInfoTool implements ToolInterface
     public function __construct(
         private readonly PackageManager $packageManager,
         private readonly HttpFetcher $httpFetcher,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -128,7 +127,7 @@ final class ExtensionInfoTool implements ToolInterface
             'ter' => $ter,
             'packagist' => $packagist,
             'notes' => $notes !== [] ? $notes : null,
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**
@@ -167,7 +166,7 @@ final class ExtensionInfoTool implements ToolInterface
             'version' => $package->getPackageMetaData()->getVersion(),
             'active' => $this->packageManager->isPackageActive($packageKey),
             'path' => $package->getPackagePath(),
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**
@@ -227,7 +226,7 @@ final class ExtensionInfoTool implements ToolInterface
             'owner' => $extension['owner'] ?? null,
             'composerName' => $meta['composer_name'] ?? null,
             'repository' => $meta['repository_url'] ?? null,
-        ], static fn (mixed $value): bool => $value !== null && $value !== '');
+        ], static fn(mixed $value): bool => $value !== null && $value !== '');
     }
 
     /**
@@ -260,7 +259,7 @@ final class ExtensionInfoTool implements ToolInterface
                 'requiresTypo3' => $release['require']['typo3/cms-core'] ?? null,
                 'requiresPhp' => $release['require']['php'] ?? null,
                 'released' => isset($release['time']) ? substr((string)$release['time'], 0, 10) : null,
-            ], static fn (mixed $value): bool => $value !== null);
+            ], static fn(mixed $value): bool => $value !== null);
         }
 
         $newest = \is_array($versions[0] ?? null) ? $versions[0] : [];
@@ -274,6 +273,6 @@ final class ExtensionInfoTool implements ToolInterface
                 : null,
             'recentVersions' => $releases !== [] ? $releases : null,
             'url' => 'https://packagist.org/packages/' . $composerName,
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 }

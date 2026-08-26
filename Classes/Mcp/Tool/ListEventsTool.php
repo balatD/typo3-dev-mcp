@@ -27,8 +27,7 @@ final class ListEventsTool implements ToolInterface
     public function __construct(
         private readonly ListenerProvider $listenerProvider,
         private readonly PackageManager $packageManager,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -107,7 +106,7 @@ final class ListEventsTool implements ToolInterface
                 'listenerCount' => \count($eventListeners),
                 'listeners' => $eventListeners !== [] ? $eventListeners : null,
                 'package' => $this->packageOfClass($eventClass),
-            ], static fn (mixed $value): bool => $value !== null);
+            ], static fn(mixed $value): bool => $value !== null);
         }
 
         if ($results === [] && ($eventFilter !== '' || $listenerFilter !== '')) {
@@ -123,7 +122,7 @@ final class ListEventsTool implements ToolInterface
             'events' => $results,
             'hint' => 'Events without listeners are extension points nobody uses yet. Register a listener '
                 . 'with the #[AsEventListener] attribute on an invokable class.',
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**
@@ -151,7 +150,7 @@ final class ListEventsTool implements ToolInterface
                     // a null method means the listener is invokable
                     'method' => \is_string($method) ? $method : '__invoke',
                     'identifier' => (string)$identifier !== $service ? (string)$identifier : null,
-                ], static fn (mixed $value): bool => $value !== null);
+                ], static fn(mixed $value): bool => $value !== null);
             }
         }
 

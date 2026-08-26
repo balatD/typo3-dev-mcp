@@ -26,8 +26,7 @@ final class FlexFormSchemaTool implements ToolInterface
         private readonly FlexFormTools $flexFormTools,
         private readonly TcaSchemaFactory $tcaSchemaFactory,
         private readonly LabelTranslator $labelTranslator,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -116,7 +115,7 @@ final class FlexFormSchemaTool implements ToolInterface
             'sheets' => $this->describeSheets($dataStructure),
             'hint' => 'Field names are the keys inside each sheet; FlexForm values are stored under '
                 . 'data.<sheet>.lDEF.<field>.vDEF in the XML.',
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**
@@ -215,7 +214,7 @@ final class FlexFormSchemaTool implements ToolInterface
                 ),
                 'fieldCount' => \count($fields),
                 'fields' => $fields,
-            ], static fn (mixed $value): bool => $value !== null);
+            ], static fn(mixed $value): bool => $value !== null);
         }
 
         return $sheets;
@@ -242,6 +241,6 @@ final class FlexFormSchemaTool implements ToolInterface
             'description' => $this->labelTranslator->translate(
                 isset($definition['description']) ? (string)$definition['description'] : null,
             ),
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 }

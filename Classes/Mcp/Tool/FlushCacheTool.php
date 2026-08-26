@@ -17,8 +17,7 @@ final class FlushCacheTool implements ToolInterface
 {
     public function __construct(
         private readonly CacheManager $cacheManager,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {

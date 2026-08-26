@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Event;
 
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use BalatD\DevMcp\Event\CollectToolsEvent;
 use BalatD\DevMcp\Tests\Unit\Fixture\CallableTool;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 
 final class CollectToolsEventTest extends TestCase
 {

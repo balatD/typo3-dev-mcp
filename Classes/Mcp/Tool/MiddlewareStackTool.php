@@ -24,8 +24,7 @@ final class MiddlewareStackTool implements ToolInterface
     public function __construct(
         private readonly MiddlewareStackResolver $middlewareStackResolver,
         private readonly PackageManager $packageManager,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -98,7 +97,7 @@ final class MiddlewareStackTool implements ToolInterface
                 'package' => $declaration['package'] ?? null,
                 'before' => $declaration['before'] ?? null,
                 'after' => $declaration['after'] ?? null,
-            ], static fn (mixed $value): bool => $value !== null);
+            ], static fn(mixed $value): bool => $value !== null);
         }
 
         $disabled = [];
@@ -115,7 +114,7 @@ final class MiddlewareStackTool implements ToolInterface
             'disabled' => $disabled !== [] ? $disabled : null,
             'hint' => 'Listed in execution order: position 1 sees the request first and the response last. '
                 . 'Disabled middlewares are configured but not part of the stack.',
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
     }
 
     /**
@@ -168,7 +167,7 @@ final class MiddlewareStackTool implements ToolInterface
                     'before' => ($middleware['before'] ?? []) !== [] ? $middleware['before'] : null,
                     'after' => ($middleware['after'] ?? []) !== [] ? $middleware['after'] : null,
                     'disabled' => ($middleware['disabled'] ?? false) === true ? true : null,
-                ], static fn (mixed $value): bool => $value !== null);
+                ], static fn(mixed $value): bool => $value !== null);
             }
         }
 

@@ -20,8 +20,7 @@ final class PageTsConfigTool implements ToolInterface
 {
     public function __construct(
         private readonly SiteFinder $siteFinder,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {

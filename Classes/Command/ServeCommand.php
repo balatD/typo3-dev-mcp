@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Command;
 
+use BalatD\DevMcp\Event\CollectToolsEvent;
+use BalatD\DevMcp\Mcp\SdkToolHandler;
+use BalatD\DevMcp\Mcp\ToolRegistry;
 use Composer\InstalledVersions;
 use Mcp\Schema\Tool;
 use Mcp\Schema\ToolAnnotations;
@@ -13,9 +16,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use BalatD\DevMcp\Event\CollectToolsEvent;
-use BalatD\DevMcp\Mcp\SdkToolHandler;
-use BalatD\DevMcp\Mcp\ToolRegistry;
 
 /**
  * `typo3 devmcp:serve` — serves the MCP protocol on stdio.

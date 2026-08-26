@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp\Tool;
 
+use BalatD\DevMcp\Mcp\Tool\DatabaseQueryTool;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use BalatD\DevMcp\Mcp\Tool\DatabaseQueryTool;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 
 final class DatabaseQueryToolTest extends TestCase

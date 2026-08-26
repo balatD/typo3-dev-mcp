@@ -21,8 +21,7 @@ final class ReadLogEntriesTool implements ToolInterface
         private readonly LogReader $logReader,
         private readonly LogEntryParser $logEntryParser,
         private readonly ConnectionPool $connectionPool,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -100,7 +99,7 @@ final class ReadLogEntriesTool implements ToolInterface
         // for last_error.
         $full = (bool)($arguments['full'] ?? false);
         $parsed = array_map(
-            fn (array $entry): array => $this->logEntryParser->parse($entry, $full),
+            fn(array $entry): array => $this->logEntryParser->parse($entry, $full),
             $entries,
         );
 
@@ -133,7 +132,7 @@ final class ReadLogEntriesTool implements ToolInterface
             if (\is_array($logData) && $logData !== [] && str_contains($details, '%')) {
                 try {
                     $details = vsprintf($details, array_map(
-                        static fn (mixed $value): string => \is_scalar($value) ? (string)$value : (string)json_encode($value),
+                        static fn(mixed $value): string => \is_scalar($value) ? (string)$value : (string)json_encode($value),
                         $logData,
                     ));
                 } catch (\Throwable) {

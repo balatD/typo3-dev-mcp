@@ -26,8 +26,7 @@ final class GetConfigTool implements ToolInterface
     public function __construct(
         private readonly ExtensionConfiguration $extensionConfiguration,
         private readonly SecretMasker $secretMasker,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -126,7 +125,7 @@ final class GetConfigTool implements ToolInterface
                 ? 'Nested values collapsed below depth ' . self::DEFAULT_DEPTH
                     . '. Pass {"path": "' . $path . '/<key>"} to drill in, or {"full": true} for everything.'
                 : null,
-        ], static fn (mixed $entry): bool => $entry !== null);
+        ], static fn(mixed $entry): bool => $entry !== null);
     }
 
     private function summarize(mixed $value, int $depth, bool &$collapsed): mixed

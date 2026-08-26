@@ -15,8 +15,7 @@ final class ContentElementsTool implements ToolInterface
 {
     public function __construct(
         private readonly LabelTranslator $labelTranslator,
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -82,7 +81,7 @@ final class ContentElementsTool implements ToolInterface
                 'label' => $this->labelTranslator->translate($item['label'] ?? $item[0] ?? null),
                 'group' => $item['group'] ?? null,
                 'icon' => $item['icon'] ?? null,
-            ], static fn (mixed $itemValue): bool => $itemValue !== null && $itemValue !== '');
+            ], static fn(mixed $itemValue): bool => $itemValue !== null && $itemValue !== '');
         }
 
         return $collected;

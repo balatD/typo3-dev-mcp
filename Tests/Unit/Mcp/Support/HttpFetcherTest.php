@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp\Support;
 
+use BalatD\DevMcp\Mcp\Support\HttpFetcher;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use BalatD\DevMcp\Mcp\Support\HttpFetcher;
 use TYPO3\CMS\Core\Http\RequestFactory;
 
 final class HttpFetcherTest extends TestCase
