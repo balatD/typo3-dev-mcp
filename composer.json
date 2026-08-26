@@ -23,7 +23,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "mcp/sdk": "^0.7",
+        "mcp/sdk": "^0.7.1",
         "typo3/cms-core": "^13.4 || ^14.0"
     },
     "require-dev": {
@@ -67,7 +67,11 @@
     },
     "extra": {
         "typo3/cms": {
-            "extension-key": "dev_mcp"
+            "extension-key": "dev_mcp",
+            "version": "1.0.0",
+            "Package": {
+                "providesPackages": {}
+            }
         }
     }
 }

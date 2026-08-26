@@ -15,6 +15,13 @@ three PSR-14 events, the two command names, and the `DEV_MCP_ALLOW_WRITE` /
 one, that work is not finished, and pinning payload shapes to the major version would
 price it out. The README's *Versioning* section states the full scope.
 
+### Security
+
+- `mcp/sdk` is now required at `^0.7.1`. The previous `^0.7` permitted 0.7.0, which
+  CVE-2026-53965 (high) affects — an unbounded SSE buffer in the *client* HTTP transport.
+  This server only ever uses `StdioTransport`, so the exposure was theoretical, but the
+  constraint had no business allowing the affected version.
+
 ### Added
 
 - A functional test suite. All 23 tools are now executed against a booted TYPO3 and
@@ -25,6 +32,13 @@ price it out. The README's *Versioning* section states the full scope.
 - Publication in the TER as `dev_mcp`, via `ext_emconf.php` and a tag-triggered workflow
   that refuses to publish when the committed version and the tag disagree.
 - `composer cgl:check` and `composer test:functional`.
+- `extra.typo3/cms.version` and `extra.typo3/cms.Package.providesPackages` in
+  `composer.json`. TYPO3 14.2 deprecated `ext_emconf.php`, and 14.3 emits that
+  deprecation on every cache warm-up when the file is present and `composer.json` lacks
+  this metadata. Core's own guidance is to keep `ext_emconf.php` — Tailor and the TER
+  still need it — and make `composer.json` self-sufficient, which is what this does.
+  `tailor set-version` writes both, and the release workflow refuses to publish if they
+  drift apart.
 
 ### Fixed
 

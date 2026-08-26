@@ -18,27 +18,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolve the version from the tag
-        id: version
-        run: echo "number=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-
-      # The committed ext_emconf.php version and the tag are two independent
-      # facts. When they disagree the TER silently ships the wrong number, so
-      # fail here instead.
-      - name: Check ext_emconf.php matches the tag
-        run: |
-          emconf=$(grep -oE "'version' => '[^']+'" ext_emconf.php | head -1 | sed "s/.*'version' => '\(.*\)'/\1/")
-          if [ "$emconf" != "${{ steps.version.outputs.number }}" ]; then
-            echo "::error::ext_emconf.php says $emconf but the tag says ${{ steps.version.outputs.number }}."
-            echo "Run 'vendor/bin/tailor set-version ${{ steps.version.outputs.number }}', commit, and re-tag."
-            exit 1
-          fi
-          echo "ext_emconf.php and the tag agree on $emconf."
-
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           coverage: none
+
+      - name: Resolve the version from the tag
+        id: version
+        run: echo "number=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      # The version is committed in two files — ext_emconf.php for the TER and
+      # extra.typo3/cms.version in composer.json so TYPO3 v14 does not deprecate
+      # the former. `tailor set-version` writes both; when either drifts from the
+      # tag the TER silently ships the wrong number, so fail here instead.
+      - name: Check the committed versions match the tag
+        run: |
+          tag="${{ steps.version.outputs.number }}"
+          emconf=$(grep -oE "'version' => '[^']+'" ext_emconf.php | head -1 | sed "s/.*'version' => '\(.*\)'/\1/")
+          composer_version=$(php -r 'echo json_decode(file_get_contents("composer.json"), true)["extra"]["typo3/cms"]["version"] ?? "";')
+          for pair in "ext_emconf.php:$emconf" "composer.json:$composer_version"; do
+            file="${pair%%:*}"; found="${pair#*:}"
+            if [ "$found" != "$tag" ]; then
+              echo "::error::$file says '$found' but the tag says '$tag'."
+              echo "Run 'vendor/bin/tailor set-version $tag', commit, and re-tag."
+              exit 1
+            fi
+          done
+          echo "ext_emconf.php and composer.json both agree on $tag."
 
       # tailor only zips and uploads the extension folder, so the project's own
       # dependencies are not installed here — a global install is enough.
