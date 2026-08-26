@@ -5,8 +5,13 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  phpstan:
+  static:
+    name: Static analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,10 +19,23 @@ jobs:
         with:
           php-version: '8.3'
           coverage: none
+      - run: composer validate --strict
       - run: composer update --no-progress
       - run: composer stan
 
-  tests:
+  cgl:
+    name: Coding standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - run: composer update --no-progress
+      - run: composer cgl:check
+
+  unit:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -39,3 +57,45 @@ jobs:
       - run: composer require typo3/cms-core:"${{ matrix.typo3 }}" --no-update
       - run: composer update --no-progress
       - run: composer test:unit
+
+  functional:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php: '8.3', typo3: '^13.4' }
+          - { php: '8.3', typo3: '^14.0' }
+    name: "Functional (PHP ${{ matrix.php }}, TYPO3 ${{ matrix.typo3 }})"
+    env:
+      # The suite boots a real TYPO3 on sqlite, so no database service is needed.
+      typo3DatabaseDriver: pdo_sqlite
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '${{ matrix.php }}'
+          extensions: pdo_sqlite, sqlite3
+          coverage: none
+      - run: composer require typo3/cms-core:"${{ matrix.typo3 }}" --no-update
+      - run: composer update --no-progress
+      - run: composer test:functional
+
+  lowest:
+    name: "Lowest dependencies (PHP 8.2, TYPO3 ^13.4)"
+    runs-on: ubuntu-latest
+    env:
+      typo3DatabaseDriver: pdo_sqlite
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_sqlite, sqlite3
+          coverage: none
+      - run: composer require typo3/cms-core:"^13.4" --no-update
+      # Proves the declared floor of every constraint actually resolves and
+      # works — the version combination nobody installs by accident.
+      - run: composer update --no-progress --prefer-lowest --prefer-stable
+      - run: composer test:unit
+      - run: composer test:functional

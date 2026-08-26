@@ -1,6 +1,9 @@
-# Keep the composer dist lean — development-only paths are not shipped
+# Keep the composer dist lean — development-only paths are not shipped.
+# ext_emconf.php is deliberately absent from this list: the TER needs it.
 /.ddev export-ignore
 /.github export-ignore
 /Tests export-ignore
 /.gitattributes export-ignore
 /.gitignore export-ignore
+/.php-cs-fixer.dist.php export-ignore
+/phpstan.neon export-ignore

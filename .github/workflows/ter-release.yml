@@ -1,0 +1,51 @@
+name: TER release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    name: Publish to the TER
+    runs-on: ubuntu-latest
+    # Pre-release tags (v1.1.0-beta.1) carry a hyphen and must never reach the
+    # TER, which has no concept of stability suffixes.
+    if: "!contains(github.ref_name, '-')"
+    env:
+      TYPO3_API_TOKEN: ${{ secrets.TYPO3_API_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve the version from the tag
+        id: version
+        run: echo "number=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      # The committed ext_emconf.php version and the tag are two independent
+      # facts. When they disagree the TER silently ships the wrong number, so
+      # fail here instead.
+      - name: Check ext_emconf.php matches the tag
+        run: |
+          emconf=$(grep -oE "'version' => '[^']+'" ext_emconf.php | head -1 | sed "s/.*'version' => '\(.*\)'/\1/")
+          if [ "$emconf" != "${{ steps.version.outputs.number }}" ]; then
+            echo "::error::ext_emconf.php says $emconf but the tag says ${{ steps.version.outputs.number }}."
+            echo "Run 'vendor/bin/tailor set-version ${{ steps.version.outputs.number }}', commit, and re-tag."
+            exit 1
+          fi
+          echo "ext_emconf.php and the tag agree on $emconf."
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      # tailor only zips and uploads the extension folder, so the project's own
+      # dependencies are not installed here — a global install is enough.
+      - run: composer global require typo3/tailor "^2.0" --no-progress
+
+      - name: Publish
+        run: |
+          "$(composer global config bin-dir --absolute --quiet)/tailor" ter:publish \
+            --comment "See CHANGELOG.md for the release notes." \
+            "${{ steps.version.outputs.number }}" dev_mcp
