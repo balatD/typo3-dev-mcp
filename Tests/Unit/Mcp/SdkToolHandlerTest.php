@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp;
 
+use BalatD\DevMcp\Event\AfterToolExecutionEvent;
+use BalatD\DevMcp\Event\BeforeToolExecutionEvent;
+use BalatD\DevMcp\Mcp\SdkToolHandler;
+use BalatD\DevMcp\Tests\Unit\Fixture\CallableTool;
 use Mcp\Exception\ToolCallException;
 use Mcp\Server\ClientGateway;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use BalatD\DevMcp\Event\AfterToolExecutionEvent;
-use BalatD\DevMcp\Event\BeforeToolExecutionEvent;
-use BalatD\DevMcp\Mcp\SdkToolHandler;
-use BalatD\DevMcp\Tests\Unit\Fixture\CallableTool;
 
 final class SdkToolHandlerTest extends TestCase
 {
@@ -21,13 +21,11 @@ final class SdkToolHandlerTest extends TestCase
      */
     private function createDispatcher(array $listeners = []): EventDispatcherInterface
     {
-        return new class($listeners) implements EventDispatcherInterface {
+        return new class ($listeners) implements EventDispatcherInterface {
             /**
              * @param array<class-string, list<callable>> $listeners
              */
-            public function __construct(private readonly array $listeners)
-            {
-            }
+            public function __construct(private readonly array $listeners) {}
 
             public function dispatch(object $event): object
             {
@@ -48,10 +46,10 @@ final class SdkToolHandlerTest extends TestCase
     #[Test]
     public function executesToolWithArgumentsModifiedByBeforeEvent(): void
     {
-        $tool = new CallableTool('echo', static fn (array $arguments): mixed => $arguments);
+        $tool = new CallableTool('echo', static fn(array $arguments): mixed => $arguments);
         $dispatcher = $this->createDispatcher([
             BeforeToolExecutionEvent::class => [
-                static fn (BeforeToolExecutionEvent $event) => $event->setArguments(['limit' => 5]),
+                static fn(BeforeToolExecutionEvent $event) => $event->setArguments(['limit' => 5]),
             ],
         ]);
 
@@ -62,12 +60,36 @@ final class SdkToolHandlerTest extends TestCase
     }
 
     #[Test]
+    public function sdkInjectedSessionAndRequestKeysNeverReachTheTool(): void
+    {
+        $tool = new CallableTool('echo', static fn(array $arguments): mixed => $arguments);
+
+        $seenByListener = null;
+        $dispatcher = $this->createDispatcher([
+            BeforeToolExecutionEvent::class => [
+                static function (BeforeToolExecutionEvent $event) use (&$seenByListener): void {
+                    $seenByListener = $event->getArguments();
+                },
+            ],
+        ]);
+
+        $result = (new SdkToolHandler($tool, $dispatcher))->execute([
+            'limit' => 5,
+            '_session' => new \stdClass(),
+            '_request' => new \stdClass(),
+        ], $this->createGateway());
+
+        self::assertSame(['limit' => 5], $result);
+        self::assertSame(['limit' => 5], $seenByListener);
+    }
+
+    #[Test]
     public function beforeEventResultShortCircuitsExecution(): void
     {
         $tool = new CallableTool('never');
         $dispatcher = $this->createDispatcher([
             BeforeToolExecutionEvent::class => [
-                static fn (BeforeToolExecutionEvent $event) => $event->setResult(['cached' => true]),
+                static fn(BeforeToolExecutionEvent $event) => $event->setResult(['cached' => true]),
             ],
         ]);
 
@@ -80,10 +102,10 @@ final class SdkToolHandlerTest extends TestCase
     #[Test]
     public function afterEventCanReplaceTheResult(): void
     {
-        $tool = new CallableTool('secret', static fn (): array => ['value' => 'raw']);
+        $tool = new CallableTool('secret', static fn(): array => ['value' => 'raw']);
         $dispatcher = $this->createDispatcher([
             AfterToolExecutionEvent::class => [
-                static fn (AfterToolExecutionEvent $event) => $event->setResult(['value' => 'masked']),
+                static fn(AfterToolExecutionEvent $event) => $event->setResult(['value' => 'masked']),
             ],
         ]);
 
@@ -95,7 +117,7 @@ final class SdkToolHandlerTest extends TestCase
     #[Test]
     public function throwablesBecomeToolCallExceptions(): void
     {
-        $tool = new CallableTool('broken', static fn () => throw new \RuntimeException('kaputt'));
+        $tool = new CallableTool('broken', static fn() => throw new \RuntimeException('kaputt'));
 
         $this->expectException(ToolCallException::class);
         $this->expectExceptionMessage('kaputt');
@@ -109,7 +131,7 @@ final class SdkToolHandlerTest extends TestCase
         $tool = new CallableTool('vetoed');
         $dispatcher = $this->createDispatcher([
             BeforeToolExecutionEvent::class => [
-                static fn () => throw new \RuntimeException('vetoed by policy'),
+                static fn() => throw new \RuntimeException('vetoed by policy'),
             ],
         ]);
 

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Mcp;
 
+use BalatD\DevMcp\Event\AfterToolExecutionEvent;
+use BalatD\DevMcp\Event\BeforeToolExecutionEvent;
 use Mcp\Exception\ToolCallException;
 use Mcp\Server\ClientGateway;
 use Mcp\Server\Handler\ToolHandlerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use BalatD\DevMcp\Event\AfterToolExecutionEvent;
-use BalatD\DevMcp\Event\BeforeToolExecutionEvent;
 
 /**
  * Bridges a typo3-dev-mcp tool to the MCP SDK's explicit handler contract, which
@@ -22,11 +22,17 @@ final class SdkToolHandler implements ToolHandlerInterface
     public function __construct(
         private readonly ToolInterface $tool,
         private readonly EventDispatcherInterface $eventDispatcher,
-    ) {
-    }
+    ) {}
 
     public function execute(array $arguments, ClientGateway $gateway): mixed
     {
+        // The SDK injects the session and request objects into the argument bag
+        // after it has validated the bag against the announced input schema, so
+        // they arrive as two keys no tool declares. Strip them here: ToolInterface
+        // is implemented by third parties and its contract is the schema, not
+        // whatever the SDK happens to append.
+        unset($arguments['_session'], $arguments['_request']);
+
         try {
             $beforeEvent = new BeforeToolExecutionEvent($this->tool, $arguments);
             $this->eventDispatcher->dispatch($beforeEvent);
