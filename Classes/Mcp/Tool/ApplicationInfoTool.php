@@ -14,6 +14,10 @@ use TYPO3\CMS\Core\Package\PackageManager;
 /**
  * Boost analog: application-info. The entry-point tool an AI client should
  * call first to understand the installation it is working with.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class ApplicationInfoTool implements ToolInterface
 {

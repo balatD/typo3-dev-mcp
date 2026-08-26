@@ -13,6 +13,10 @@ use TYPO3\CMS\Core\Http\RequestFactory;
  * place. Core's RequestFactory is used rather than raw Guzzle because its
  * client factory already applies the project's TYPO3_CONF_VARS['HTTP'] proxy
  * and TLS settings.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class HttpFetcher
 {

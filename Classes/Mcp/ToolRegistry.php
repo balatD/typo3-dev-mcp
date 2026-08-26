@@ -6,6 +6,10 @@ namespace BalatD\DevMcp\Mcp;
 
 /**
  * Collects all ToolInterface services tagged with `devmcp.tool`.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class ToolRegistry
 {

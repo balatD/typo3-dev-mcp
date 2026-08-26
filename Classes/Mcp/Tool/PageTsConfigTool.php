@@ -15,6 +15,10 @@ use TYPO3\CMS\Core\Site\SiteFinder;
  *
  * Sibling of the typoscript tool; BackendUtility::getPagesTSconfig() is public
  * API and null-safe about $GLOBALS['BE_USER'], so it works in CLI.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class PageTsConfigTool implements ToolInterface
 {

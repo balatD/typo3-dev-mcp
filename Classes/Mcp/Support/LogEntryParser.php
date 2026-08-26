@@ -16,6 +16,10 @@ namespace BalatD\DevMcp\Mcp\Support;
  * Everything else in the context (exception class, code, file, line, message,
  * request URL) is small and worth keeping, so this trims the trace rather than
  * the entry.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class LogEntryParser
 {

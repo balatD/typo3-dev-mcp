@@ -9,6 +9,10 @@ use TYPO3\CMS\Core\Site\SiteFinder;
 
 /**
  * Closest boost analog: list-routes. Sites are TYPO3's routing entry points.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class SiteInfoTool implements ToolInterface
 {

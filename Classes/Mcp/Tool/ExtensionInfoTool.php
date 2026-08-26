@@ -17,6 +17,10 @@ use TYPO3\CMS\Core\Package\PackageManager;
  *
  * Local package data always comes back; TER and Packagist are best-effort, so
  * the tool stays useful offline or behind a proxy.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class ExtensionInfoTool implements ToolInterface
 {

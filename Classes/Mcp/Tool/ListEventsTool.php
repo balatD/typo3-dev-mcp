@@ -16,6 +16,10 @@ use TYPO3\CMS\Core\Package\PackageManager;
  * ListenerProvider::getAllListenerDefinitions() is marked @internal for
  * debugging use — which is exactly this — and EXT:lowlevel's configuration
  * module injects it the same way.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class ListEventsTool implements ToolInterface
 {

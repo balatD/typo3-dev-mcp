@@ -10,6 +10,10 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 /**
  * Boost analog: database-query. Read-only by default; write statements
  * require the developer to opt in via the DEV_MCP_ALLOW_WRITE=1 env var.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class DatabaseQueryTool implements ToolInterface
 {

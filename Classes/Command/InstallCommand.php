@@ -17,6 +17,10 @@ use TYPO3\CMS\Core\Core\Environment;
 /**
  * `typo3 devmcp:install` — registers the MCP server with AI assistants
  * (.mcp.json, DDEV-aware) and installs composed AI guidelines.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class InstallCommand extends Command
 {

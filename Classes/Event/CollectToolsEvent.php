@@ -10,6 +10,9 @@ use BalatD\DevMcp\Mcp\ToolInterface;
  * Dispatched once when the MCP server starts, before the tool list is
  * announced to the client. Listeners can add project-specific tools,
  * remove built-in ones, or replace a tool with a decorated variant.
+ *
+ * @api Part of the public extension-point contract; covered by the
+ *      backwards-compatibility promise documented in the README.
  */
 final class CollectToolsEvent
 {

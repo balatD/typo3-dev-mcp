@@ -19,6 +19,10 @@ use TYPO3\CMS\Core\Utility\RootlineUtility;
  * Built on the v13.3+ FrontendTypoScriptFactory, which core marks @internal;
  * failures therefore degrade to an explanatory error instead of leaking
  * version drift to the client.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class TypoScriptTool implements ToolInterface
 {

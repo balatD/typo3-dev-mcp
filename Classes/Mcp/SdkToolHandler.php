@@ -16,6 +16,10 @@ use Psr\EventDispatcher\EventDispatcherInterface;
  * passes the raw argument bag instead of reflection-mapping named parameters.
  *
  * Not a DI service — instantiated by the ServeCommand (excluded in Services.yaml).
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class SdkToolHandler implements ToolHandlerInterface
 {

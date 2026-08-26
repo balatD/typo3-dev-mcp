@@ -10,6 +10,10 @@ use BalatD\DevMcp\Mcp\ToolInterface;
 
 /**
  * Boost analog: last-error.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class LastErrorTool implements ToolInterface
 {

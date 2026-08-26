@@ -9,6 +9,10 @@ use TYPO3\CMS\Core\Console\CommandRegistry;
 
 /**
  * Boost analog: list-artisan-commands.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class ListCommandsTool implements ToolInterface
 {

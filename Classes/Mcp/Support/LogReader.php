@@ -11,6 +11,10 @@ use TYPO3\CMS\Core\Core\Environment;
  *
  * Only the last TAIL_BYTES of each file are read so multi-hundred-MB dev
  * logs cannot blow up tool responses.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class LogReader
 {

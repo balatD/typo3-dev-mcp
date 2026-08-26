@@ -15,6 +15,10 @@ use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
  * show: the structure lives in a separate XML file (or string) selected at
  * runtime from the record's type, so the field names a plugin actually stores
  * are invisible until the DS is resolved.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class FlexFormSchemaTool implements ToolInterface
 {

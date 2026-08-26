@@ -17,6 +17,10 @@ use TYPO3Fluid\Fluid\Schema\ViewHelperMetadata;
  * registered in this installation, core and extensions alike.
  *
  * Built on the same Fluid API as `fluid:schema:generate`.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class ViewHelperLookupTool implements ToolInterface
 {

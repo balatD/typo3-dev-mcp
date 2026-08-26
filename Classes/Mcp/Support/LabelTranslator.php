@@ -11,6 +11,10 @@ use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
  * Best-effort resolution of label references in CLI context. TCA labels are
  * mostly LLL keys; showing "Header" instead of a 100-char LLL path keeps
  * tool output readable for the AI. Falls back to the raw value on failure.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class LabelTranslator
 {

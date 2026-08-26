@@ -12,6 +12,10 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 /**
  * Boost analog: read-log-entries, extended with TYPO3's deprecation log
  * and the sys_log table as additional sources.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class ReadLogEntriesTool implements ToolInterface
 {

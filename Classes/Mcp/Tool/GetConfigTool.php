@@ -11,6 +11,10 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 /**
  * Boost analog: get-config + list-available-config-keys, for
  * $GLOBALS['TYPO3_CONF_VARS'], feature toggles and extension configuration.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class GetConfigTool implements ToolInterface
 {

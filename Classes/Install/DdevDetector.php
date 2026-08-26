@@ -10,6 +10,10 @@ use TYPO3\CMS\Core\Core\Environment;
  * Detects whether this project runs under DDEV — either from inside the web
  * container (env markers) or from the host (.ddev/ directory). Decides how
  * the MCP server must be launched by the AI client on the host.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class DdevDetector
 {

@@ -20,6 +20,10 @@ use TYPO3\CMS\Core\Site\SiteFinder;
  * the CLI.
  *
  * site_info lists which sets a site uses; this tool explains what they contain.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class SiteSetsTool implements ToolInterface
 {

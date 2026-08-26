@@ -17,6 +17,10 @@ use TYPO3\CMS\Core\Information\Typo3Version;
  * Complements search_changelog: that one is offline and exact for "what
  * changed", this one covers "how does X work" — including third-party
  * extension manuals.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class SearchDocsTool implements ToolInterface
 {

@@ -10,6 +10,9 @@ namespace BalatD\DevMcp\Mcp;
  * Implementations are auto-registered via the `devmcp.tool` service tag
  * (see Configuration/Services.yaml) and bridged to the MCP SDK by the
  * ServeCommand, so they stay free of any SDK-specific types.
+ *
+ * @api Part of the public extension-point contract; covered by the
+ *      backwards-compatibility promise documented in the README.
  */
 interface ToolInterface
 {

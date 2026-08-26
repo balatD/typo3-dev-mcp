@@ -8,6 +8,10 @@ namespace BalatD\DevMcp\Install;
  * Registers the typo3-dev-mcp server in the project's .mcp.json (the project-scope
  * MCP registry Claude Code and other clients read). Merges into an existing
  * file — other servers are never touched.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class McpJsonWriter
 {

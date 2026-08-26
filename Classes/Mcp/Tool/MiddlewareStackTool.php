@@ -16,6 +16,10 @@ use TYPO3\CMS\Core\Package\PackageManager;
  *
  * The resolved stack and the raw declarations are combined here: the resolver
  * knows the final order but discards before/after and the declaring package.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class MiddlewareStackTool implements ToolInterface
 {

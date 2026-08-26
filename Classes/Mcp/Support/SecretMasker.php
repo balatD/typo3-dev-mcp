@@ -7,6 +7,10 @@ namespace BalatD\DevMcp\Mcp\Support;
 /**
  * Masks secret-looking values before configuration leaves the MCP boundary.
  * Tool output ends up in AI conversation logs, so err on the side of masking.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class SecretMasker
 {

@@ -15,6 +15,10 @@ use TYPO3\CMS\Core\Package\PackageManager;
  * The file documents which tools exist and what each reports. Framework advice
  * deliberately stays out of it: an agent already knows TYPO3, and every line
  * here is context on every request.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class GuidelineComposer
 {

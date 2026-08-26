@@ -16,6 +16,10 @@ use TYPO3\CMS\ContentBlocks\Registry\ContentBlockRegistry;
  *
  * Only registered when friendsoftypo3/content-blocks is installed
  * (see Configuration/Services.php).
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class ContentBlocksTool implements ToolInterface
 {

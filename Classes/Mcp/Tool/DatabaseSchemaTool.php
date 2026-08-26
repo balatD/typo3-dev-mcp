@@ -9,6 +9,10 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 
 /**
  * Boost analog: database-schema.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class DatabaseSchemaTool implements ToolInterface
 {

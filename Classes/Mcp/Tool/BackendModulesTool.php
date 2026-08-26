@@ -16,6 +16,10 @@ use TYPO3\CMS\Backend\Module\ModuleProvider;
  *
  * ModuleProvider is public API and skips every access check when no backend
  * user is passed, which is what makes this work on the CLI.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class BackendModulesTool implements ToolInterface
 {

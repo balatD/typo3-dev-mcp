@@ -23,6 +23,10 @@ use Symfony\Component\Console\Output\OutputInterface;
  * stdout is reserved for JSON-RPC frames; anything else (PHP notices,
  * deprecations, accidental echo) would corrupt the protocol, so all
  * error output is forced to stderr before the server starts.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class ServeCommand extends Command
 {

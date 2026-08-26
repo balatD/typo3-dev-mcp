@@ -10,6 +10,9 @@ use BalatD\DevMcp\Mcp\ToolInterface;
  * Dispatched after every successful tool execution, before the result is
  * serialized for the client. Listeners can post-process the result —
  * e.g. mask additional project-specific secrets or record an audit trail.
+ *
+ * @api Part of the public extension-point contract; covered by the
+ *      backwards-compatibility promise documented in the README.
  */
 final class AfterToolExecutionEvent
 {

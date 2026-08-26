@@ -18,6 +18,10 @@ use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
  * capabilities, relations and record types come pre-resolved and identical on
  * v13 and v14. Core still marks that API @internal on 13.4 ("experimental until
  * TYPO3 v13 LTS"); the marker is gone in v14.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class TcaSchemaTool implements ToolInterface
 {

@@ -12,6 +12,10 @@ use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheGroupException;
  * The one state-changing convenience tool: after code/TCA/TypoScript changes
  * the AI must flush caches anyway — better a dedicated tool than a shell
  * detour.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class FlushCacheTool implements ToolInterface
 {

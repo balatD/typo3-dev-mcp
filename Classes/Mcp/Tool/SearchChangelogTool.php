@@ -11,6 +11,10 @@ use TYPO3\CMS\Core\Package\PackageManager;
  * Searches the RST changelog that ships inside typo3/cms-core, so results are
  * offline and exact for the installed TYPO3 version — the primary source for
  * "what changed / what is deprecated / how do I migrate".
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class SearchChangelogTool implements ToolInterface
 {

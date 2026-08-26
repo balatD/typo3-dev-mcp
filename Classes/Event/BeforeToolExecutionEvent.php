@@ -11,6 +11,9 @@ use BalatD\DevMcp\Mcp\ToolInterface;
  * arguments, or short-circuit the call by setting a result — the tool is
  * then never executed. To veto a call with an error the client can read,
  * throw a \RuntimeException from the listener instead.
+ *
+ * @api Part of the public extension-point contract; covered by the
+ *      backwards-compatibility promise documented in the README.
  */
 final class BeforeToolExecutionEvent
 {

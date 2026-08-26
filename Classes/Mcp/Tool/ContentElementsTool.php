@@ -10,6 +10,10 @@ use BalatD\DevMcp\Mcp\ToolInterface;
 /**
  * Lists the registered content element types (CTypes) — the vocabulary an AI
  * needs when creating content, templates or new content elements.
+ *
+ * @internal Not covered by the backwards-compatibility promise: tool
+ *           response payloads and these implementation classes may change
+ *           in any minor release.
  */
 final class ContentElementsTool implements ToolInterface
 {
