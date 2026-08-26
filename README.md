@@ -7,9 +7,6 @@ from files, the AI reads them from the running application. Inspired by
 
 **Development-only tooling. Do not install or enable in production.**
 
-> **Status: alpha** — verified live against TYPO3 13.4 and 14.3, but APIs and
-> tool output formats may still change between releases.
-
 ## Does it actually help?
 
 Measured, not asserted. 170 benchmark runs on `claude-opus-5` against a real TYPO3 13.4
@@ -33,8 +30,8 @@ Two things this benchmark does **not** show, stated plainly:
 - **Task success was 100% in both arms, on all 17 tasks.** A competent agent with grep and
   a shell solved everything. This is a measure of efficiency and reliability, not
   capability — the tools make the agent faster and steadier, not smarter.
-- The tool schemas cost **~6,800 tokens on every request**, whether or not a tool is used.
-  On short, non-TYPO3 work that is pure overhead.
+- The tool schemas cost **6,270 tokens on every request** (measured at 0.1.0-alpha.7),
+  whether or not a tool is used. On short, non-TYPO3 work that is pure overhead.
 
 Full methodology, per-task results, per-tool usage and limitations:
 **[Tests/Benchmark/README.md](Tests/Benchmark/README.md)**.
@@ -42,9 +39,12 @@ Full methodology, per-task results, per-tool usage and limitations:
 ## Installation
 
 ```bash
-composer require --dev "balatd/typo3-dev-mcp:^0.1@alpha"
+composer require --dev balatd/typo3-dev-mcp
 vendor/bin/typo3 devmcp:install        # or: ddev exec vendor/bin/typo3 devmcp:install
 ```
+
+Also published in the TER as `dev_mcp`, though Composer is the supported path for a
+`--dev` dependency.
 
 `devmcp:install`
 
@@ -193,6 +193,34 @@ public function __invoke(BeforeToolExecutionEvent $event): void
 - TYPO3 13.4 LTS or 14, Composer mode
 - PHP 8.2, 8.3 or 8.4 — every PHP/TYPO3 combination is tested in CI
 
+## Versioning
+
+Semantic versioning, with a deliberately narrow promise. **Covered** — break these and
+the major version goes up:
+
+- `ToolInterface`, the contract your own tools implement
+- `CollectToolsEvent`, `BeforeToolExecutionEvent`, `AfterToolExecutionEvent` and their
+  public methods
+- The command names `devmcp:serve` and `devmcp:install`, and `devmcp:install`'s options
+- The environment flags `DEV_MCP_ALLOW_WRITE` and `DEV_MCP_NO_NETWORK`
+
+**Not covered** — these may change in any minor release:
+
+- **The shape of what a tool returns.** Payloads are tuned against the benchmark, and
+  three of the eight alphas shrank one. That work is not finished: a tool result stays in
+  the conversation for every later turn, so an oversized response is paid repeatedly.
+  Where a reduction has an escape hatch, it is documented (`{"full": true}` on
+  `last_error` and `read_log_entries`, `get_config`'s drill-down hint).
+- The concrete tool classes, `ToolRegistry`, `SdkToolHandler`, and everything under
+  `Mcp\Support\` and `Install\`. All are marked `@internal`.
+- The `mcp/sdk` constraint. It is a 0.x dependency and the constraint may widen in a minor
+  release; `ToolInterface` carries no SDK types, so that stays invisible to your tools.
+
+Two tools read core APIs that core itself marks `@internal` — `typoscript`
+(`FrontendTypoScriptFactory`) and `list_events` (`ListenerProvider`) — because no public
+equivalent exists. Both degrade to an explanatory error rather than a stack trace, but a
+core *minor* can require a patch release here.
+
 ## Development
 
 The repository ships a DDEV harness with TYPO3 v13 and v14 side by side:
@@ -205,6 +233,17 @@ ddev install-v14      # TYPO3 14 + this extension at /var/www/html/v14
 
 Backends: `https://v13.typo3-dev-mcp.ddev.site/typo3/` /
 `https://v14.typo3-dev-mcp.ddev.site/typo3/` (admin / `Joh316!!`).
+
+```bash
+composer cgl                       # format; cgl:check for the CI dry-run
+composer stan                      # PHPStan level 8
+composer test:unit
+composer test:functional           # boots TYPO3 per test; needs typo3DatabaseDriver=pdo_sqlite
+```
+
+The functional suite is a smoke matrix: it executes all 23 tools against a booted TYPO3
+and asserts the announced roster, the input schemas and each documented top-level shape.
+It deliberately does not pin payload contents — see [Versioning](#versioning).
 Protocol smoke test without an MCP client:
 
 ```bash

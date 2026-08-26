@@ -1,5 +1,62 @@
 # Changelog
 
+## 1.0.0 — 2026-08-26
+
+First release out of alpha. No new tools: the surface arrived at over eight alphas is the
+one being frozen, and what changed here is everything around it.
+
+### Backwards-compatibility promise
+
+Semantic versioning now applies, to a deliberately narrow surface: `ToolInterface`, the
+three PSR-14 events, the two command names, and the `DEV_MCP_ALLOW_WRITE` /
+`DEV_MCP_NO_NETWORK` flags. Every class is annotated `@api` or `@internal` accordingly.
+
+**Tool response payloads are explicitly not covered.** Three of the eight alphas shrank
+one, that work is not finished, and pinning payload shapes to the major version would
+price it out. The README's *Versioning* section states the full scope.
+
+### Added
+
+- A functional test suite. All 23 tools are now executed against a booted TYPO3 and
+  asserted to return their documented top-level shape, alongside a contract test over the
+  announced roster and every input schema — a malformed schema makes MCP clients reject
+  the whole `tools/list`, disabling every tool at once. It runs on `pdo_sqlite`, so CI
+  needs no database service.
+- Publication in the TER as `dev_mcp`, via `ext_emconf.php` and a tag-triggered workflow
+  that refuses to publish when the committed version and the tag disagree.
+- `composer cgl:check` and `composer test:functional`.
+
+### Fixed
+
+- The MCP SDK validates the argument bag against the announced input schema and then
+  appends `_session` and `_request` to it, so every `ToolInterface::execute()` and every
+  PSR-14 listener received two arguments no schema declares. They are now stripped before
+  the tool or any listener sees the bag.
+- `composer cgl` was `php-cs-fixer fix` with neither a config file nor a path — a
+  combination php-cs-fixer rejects, so the script had never run. With
+  `.php-cs-fixer.dist.php` in place, its first run reformatted 50 of 58 files. `phpstan`
+  likewise now reads `phpstan.neon` instead of CLI arguments.
+- The README quoted the fixed tool-schema tax as ~6,800 tokens; the measured value has
+  been 6,270 since 0.1.0-alpha.7.
+
+### Changed
+
+- CI gained `composer validate --strict`, a coding-standards check, the functional suite
+  on both TYPO3 majors, and a `--prefer-lowest` job — the declared dependency floor had
+  never been proven.
+- `typo3/cms-fluid-styled-content`, `typo3/cms-tstemplate` and `typo3/tailor` join
+  `require-dev`; the first two give the TypoScript and content-element tools real data to
+  report in the functional suite.
+
+### Known limitations
+
+- `typoscript` and `list_events` build on core APIs that core marks `@internal`
+  (`FrontendTypoScriptFactory`, `ListenerProvider`) because no public equivalent exists.
+  Both are verified on 13.4 and 14.3 and degrade to an explanatory error, but a core minor
+  can require a patch release.
+- The composed guidelines and the `.mcp.json` registration target Claude Code's
+  project-scoped format. Other MCP clients work when pointed at `devmcp:serve` manually.
+
 ## 0.1.0-alpha.8 — 2026-08-14
 
 ### Changed
