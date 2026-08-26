@@ -61,6 +61,9 @@ price it out. The README's *Versioning* section states the full scope.
 - `typo3/cms-fluid-styled-content`, `typo3/cms-tstemplate` and `typo3/tailor` join
   `require-dev`; the first two give the TypoScript and content-element tools real data to
   report in the functional suite.
+- `typo3/testing-framework` is now required at `^9.6`. The functional suite reaches the
+  extension's private services through the framework's private-container, which does not
+  resolve on 9.0. A dev-only constraint — it affects contributors, not installs.
 
 ### Known limitations
 

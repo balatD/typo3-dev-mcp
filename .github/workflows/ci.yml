@@ -14,7 +14,7 @@ jobs:
     name: Static analysis
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -27,7 +27,7 @@ jobs:
     name: Coding standards
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
@@ -49,7 +49,7 @@ jobs:
           - { php: '8.4', typo3: '^14.0' }
     name: "Unit (PHP ${{ matrix.php }}, TYPO3 ${{ matrix.typo3 }})"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '${{ matrix.php }}'
@@ -71,7 +71,7 @@ jobs:
       # The suite boots a real TYPO3 on sqlite, so no database service is needed.
       typo3DatabaseDriver: pdo_sqlite
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '${{ matrix.php }}'
@@ -84,18 +84,17 @@ jobs:
   lowest:
     name: "Lowest dependencies (PHP 8.2, TYPO3 ^13.4)"
     runs-on: ubuntu-latest
-    env:
-      typo3DatabaseDriver: pdo_sqlite
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo_sqlite, sqlite3
           coverage: none
       - run: composer require typo3/cms-core:"^13.4" --no-update
-      # Proves the declared floor of every constraint actually resolves and
-      # works — the version combination nobody installs by accident.
+      # Proves the declared floor of the *shipped* constraints actually resolves
+      # and works — the combination nobody installs by accident.
       - run: composer update --no-progress --prefer-lowest --prefer-stable
+      # Unit tests only, deliberately. The functional suite's floor is the
+      # testing-framework's, not the extension's, and pinning that here would
+      # measure the harness instead of what ships.
       - run: composer test:unit
-      - run: composer test:functional
