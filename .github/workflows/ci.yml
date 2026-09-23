@@ -44,9 +44,11 @@ jobs:
           - { php: '8.2', typo3: '^13.4' }
           - { php: '8.3', typo3: '^13.4' }
           - { php: '8.4', typo3: '^13.4' }
+          - { php: '8.5', typo3: '^13.4' }
           - { php: '8.2', typo3: '^14.0' }
           - { php: '8.3', typo3: '^14.0' }
           - { php: '8.4', typo3: '^14.0' }
+          - { php: '8.5', typo3: '^14.0' }
     name: "Unit (PHP ${{ matrix.php }}, TYPO3 ${{ matrix.typo3 }})"
     steps:
       - uses: actions/checkout@v5
