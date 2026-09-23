@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 — 2026-08-26
+## 1.0.0 — 2026-09-23
 
 First release out of alpha. No new tools: the surface arrived at over eight alphas is the
 one being frozen, and what changed here is everything around it.
@@ -17,7 +17,7 @@ price it out. The README's *Versioning* section states the full scope.
 
 ### Security
 
-- `mcp/sdk` is now required at `^0.7.1`. The previous `^0.7` permitted 0.7.0, which
+- `mcp/sdk` is now required at `^0.7.1 || ^0.8`. The previous `^0.7` permitted 0.7.0, which
   CVE-2026-53965 (high) affects — an unbounded SSE buffer in the *client* HTTP transport.
   This server only ever uses `StdioTransport`, so the exposure was theoretical, but the
   constraint had no business allowing the affected version.
@@ -29,8 +29,14 @@ price it out. The README's *Versioning* section states the full scope.
   announced roster and every input schema — a malformed schema makes MCP clients reject
   the whole `tools/list`, disabling every tool at once. It runs on `pdo_sqlite`, so CI
   needs no database service.
+- Support for `mcp/sdk` 0.8. Both SDK minors pass the unit and functional suites on
+  TYPO3 13.4 and 14.3; CI resolves 0.8 in its regular jobs and 0.7.1 in the
+  lowest-dependencies job.
+- PHP 8.5, in the CI unit matrix on both TYPO3 majors. `composer.json` already allowed it;
+  `ext_emconf.php` capped PHP at 8.4.
 - Publication in the TER as `dev_mcp`, via `ext_emconf.php` and a tag-triggered workflow
   that refuses to publish when the committed version and the tag disagree.
+- An extension icon for the TER and the Extension Manager.
 - `composer cgl:check` and `composer test:functional`.
 - `extra.typo3/cms.version` and `extra.typo3/cms.Package.providesPackages` in
   `composer.json`. TYPO3 14.2 deprecated `ext_emconf.php`, and 14.3 emits that
@@ -73,6 +79,8 @@ price it out. The README's *Versioning* section states the full scope.
   can require a patch release.
 - The composed guidelines and the `.mcp.json` registration target Claude Code's
   project-scoped format. Other MCP clients work when pointed at `devmcp:serve` manually.
+- The TER package needs Composer mode: it cannot bundle `mcp/sdk`, so `devmcp:serve`
+  would fail on a classic-mode install. The TER description says so.
 
 ## 0.1.0-alpha.8 — 2026-08-14
 
