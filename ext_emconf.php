@@ -9,7 +9,7 @@
  */
 $EM_CONF[$_EXTKEY] = [
     'title' => 'TYPO3 Dev MCP',
-    'description' => 'AI development helper for TYPO3 v13/v14 — an MCP server exposing TCA, database schema, sites, TypoScript, logs and the core changelog to Claude Code and other MCP clients.',
+    'description' => 'AI development helper for TYPO3 v13/v14 — an MCP server exposing TCA, database schema, sites, TypoScript, logs and the core changelog to Claude Code and other MCP clients. Composer mode only.',
     'category' => 'be',
     'author' => 'Dragan Balatinac',
     'author_company' => '',
@@ -18,7 +18,7 @@ $EM_CONF[$_EXTKEY] = [
     'constraints' => [
         'depends' => [
             'typo3' => '13.4.0-14.99.99',
-            'php' => '8.2.0-8.4.99',
+            'php' => '8.2.0-8.5.99',
         ],
         'conflicts' => [],
         'suggests' => [],

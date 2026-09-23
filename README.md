@@ -191,7 +191,7 @@ public function __invoke(BeforeToolExecutionEvent $event): void
 ## Requirements
 
 - TYPO3 13.4 LTS or 14, Composer mode
-- PHP 8.2, 8.3 or 8.4 — every PHP/TYPO3 combination is tested in CI
+- PHP 8.2, 8.3, 8.4 or 8.5 — every PHP/TYPO3 combination is tested in CI
 
 ## Versioning
 
