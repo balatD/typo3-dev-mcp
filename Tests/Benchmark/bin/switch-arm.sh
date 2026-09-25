@@ -28,11 +28,12 @@ strip_arm_state() {
 }
 
 # devmcp:install writes inside the container; the host bind mount can lag by a
-# few hundred milliseconds. Without this wait the verification below fails on a
+# few hundred milliseconds, and by several seconds under the load of two
+# parallel sweeps. Without this wait the verification below fails on a
 # perfectly successful install.
 wait_for_artefacts() {
     local i
-    for ((i = 0; i < 50; i++)); do
+    for ((i = 0; i < 300; i++)); do
         if [[ -f .mcp.json && -f .ai/guidelines/typo3.md && -f CLAUDE.md ]]; then
             return 0
         fi

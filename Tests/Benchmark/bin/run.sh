@@ -27,7 +27,8 @@ LEDGER="$RESULTS_DIR/runs.jsonl"
 # Stamped once per sweep and written to every row. Without it a re-run of the
 # same (task, arm, rep) after a code change collides with the previous ledger
 # entry, and judge.sh silently reuses the old verdict for the new answer.
-SWEEP_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+# BENCH_SWEEP_ID resumes an interrupted sweep, e.g. with --tasks for what is left.
+SWEEP_ID="${BENCH_SWEEP_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
 
 MODEL="${BENCH_MODEL:-claude-opus-5}"
 EFFORT="${BENCH_EFFORT:-medium}"
@@ -85,10 +86,17 @@ reset_state() {
         bench_git clean -qfd 2>/dev/null || true
     )
     rm -rf "${BENCH_MEMORY_DIR:?}"
-    if ! bench_ddev snapshot restore bench-clean 2>&1 | grep -q 'was restored'; then
-        echo "  !! snapshot restore failed — state is dirty, aborting" >&2
-        exit 1
-    fi
+    # Retried because a busy host can make a restore fail outright; only a
+    # restore that keeps failing means the state cannot be trusted.
+    local attempt
+    for attempt in 1 2 3; do
+        bench_ddev snapshot restore bench-clean 2>&1 | grep -q 'was restored' && break
+        if [[ $attempt -eq 3 ]]; then
+            echo "  !! snapshot restore failed — state is dirty, aborting" >&2
+            exit 1
+        fi
+        sleep 20
+    done
     bench_ddev exec vendor/bin/typo3 cache:flush >/dev/null 2>&1 || true
 }
 
