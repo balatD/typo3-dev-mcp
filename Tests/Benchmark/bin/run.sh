@@ -15,11 +15,14 @@ set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TASKS_DIR="$BENCH_DIR/tasks"
-RUNS_DIR="$BENCH_DIR/results/runs"
-LEDGER="$BENCH_DIR/results/runs.jsonl"
 
 # shellcheck disable=SC1091
+source "$BENCH_DIR/bin/_env.sh"
+# shellcheck disable=SC1091
 source "$BENCH_DIR/bin/_task.sh"
+
+RUNS_DIR="$RESULTS_DIR/runs"
+LEDGER="$RESULTS_DIR/runs.jsonl"
 
 # Stamped once per sweep and written to every row. Without it a re-run of the
 # same (task, arm, rep) after a code change collides with the previous ledger
@@ -45,14 +48,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ ! -f "$BENCH_DIR/.bench-env" ]]; then
-    echo "error: bench project not set up. Run bin/setup-bench.sh first." >&2
-    exit 1
-fi
-# shellcheck disable=SC1091
-source "$BENCH_DIR/.bench-env"
+load_bench_env
 
-mkdir -p "$RUNS_DIR" "$BENCH_DIR/oracle"
+mkdir -p "$RUNS_DIR" "$ORACLE_DIR"
 say() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 
 if [[ -n "$TASK_FILTER" ]]; then
@@ -63,7 +61,7 @@ fi
 IFS=',' read -r -a ARM_LIST <<< "$ARMS"
 
 say "tasks: ${#TASKS[@]}  arms: ${#ARM_LIST[@]}  reps: $REPS  = $(( ${#TASKS[@]} * ${#ARM_LIST[@]} * REPS )) runs"
-say "model: $MODEL  effort: $EFFORT  budget/run: \$$MAX_USD"
+say "model: $MODEL  effort: $EFFORT  budget/run: \$$MAX_USD  TYPO3: ${TYPO3_VERSION:-$BENCH_TYPO3}"
 
 if [[ $DRY_RUN -eq 1 ]]; then
     printf '  %s\n' "${TASKS[@]}"
@@ -185,13 +183,14 @@ record() {
         local rc=0
         ( cd "$BENCH_ROOT" \
             && RESPONSE_FILE="$response_file" \
-               ORACLE_FILE="$BENCH_DIR/oracle/${task}.txt" \
+               ORACLE_FILE="$ORACLE_DIR/${task}.txt" \
                bash -c "$(task_section "$file" check)" ) >/dev/null 2>&1 || rc=$?
         [[ $rc -eq 0 ]] && checked=true || checked=false
     fi
 
     jq -nc \
         --arg sweep "$SWEEP_ID" \
+        --arg typo3 "${TYPO3_VERSION:-$BENCH_TYPO3}" \
         --arg task "$task" --arg arm "$arm" --argjson rep "$rep" \
         --arg family "$(task_field "$file" family)" \
         --arg grade "$grade" \
@@ -203,7 +202,7 @@ record() {
         --arg response "$(cat "$response_file")" \
         --argjson result "$result" \
         '{
-            sweep: $sweep,
+            sweep: $sweep, typo3: $typo3,
             task: $task, arm: $arm, rep: $rep, family: $family, grade: $grade,
             hygiene: $hygiene, checked: $checked,
             mcp_calls: $mcp_calls, tool_bytes: $tool_bytes, tools: $tools,

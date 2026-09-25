@@ -2,7 +2,7 @@ family: F3
 grade: judge
 
 --- prompt ---
-Content elements on https://typo3-dev-mcp-bench.ddev.site/products render without any
+Content elements on https://{{SITE_HOST}}/products render without any
 of the bench_fixture markup — the custom card template is being ignored, and the page
 falls back to default output.
 

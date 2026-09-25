@@ -18,8 +18,10 @@ declare(strict_types=1);
  */
 
 $benchDir = dirname(__DIR__);
-$ledgerFile = $benchDir . '/results/runs.jsonl';
-$judgedFile = $benchDir . '/results/judged.jsonl';
+// Mirrors bin/_env.sh: BENCH_TYPO3=14 reads the v14 bench's results.
+$resultsDir = $benchDir . '/results' . (getenv('BENCH_TYPO3') === '14' ? '/v14' : '');
+$ledgerFile = $resultsDir . '/runs.jsonl';
+$judgedFile = $resultsDir . '/judged.jsonl';
 
 if (!is_file($ledgerFile)) {
     fwrite(STDERR, "error: no ledger at $ledgerFile — run bin/run.sh first\n");

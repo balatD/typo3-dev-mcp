@@ -1,138 +1,192 @@
-# Final benchmark report
+# Final benchmark report — 1.0.0
 
-17 tasks × 2 arms × 5 reps = **170 runs**, `claude-opus-5` (effort medium), TYPO3 13.4.34,
-23 tools. 167 usable — 3 excluded as API transport errors, 0 voided by hygiene assertions.
-Total spend $34.30 (arm A $19.33, arm B $14.97).
+Two sweeps of 17 tasks × 2 arms × 5 reps = **340 runs**, `claude-opus-5-5` (effort medium),
+`balatd/typo3-dev-mcp:1.0.0` installed from Packagist (mcp/sdk 0.8.1), 22 tools:
+
+- **v13 bench:** TYPO3 13.4.35, 170 runs, $13.37 (arm A $7.05, arm B $6.32)
+- **v14 bench:** TYPO3 14.3.7, 170 runs, $13.55 (arm A $6.61, arm B $6.94)
+
+340 usable — 0 voided by hygiene assertions, 0 API errors. Judge `claude-opus-5`, as in
+August, deliberately not the model under test. A 68-run pilot ($7.26) preceded the sweeps and
+is not included. The previous report (August, alpha.6, `claude-opus-5`) is archived as
+[final-report-alpha.6.md](final-report-alpha.6.md).
 
 Arm A = plain Claude Code with Read/Grep/Glob/Bash. Arm B = after `typo3 devmcp:install`
 (MCP server + `.ai/guidelines/typo3.md`). Skills and user settings disabled in both.
 
 ## Headline
 
+**TYPO3 13.4**
+
 | Family | Arm | Runs | Success | Halluc | Med cost | Med tokens | Med turns |
 |---|---|---|---|---|---|---|---|
-| **F1** live-state | a | 40 | 100% | — | $0.208 | 170,365 | 10.0 |
-| **F1** live-state | **b** | 40 | 100% | — | **$0.097** | **98,965** | **4.0** |
-| F2 code change | a | 15 | 100% | — | $0.236 | 210,728 | 13.0 |
-| F2 code change | b | 15 | 100% | — | $0.212 | 199,001 | 13.0 |
-| F3 debug | a | 15 | 100% | **7%** | $0.164 | 111,135 | 8.0 |
-| F3 debug | b | 14 | 100% | **0%** | $0.205 | 189,049 | 9.0 |
-| F4 control | a | 14 | 100% | 0% | $0.107 | 101,550 | 5.5 |
-| F4 control | b | 14 | 100% | 0% | $0.088 | 97,479 | 4.0 |
+| **F1** live-state | a | 40 | 100% | — | $0.074 | 113,937 | 5 |
+| **F1** live-state | **b** | 40 | 100% | — | **$0.038** | **93,884** | **4** |
+| F2 code change | a | 15 | 100% | — | $0.106 | 144,391 | 7 |
+| F2 code change | b | 15 | 100% | — | $0.109 | 171,655 | 7 |
+| F3 debug | a | 15 | 100% | 0% | $0.073 | 89,766 | 4 |
+| F3 debug | b | 15 | 100% | 0% | $0.089 | 122,357 | 7 |
+| F4 control | a | 15 | 100% | 0% | $0.068 | 111,868 | 5 |
+| F4 control | b | 15 | 100% | 0% | $0.066 | 117,929 | 5 |
 
-## Read this first: success rate is a null result
+**TYPO3 14.3**
 
-**Every task, both arms, 100%.** A competent baseline with Read, Grep and Bash solved all 17
-tasks, including resolving FlexForm values, compiled TypoScript and Page TSconfig. The MCP
-does not make previously-impossible tasks possible on a project of this shape.
+| Family | Arm | Runs | Success | Halluc | Med cost | Med tokens | Med turns |
+|---|---|---|---|---|---|---|---|
+| **F1** live-state | a | 40 | 100% | — | $0.069 | 111,945 | 5 |
+| **F1** live-state | **b** | 40 | 100% | — | **$0.045** | **71,853** | **4** |
+| F2 code change | a | 15 | 100% | — | $0.096 | 134,376 | 6 |
+| F2 code change | b | 15 | 100% | — | **$0.163** | **265,485** | **12** |
+| F3 debug | a | 15 | 100% | 0% | $0.074 | 110,266 | 5 |
+| F3 debug | b | 15 | 100% | 0% | $0.076 | 124,389 | 7 |
+| F4 control | a | 15 | 100% | 0% | $0.061 | 108,306 | 5 |
+| F4 control | b | 15 | 100% | 0% | $0.059 | 93,831 | 5 |
 
-Anything this benchmark supports is a claim about **efficiency and reliability**, not
-capability. Do not write "more accurate" anywhere.
+## Read this first: success is still a null result
+
+**Every task, both arms, both TYPO3 versions: 100%.** All 80 judged answers were correct with
+a score of 3/3 and **zero hallucinated claims in either arm**. The one accuracy-flavoured signal
+from August — 1 of 15 arm-A F3 answers with a fabricated claim — did not reproduce on
+Opus 5.5.
+
+Everything below is a claim about **efficiency**, not capability or accuracy.
 
 ## Where it wins: live-state lookup
 
-F1 is the family the tools were built for, and the effect is large and consistent:
+F1 is the family the tools exist for, and the effect holds on both versions:
 
-- **53% cheaper** ($0.208 → $0.097)
-- **42% fewer tokens** (170k → 99k)
-- **60% fewer turns** (10 → 4)
+| | v13 | v14 |
+|---|---|---|
+| median cost | $0.074 → **$0.038 (−48%)** | $0.069 → **$0.045 (−35%)** |
+| median tokens | 114k → 94k (−18%) | 112k → 72k (−36%) |
+| median turns | 5 → 4 | 5 → 4 |
 
-The mechanism is visible in the per-task numbers — targeted queries replace file archaeology:
+The mechanism is the same as in August — targeted queries replace file archaeology:
 
-| Task | arm a | arm b | Δ tokens |
+| Task | v13 a → b | v14 a → b |
+|---|---|---|
+| `f1-template-paths` | $0.145 → **$0.034** (−145k tok) | $0.120 → **$0.030** (−115k tok) |
+| `f1-page-tsconfig` | $0.090 → **$0.022** (−88k tok) | $0.070 → **$0.023** (−40k tok) |
+| `f1-flexform-record` | $0.066 → $0.040 | $0.087 → $0.048 |
+
+`f1-template-paths` remains the clearest case: the compiled
+`lib.contentElement.templateRootPaths` after site-set merging exists in no single file, and
+`typoscript` returns it directly.
+
+Not uniform: `f1-custom-ctypes` costs more in arm B on both versions (+$0.028 / +$0.023), and
+`f1-site-languages` on v13 (+$0.026).
+
+## Where it costs: code changes on v14
+
+On v14, arm B's F2 median is **+70%** ($0.096 → $0.163) with twice the turns (6 → 12), and
+the F4 task `f4-rename-method` nearly doubles ($0.094 → $0.176). On v13 the same tasks are at
+parity. Success is 100% in both arms either way — this is spend, not correctness.
+
+The streams show why. On v14 arm B verifies every edit through the tools; on v13 it verifies
+with Bash or not at all. Tool sequences, all five reps alike:
+
+```
+v14 f2-event-listener  Bash Bash Write ToolSearch flush_cache list_events list_events Bash …
+v14 f4-rename-method   Bash Bash Bash ToolSearch flush_cache backend_modules flush_cache backend_modules …
+v13 f2-event-listener  Bash Bash Write Bash Bash Bash
+```
+
+Two specifics are worth acting on:
+
+- **`flush_cache` on a method rename.** Its description says editing PHP inside a class needs
+  no flush; on v14 every `f4-rename-method` run flushed twice anyway.
+- **`ToolSearch` round-trips.** Claude Code defers MCP tool schemas, so the first use of any
+  tool in a session costs an extra turn to load it. That is paid on both versions and is
+  outside this extension's control.
+
+Why v14 and not v13 is **not established**: same tools, same guidelines, consistent across all
+five reps on one version and absent on all five on the other. A plausible reading — untested —
+is that the model trusts its prior knowledge of v14 less and checks the live install.
+
+## Debugging and the control
+
+- **F3 debug:** arm B costs more on v13 (+21%, 4 → 7 turns) and is at parity on v14 (+2%).
+  Both arms diagnosed every fault correctly.
+- **F4 control** (the MCP is irrelevant): parity on both versions ($0.068 → $0.066,
+  $0.061 → $0.059). The tax is not showing up as extra spend here.
+
+## Compared to August
+
+August ran alpha.6 on `claude-opus-5`; this ran 1.0.0 on `claude-opus-5-5`. **Both the model
+and the code changed**, so no difference below can be attributed to either alone.
+
+| v13 | Aug a | Aug b | now a | now b |
+|---|---|---|---|---|
+| F1 median cost | $0.208 | $0.097 | $0.074 | $0.038 |
+| F1 median turns | 10 | 4 | 5 | 4 |
+| F3 median cost | $0.164 | $0.205 | $0.073 | $0.089 |
+| F4 median cost | $0.107 | $0.088 | $0.068 | $0.066 |
+
+The baseline got much stronger: arm A's F1 cost fell 64% and its turns halved. The MCP's lead
+in turns narrowed accordingly (60% fewer → 20% fewer), while its relative cost saving on F1
+held (−53% → −48%).
+
+## Tool usage
+
+**v13: 14 of 22 tools called. v14: 15 of 22.** Never called in either sweep:
+`extension_info`, `list_commands`, `middleware_stack`, `read_log_entries`,
+`search_changelog`, `search_docs`, `viewhelper_lookup`.
+
+| Tool | v13 calls | v14 calls | med payload (v13) |
 |---|---|---|---|
-| `f1-template-paths` | $0.684 | **$0.053** | **−458,075** |
-| `f1-page-tsconfig` | $0.241 | **$0.076** | −128,617 |
-| `f1-noncore-columns` | $0.281 | **$0.177** | −10,615 |
-| `f1-flexform-record` | $0.146 | **$0.084** | −11,550 |
+| `database_query` | 19 | 26 | 939 chars |
+| `site_sets` | 17 | 20 | 2,445 chars |
+| `typoscript` | 17 | 18 | 223 chars |
+| `site_info` | 12 | 11 | 533 chars |
+| `flexform_schema` | 10 | 11 | 871 chars |
+| `get_config` | 10 | 10 | 42 chars |
+| `flush_cache` | 4 | **25** | 17 chars |
+| `tca_schema` | 5 | 14 | 6,498 chars |
+| `list_events` | 0 | 12 | — |
+| `backend_modules` | 1 | 12 | 586 chars |
+| `content_elements` · `application_info` · `database_schema` · `page_tsconfig` · `last_error` | 5 each | 5 each | |
 
-`f1-template-paths` is the clearest case: compiled `lib.contentElement.templateRootPaths`
-after site-set merging is not in any single file. The baseline reads its way across
-fluid_styled_content and the fixture set to reconstruct it — 458k more tokens and 13× the
-cost — while `typoscript` returns the merged result directly.
+Tool output totalled ~68k tokens over 120 calls (v13) and ~72k over 184 calls (v14), across 85
+arm-B runs each. The largest single payloads are `database_schema` for one table (~3.1k
+tokens) and `tca_schema` for a whole table (~2.8k); on v14 most `tca_schema` calls asked for
+one field (median 33 tokens).
 
-Three F1 tasks went the other way, `f1-trusted-hosts` worst at +$0.192. The gains are not
-uniform; the median is.
-
-## Where it wins quietly: hallucination under uncertainty
-
-F3 seeds a real fault and asks for a diagnosis. Both arms diagnosed correctly every time,
-but the judge flagged **1 of 15 arm-A answers** as containing a fabricated claim about the
-installation, against **0 of 14** for arm B.
-
-One instance is not a rate — treat it as directional. It is the only accuracy-flavoured
-signal in the whole sweep, and it is the failure mode the tools are designed to prevent.
-
-## Where it costs: debugging spend, and a long tail
-
-F3 arm B is **25% more expensive** and uses 70% more tokens. Having log and TypoScript tools
-available invites more investigation, which produced cleaner answers but not faster ones.
-
-F2 and F4 are essentially parity. Notably F4 — the negative control, where the MCP has
-nothing to offer — is now *slightly cheaper* in arm B ($0.107 → $0.088). Before the payload
-optimisations it was **3.6× more expensive**; see `efficiency-findings.md`.
-
-## Tool usage: 17 of 23 tools earned a call
-
-| Tool | Calls | Runs | Tasks |
-|---|---|---|---|
-| `site_sets` | 23 | 14 | 3 |
-| `typoscript` | 21 | 14 | 3 |
-| `flush_cache` | 15 | 15 | 4 |
-| `flexform_schema` | 13 | 12 | 3 |
-| `tca_schema` | 10 | 9 | 3 |
-| `database_query` | 10 | 10 | 2 |
-| `list_events` | 10 | 5 | 1 |
-| `application_info` | 8 | 8 | 2 |
-| `content_elements` · `database_schema` · `site_info` · `get_config` | 6 each | | |
-| `page_tsconfig` · `last_error` · `viewhelper_lookup` | 5 each | | |
-| `list_commands` · `backend_modules` | 1 each | | |
-
-**Never called:** `extension_info`, `get_url`, `middleware_stack`, `read_log_entries`,
-`search_changelog`, `search_docs`.
-
-Two caveats on that list, both important:
-
-1. `search_docs` and `extension_info` are **network tools, and the sweep ran with
-   `DEV_MCP_NO_NETWORK=1`** to remove network variance. Their absence is a harness artifact,
-   not evidence.
-2. `read_log_entries` was unused because `last_error` covered every debugging task. That is a
-   task-set gap, not proof the tool is dead weight.
-
-So the honest unused set is `get_url` and `middleware_stack` — plus four tools this task set
-never had a reason to exercise.
+**Correction to August's caveat.** August attributed the idle network tools to
+`DEV_MCP_NO_NETWORK=1`. That flag is set on the host by `run.sh`, but `ddev exec` does not
+forward host environment variables, so it never reached the server — verified during this
+sweep. `search_docs` and `extension_info` were live in both sweeps and simply never chosen.
+The other never-called tools are, as before, partly a task-set gap: no task needs a
+ViewHelper signature, a middleware order or a changelog entry.
 
 ## Cost model
 
-Fixed context tax: **6,807 tokens per request** (`tax-baseline.md`), flat across tools — the
-largest is 6.7%, the top five 31%. Dropping tools will not move it; only trimming descriptions
-across the board or merging tool surfaces will.
-
-That tax is why F1's token saving (−42%) exceeds its cost saving (−53% is cost, but tokens
-only fall 42%): the tax is mostly cache reads after the first request, so it dilutes rather
-than dominates on multi-turn work.
+Fixed context tax: **6,278 tokens per request** on Opus 5.5 (6,269 on Sonnet 5), unchanged
+since alpha.7 and identical on v14 — see [tax-baseline.md](tax-baseline.md). F4 parity says it
+is not visible as extra spend on these task sizes: after the first request it is mostly cache
+reads.
 
 ## Limitations
 
-- **One project, and a deliberately modest one.** A vanilla TYPO3 13 install plus a fixture
-  extension. Real projects with large sitepackages and heavy TCA overrides have more hidden
-  live state, so this is a floor, not an average.
-- **Two arms cannot separate tools from guidelines.** `devmcp:install` ships both. Every
-  number here is "what installing this gets you", never "what the tools do". A third arm
-  (guidelines, no `.mcp.json`) would settle it and is one `case` branch in `switch-arm.sh`.
-- **n=5 per cell.** Medians are reported for that reason; per-task spread reached 2.3× in
-  earlier runs. Family-level numbers aggregate 14–40 runs and are firmer than per-task ones.
-- **The harness needed four corrections during this work** — two grading false negatives, one
-  silent judge truncation, one inert fixture. Each was caught because a whole cell failed at
-  once, which is nearly always a broken task rather than a broken model. Findings that
-  survived are the ones where failures were partial and arm-asymmetric.
+- **One project shape per version,** vanilla TYPO3 plus a fixture extension. Real projects
+  with sitepackages and heavy TCA overrides hide more live state; this is a floor.
+- **Two arms cannot separate tools from guidelines.** `devmcp:install` ships both.
+- **n=5 per cell.** Family numbers aggregate 15–40 runs and are firmer than per-task ones.
+- **The v14 bench is new** and needed a fixture change: v14 keeps a content type's FlexForm on
+  the type itself, so the fixture now registers it per version (v13 unchanged; its 17 oracles
+  regenerated byte-identical to August's).
+- **One checker fix during the pilot:** `f1-trusted-hosts` rejected the correct answer
+  "displayErrors: yes, `1`". The widened check still passes all ten August answers and still
+  rejects "no" and "disabled"; the one affected pilot row was regraded.
+- **The network flag is inert** (see above). Runs were not network-isolated.
 
 ## Reproducing
 
 ```bash
-bin/setup-bench.sh && bin/verify-arms.sh && bin/oracle.sh
-bin/tax.sh
-bin/run.sh --reps 5
+DEV_MCP_CONSTRAINT=1.0.0 bin/setup-bench.sh                 # v13 bench
+BENCH_TYPO3=14 DEV_MCP_CONSTRAINT=1.0.0 bin/setup-bench.sh  # v14 bench
+bin/verify-arms.sh && bin/oracle.sh                         # prefix BENCH_TYPO3=14 for v14
+BENCH_MODEL=claude-opus-5-5 bin/run.sh --reps 5
 bin/judge.sh
 ddev exec -d /var/www/dev_mcp/Tests/Benchmark php bin/report.php
+bin/tax.sh "$BENCH_ROOT/.mcp.json" 3                        # from the bench root, arm b
 ```

@@ -19,13 +19,15 @@
 set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-LEDGER="$BENCH_DIR/results/runs.jsonl"
-RUNS_DIR="$BENCH_DIR/results/runs"
 
 # shellcheck disable=SC1091
-source "$BENCH_DIR/bin/_task.sh"
+source "$BENCH_DIR/bin/_env.sh"
 # shellcheck disable=SC1091
-source "$BENCH_DIR/.bench-env"
+source "$BENCH_DIR/bin/_task.sh"
+load_bench_env
+
+LEDGER="$RESULTS_DIR/runs.jsonl"
+RUNS_DIR="$RESULTS_DIR/runs"
 
 TASKS_DIR="$BENCH_DIR/tasks"
 [[ -f "$LEDGER" ]] || { echo "error: no ledger" >&2; exit 1; }
@@ -74,7 +76,7 @@ while IFS= read -r row; do
     rc=0
     ( cd "$BENCH_ROOT" \
         && RESPONSE_FILE="$response_file" \
-           ORACLE_FILE="$BENCH_DIR/oracle/${task}.txt" \
+           ORACLE_FILE="$ORACLE_DIR/${task}.txt" \
            bash -c "$(task_section "$TASKS_DIR/$task.task" check)" ) >/dev/null 2>&1 || rc=$?
 
     new=$([[ $rc -eq 0 ]] && echo true || echo false)

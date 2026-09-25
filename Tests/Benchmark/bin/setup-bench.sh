@@ -12,20 +12,52 @@
 # arms get the same file access a real developer has.
 #
 # The extension repo is bind-mounted at /var/www/dev_mcp and installed through a
-# Composer path repository, mirroring .ddev/commands/web/install-v13.
+# Composer path repository, mirroring .ddev/commands/web/install-v13. Set
+# DEV_MCP_CONSTRAINT (e.g. 1.0.0) to install a released version from Packagist
+# instead, which benchmarks exactly what shipped.
 #
-# Usage: setup-bench.sh [--recreate]
+# BENCH_TYPO3=14 builds the TYPO3 v14 bench as a separate DDEV project.
+#
+# Usage: [BENCH_TYPO3=14] [DEV_MCP_CONSTRAINT=1.0.0] setup-bench.sh [--recreate]
 
 set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_ROOT="$(cd "$BENCH_DIR/../.." && pwd)"
 
-BENCH_ROOT="${BENCH_ROOT:-$(dirname "$REPO_ROOT")/typo3-dev-mcp-bench}"
-PROJECT_NAME="typo3-dev-mcp-bench"
+# shellcheck disable=SC1091
+source "$BENCH_DIR/bin/_env.sh"
+
+PROJECT_NAME="typo3-dev-mcp-bench${BENCH_SUFFIX:+-$BENCH_SUFFIX}"
+BENCH_ROOT="${BENCH_ROOT:-$(dirname "$REPO_ROOT")/$PROJECT_NAME}"
 SITE_URL="https://${PROJECT_NAME}.ddev.site"
 ADMIN_PASSWORD='Joh316!!'
 RECREATE=0
+
+# v14 has no t3/cms meta package. This list mirrors what t3/cms installs on v13;
+# cms-base-distribution would add impexp, whose extra tt_content column breaks
+# the "which columns are non-core" task.
+case "$BENCH_TYPO3" in
+    13)
+        TYPO3_VERSION=13.4
+        TYPO3_PACKAGES="t3/cms:'^13'"
+        ;;
+    14)
+        TYPO3_VERSION=14.3
+        TYPO3_PACKAGES="typo3/minimal:'^14.3' helhum/typo3-console:'^9'"
+        for ext in belog beuser fluid-styled-content info install lowlevel rte-ckeditor setup tstemplate; do
+            TYPO3_PACKAGES="$TYPO3_PACKAGES typo3/cms-$ext:'^14.3'"
+        done
+        ;;
+esac
+
+if [[ -n "${DEV_MCP_CONSTRAINT:-}" ]]; then
+    DEV_MCP_REPO=":"
+    DEV_MCP_PACKAGE="balatd/typo3-dev-mcp:'$DEV_MCP_CONSTRAINT'"
+else
+    DEV_MCP_REPO="composer config repositories.dev_mcp path /var/www/dev_mcp"
+    DEV_MCP_PACKAGE="balatd/typo3-dev-mcp:'*@dev'"
+fi
 
 [[ "${1:-}" == "--recreate" ]] && RECREATE=1
 
@@ -33,13 +65,18 @@ RECREATE=0
 # have to resolve to different paths on the host and inside the container. Copies
 # mean fixture edits need an explicit sync.
 if [[ "${1:-}" == "--sync-fixture" ]]; then
-    [[ -f "$BENCH_DIR/.bench-env" ]] || { echo "error: no bench project yet" >&2; exit 1; }
-    # shellcheck disable=SC1091
-    source "$BENCH_DIR/.bench-env"
+    load_bench_env
     rsync -a --delete "$BENCH_DIR/fixture/bench_fixture/" "$BENCH_ROOT/packages/bench_fixture/"
     rm -rf "$BENCH_ROOT/var/cache"
     ddev -p "$PROJECT_NAME" exec vendor/bin/typo3 extension:setup
     ddev -p "$PROJECT_NAME" exec vendor/bin/typo3 cache:flush
+    # The fixture is tracked in the bench's git, and every run resets with
+    # `git checkout`, so an uncommitted sync would be reverted by the first run.
+    (
+        cd "$BENCH_ROOT"
+        git add -A packages/bench_fixture
+        git -c user.email=bench@local -c user.name=bench commit -qm "bench: sync fixture" || true
+    )
     echo "fixture synced"
     exit 0
 fi
@@ -80,6 +117,15 @@ ddev config \
     --disable-upload-dirs-warning \
     >/dev/null
 
+# Written before seeding: seed-content.sh and every later script resolve the
+# project through this file, so writing it last would seed the wrong bench.
+cat > "$BENCH_ENV_FILE" <<EOF
+BENCH_ROOT=$BENCH_ROOT
+PROJECT_NAME=$PROJECT_NAME
+SITE_URL=$SITE_URL
+TYPO3_VERSION=$TYPO3_VERSION
+EOF
+
 # Bind-mount the extension repo so Composer's path repository can reach it.
 cat > .ddev/docker-compose.ext.yaml <<EOF
 services:
@@ -96,17 +142,17 @@ EOF
 say "Starting DDEV"
 ddev start >/dev/null
 
-say "Installing TYPO3 13 + EXT:dev_mcp"
-ddev exec bash -s <<'INNER'
+say "Installing TYPO3 $TYPO3_VERSION + EXT:dev_mcp"
+ddev exec bash -s <<INNER
 set -e
 cd /var/www/html
 
 echo "{}" > composer.json
 composer config extra.typo3/cms.web-dir public
-composer config repositories.dev_mcp path /var/www/dev_mcp
+$DEV_MCP_REPO
 composer config --no-plugins allow-plugins.typo3/cms-composer-installers true
 composer config --no-plugins allow-plugins.typo3/class-alias-loader true
-composer req t3/cms:'^13' balatd/typo3-dev-mcp:'*@dev' --no-progress -n
+composer req $TYPO3_PACKAGES $DEV_MCP_PACKAGE --no-progress -n
 INNER
 
 say "Running TYPO3 setup"
@@ -181,16 +227,10 @@ ddev snapshot --name bench-clean >/dev/null
 rm -f .mcp.json CLAUDE.md AGENTS.md
 rm -rf .ai
 
-cat > "$BENCH_DIR/.bench-env" <<EOF
-BENCH_ROOT=$BENCH_ROOT
-PROJECT_NAME=$PROJECT_NAME
-SITE_URL=$SITE_URL
-EOF
-
 say "Done"
 echo
 echo "  project : $BENCH_ROOT"
 echo "  backend : $SITE_URL/typo3/  (admin / $ADMIN_PASSWORD)"
 echo "  snapshot: bench-clean"
 echo
-echo "Next: Tests/Benchmark/bin/switch-arm.sh a|b"
+echo "Next: BENCH_TYPO3=$BENCH_TYPO3 Tests/Benchmark/bin/verify-arms.sh"

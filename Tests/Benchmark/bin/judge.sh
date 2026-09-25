@@ -14,8 +14,14 @@
 set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-LEDGER="$BENCH_DIR/results/runs.jsonl"
-JUDGED="$BENCH_DIR/results/judged.jsonl"
+
+# shellcheck disable=SC1091
+source "$BENCH_DIR/bin/_env.sh"
+# The judge sees the prompt as the agent did, {{SITE_HOST}} resolved.
+load_bench_env
+
+LEDGER="$RESULTS_DIR/runs.jsonl"
+JUDGED="$RESULTS_DIR/judged.jsonl"
 JUDGE_MODEL="${BENCH_JUDGE_MODEL:-claude-opus-5}"
 
 [[ "${1:-}" == "--force" ]] && rm -f "$JUDGED"
@@ -55,7 +61,7 @@ while IFS= read -r row; do
     key="$(echo "$row" | jq -r '.sweep // "legacy"')__${task}__${arm}__${rep}"
     grep -qF "\"key\":\"$key\"" "$JUDGED" 2>/dev/null && continue
 
-    oracle="$(cat "$BENCH_DIR/oracle/${task}.txt" 2>/dev/null || echo '(no oracle)')"
+    oracle="$(cat "$ORACLE_DIR/${task}.txt" 2>/dev/null || echo '(no oracle)')"
     prompt_text="$(bash -c "source '$BENCH_DIR/bin/_task.sh'; task_section '$BENCH_DIR/tasks/${task}.task' prompt")"
 
     judge_prompt=$(cat <<EOF

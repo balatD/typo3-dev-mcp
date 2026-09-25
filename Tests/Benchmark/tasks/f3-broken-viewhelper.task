@@ -2,7 +2,7 @@ family: F3
 grade: judge
 
 --- prompt ---
-Opening https://typo3-dev-mcp-bench.ddev.site/products returns an error instead of the
+Opening https://{{SITE_HOST}}/products returns an error instead of the
 page.
 
 Diagnose the root cause. Name the exact file and the exact problem. Do not fix it.
@@ -15,7 +15,7 @@ sed -i.bak 's|<f:format.html>{data.bodytext}</f:format.html>|<f:format.html pars
 rm -f packages/bench_fixture/Resources/Private/Templates/BenchCard.html.bak
 ddev exec vendor/bin/typo3 cache:flush >/dev/null 2>&1
 # Trigger the failure so the log tools have something to read.
-curl -sk -o /dev/null https://typo3-dev-mcp-bench.ddev.site/products || true
+curl -sk -o /dev/null https://{{SITE_HOST}}/products || true
 
 --- oracle ---
 echo "Root cause: BenchCard.html passes an undefined argument 'wrapper' to <f:format.html>."

@@ -37,3 +37,8 @@
 /Tests/Benchmark/results/invalid/
 /Tests/Benchmark/oracle/*.txt
 /Tests/Benchmark/.bench-env
+# The v14 bench (BENCH_TYPO3=14) mirrors the layout one level down.
+/Tests/Benchmark/results/v14/runs/
+/Tests/Benchmark/results/v14/*.txt
+/Tests/Benchmark/oracle/v14/
+/Tests/Benchmark/.bench-env.v14

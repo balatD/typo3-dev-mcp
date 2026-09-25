@@ -14,7 +14,8 @@ set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1091
-source "$BENCH_DIR/.bench-env"
+source "$BENCH_DIR/bin/_env.sh"
+load_bench_env
 
 SITE_CONFIG="$BENCH_ROOT/config/sites/main/config.yaml"
 
@@ -126,7 +127,9 @@ VALUES
     (3, 2, 'Gamma widget', 'The third one',  30, 1);
 SQL
 
-ddev -p "$PROJECT_NAME" exec bash -c 'mysql -h db -u db -pdb db < /var/www/html/.seed.sql'
+# Fed on stdin rather than read inside the container: with mutagen, a file just
+# written on the host may not have synced in yet.
+ddev -p "$PROJECT_NAME" exec bash -c 'mysql -h db -u db -pdb db' < "$BENCH_ROOT/.seed.sql"
 rm -f "$BENCH_ROOT/.seed.sql"
 
 ddev -p "$PROJECT_NAME" exec vendor/bin/typo3 cache:flush >/dev/null

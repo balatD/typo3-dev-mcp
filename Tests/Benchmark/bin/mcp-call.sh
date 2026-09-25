@@ -15,7 +15,8 @@ set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1091
-source "$BENCH_DIR/.bench-env"
+source "$BENCH_DIR/bin/_env.sh"
+load_bench_env
 
 TOOL="${1:?usage: mcp-call.sh <tool|tools/list> [json-args]}"
 ARGS="${2:-{\}}"

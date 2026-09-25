@@ -15,7 +15,9 @@
 set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RUNS_DIR="$BENCH_DIR/results/runs"
+# shellcheck disable=SC1091
+source "$BENCH_DIR/bin/_env.sh"
+RUNS_DIR="$RESULTS_DIR/runs"
 CPT="${1:-2.42}"   # calibrated in results/tax-baseline.md
 
 [[ -d "$RUNS_DIR" ]] || { echo "error: no runs in $RUNS_DIR" >&2; exit 1; }
