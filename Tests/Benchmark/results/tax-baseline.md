@@ -86,3 +86,54 @@ and property names, types, enums and JSON structure are not compressible. Trimmi
 description as far as it goes without losing argument semantics bought ~300 tokens, and
 deleting a tool ~235. The flat-distribution conclusion is unchanged and now better
 supported: meaningful reduction needs fewer *tools*, not shorter prose.
+
+## Update — 1.0.0, measured 2026-09-24
+
+Measured on the v13 bench with `balatd/typo3-dev-mcp:1.0.0` installed from Packagist (mcp/sdk
+0.8.1), 22 tools, 3 reps each, zero variance:
+
+| model | no MCP | with typo3-dev-mcp | **fixed tax** |
+|---|---|---|---|
+| `claude-sonnet-5` | 10,432 | 16,701 | **6,269** |
+| `claude-opus-5-5` | 4,010 | 10,288 | **6,278** |
+
+**Unchanged since alpha.7** (6,270): alpha.8 and 1.0.0 touched the guidelines and the SDK
+bridge, not a single tool schema. The two models disagree by 9 tokens on the tax but by 6,400
+on the baseline — the baseline is the model's own system prompt, so only the delta travels
+across models, just as it only travels across dates.
+
+The v14 bench serializes to the identical 14,727 chars, so the tax is the same there; no
+tool's schema depends on the TYPO3 version.
+
+Per tool, calibrated at 2.35 chars/token (`bin/schema-cost.sh 6269`):
+
+| tool | tokens | share |
+|---|---|---|
+| read_log_entries | 433 | 6.9% |
+| flexform_schema | 430 | 6.9% |
+| search_docs | 412 | 6.6% |
+| site_sets | 381 | 6.1% |
+| search_changelog | 369 | 5.9% |
+| typoscript | 350 | 5.6% |
+| get_config | 336 | 5.4% |
+| list_events | 322 | 5.1% |
+| viewhelper_lookup | 321 | 5.1% |
+| page_tsconfig | 298 | 4.8% |
+| database_query | 273 | 4.4% |
+| middleware_stack | 272 | 4.3% |
+| tca_schema | 258 | 4.1% |
+| backend_modules | 255 | 4.1% |
+| list_commands | 242 | 3.9% |
+| database_schema | 239 | 3.8% |
+| last_error | 221 | 3.5% |
+| extension_info | 221 | 3.5% |
+| flush_cache | 211 | 3.4% |
+| application_info | 183 | 2.9% |
+| content_elements | 127 | 2.0% |
+| site_info | 115 | 1.8% |
+
+Still flat: the largest tool is 6.9%, the top five 32%.
+
+The guidelines are a separate, smaller cost that this probe excludes by design
+(`--setting-sources ""`): the 2,304-character `.ai/guidelines/typo3.md` that
+`devmcp:install` links from `CLAUDE.md`, down from 9,806 before alpha.8.

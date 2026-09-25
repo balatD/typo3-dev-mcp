@@ -8,20 +8,23 @@ Answers three questions with numbers instead of anecdote:
 
 ## Latest results
 
-170 runs, `claude-opus-5`, TYPO3 13.4.34. Full write-up:
-**[results/final-report.md](results/final-report.md)** · cost model:
-[results/tax-baseline.md](results/tax-baseline.md) · optimisation work:
-[results/efficiency-findings.md](results/efficiency-findings.md)
+340 runs of 1.0.0 (installed from Packagist), `claude-opus-5-5`, on TYPO3 13.4.35 and 14.3.7.
+Full write-up: **[results/final-report.md](results/final-report.md)** · cost model:
+[results/tax-baseline.md](results/tax-baseline.md) · the August alpha.6 sweep:
+[results/final-report-alpha.6.md](results/final-report-alpha.6.md)
 
-| Family | Arm A (baseline) | Arm B (installed) |
+Median cost per run, arm A (baseline) → arm B (installed):
+
+| Family | TYPO3 13.4 | TYPO3 14.3 |
 |---|---|---|
-| F1 live-state | $0.208 · 170k tok · 10 turns | **$0.097 · 99k tok · 4 turns** |
-| F2 code change | $0.236 · 13 turns | $0.212 · 13 turns |
-| F3 debug | $0.164 · 8 turns · 7% halluc | $0.205 · 9 turns · **0% halluc** |
-| F4 control | $0.107 · 5.5 turns | $0.088 · 4 turns |
+| F1 live-state | $0.074 → **$0.038** (5 → 4 turns) | $0.069 → **$0.045** (5 → 4 turns) |
+| F2 code change | $0.106 → $0.109 | $0.096 → **$0.163** (6 → 12 turns) |
+| F3 debug | $0.073 → $0.089 | $0.074 → $0.076 |
+| F4 control | $0.068 → $0.066 | $0.061 → $0.059 |
 
-**Success was 100% in both arms on all 17 tasks.** The baseline solved everything; this
-measures efficiency and reliability, not capability.
+**Success was 100% in both arms on all 17 tasks on both versions, with zero hallucinated
+claims.** This measures efficiency, not capability. On v14, arm B verifies its own code edits
+through the tools, which doubles F2's turns without changing the outcome.
 
 ## Quick start
 
@@ -37,6 +40,23 @@ ddev exec -d /var/www/dev_mcp/Tests/Benchmark php bin/report.php
 
 `report.php` needs PHP, which is not installed on the host — run it in the container.
 
+### TYPO3 v14 and released versions
+
+Every script targets the v13 bench unless `BENCH_TYPO3=14` is set, which selects a
+second DDEV project (`typo3-dev-mcp-bench-v14`) with its own `.bench-env.v14`,
+`oracle/v14/` and `results/v14/`. The two benches share nothing, so their sweeps can run
+in parallel. `DEV_MCP_CONSTRAINT=1.0.0` makes `setup-bench.sh` install that release from
+Packagist instead of the working copy.
+
+```bash
+BENCH_TYPO3=14 DEV_MCP_CONSTRAINT=1.0.0 bin/setup-bench.sh
+BENCH_TYPO3=14 bin/verify-arms.sh && BENCH_TYPO3=14 bin/oracle.sh
+BENCH_TYPO3=14 bin/run.sh --reps 5 && BENCH_TYPO3=14 bin/judge.sh
+ddev exec -d /var/www/dev_mcp/Tests/Benchmark env BENCH_TYPO3=14 php bin/report.php
+```
+
+Task files write the bench host as `{{SITE_HOST}}`; `task_section` fills it in.
+
 ## The two arms
 
 | Arm | State | Represents |
@@ -47,8 +67,8 @@ ddev exec -d /var/www/dev_mcp/Tests/Benchmark php bin/report.php
 `switch-arm.sh b` runs the real install command rather than copying a snapshot of its
 output, so the benchmark measures what ships.
 
-**`b − a` is "what installing typo3-dev-mcp gets you", not "what the 24 tools get you."**
-The installer ships two treatments at once: the tools *and* an 89-line
+**`b − a` is "what installing typo3-dev-mcp gets you", not "what the 22 tools get you."**
+The installer ships two treatments at once: the tools *and* a 47-line
 `.ai/guidelines/typo3.md`. Those guidelines are prompt engineering and may carry a real
 share of the gain. Separating them needs a third arm (guidelines, no `.mcp.json`) — the
 runner is arm-parameterised, so that is one `case` branch in `switch-arm.sh`, not a
@@ -140,10 +160,11 @@ records.
 
 Edit the fixture, then `bin/setup-bench.sh --sync-fixture` — the bench project holds a
 copy, because a symlink would have to resolve to different paths on the host and inside
-the container.
+the container. The sync commits to the bench's git, since every run resets with
+`git checkout`.
 
 `content_blocks` is not registered here (no `friendsoftypo3/content-blocks` installed),
-so the surface is **23 tools, not 24**. Exclude it from attribution or add the package.
+so the surface is **22 tools, not 23**. Exclude it from attribution or add the package.
 
 ## Interpreting the output
 
