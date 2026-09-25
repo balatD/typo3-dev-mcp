@@ -20,7 +20,8 @@ set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1091
-source "$BENCH_DIR/.bench-env"
+source "$BENCH_DIR/bin/_env.sh"
+load_bench_env
 
 MODEL="${BENCH_VERIFY_MODEL:-claude-sonnet-5}"
 fail=0
@@ -63,6 +64,10 @@ check "fixture template is live" "bench-card" "$fe"
 check "fixture field renders" "A teaser on the card" "$fe"
 check "set TypoScript reaches compiled setup" "bench_fixture" \
     "$("$BENCH_DIR/bin/mcp-call.sh" typoscript '{"pageId":2,"path":"lib.contentElement.templateRootPaths"}' 2>/dev/null | jq -r '.content[0].text' 2>/dev/null)"
+# v14 resolves FlexForms per content type; a misregistered data structure falls
+# back to core's default and the fixture's two sheets silently disappear.
+check "fixture FlexForm is live" "sAppearance" \
+    "$("$BENCH_DIR/bin/mcp-call.sh" flexform_schema '{"type":"benchfixture_listing"}' 2>/dev/null | jq -r '.content[0].text' 2>/dev/null)"
 
 echo
 echo "Arm A (baseline)"
@@ -81,7 +86,7 @@ check "guidelines in context" "YES" \
     "$(ask b 'Reply YES or NO only: are TYPO3-specific guidelines present in your context?' '')"
 check "MCP tools available" "YES" \
     "$(ask b 'Reply YES or NO only: do you have any tool whose name starts with mcp__?' '')"
-check "MCP server answers" "13.4" \
+check "MCP server answers" "$TYPO3_VERSION" \
     "$(ask b 'Use the application_info tool and reply with the TYPO3 version number only.' '')"
 
 echo

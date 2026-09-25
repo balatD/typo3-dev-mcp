@@ -13,12 +13,13 @@ set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TASKS_DIR="$BENCH_DIR/tasks"
-OUT_DIR="$BENCH_DIR/oracle"
 
 # shellcheck disable=SC1091
-source "$BENCH_DIR/bin/_task.sh"
+source "$BENCH_DIR/bin/_env.sh"
 # shellcheck disable=SC1091
-source "$BENCH_DIR/.bench-env"
+source "$BENCH_DIR/bin/_task.sh"
+load_bench_env
+OUT_DIR="$ORACLE_DIR"
 
 mkdir -p "$OUT_DIR"
 

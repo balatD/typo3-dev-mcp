@@ -16,12 +16,9 @@ set -euo pipefail
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ARM="${1:-}"
 
-if [[ ! -f "$BENCH_DIR/.bench-env" ]]; then
-    echo "error: bench project not set up. Run bin/setup-bench.sh first." >&2
-    exit 1
-fi
 # shellcheck disable=SC1091
-source "$BENCH_DIR/.bench-env"
+source "$BENCH_DIR/bin/_env.sh"
+load_bench_env
 
 cd "$BENCH_ROOT"
 

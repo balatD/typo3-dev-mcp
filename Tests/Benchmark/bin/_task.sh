@@ -21,16 +21,22 @@
 #
 #   --- setup ---
 #   optional bash applied after state reset (seeded breakage for F3)
+#
+# {{SITE_HOST}} in any section becomes the bench project's host, so one task file
+# serves both the v13 and the v14 bench.
 
 task_field() {
     awk -v k="$2:" '$1 == k { sub(/^[^:]*:[ ]*/, ""); print; exit }' "$1"
 }
 
 task_section() {
-    awk -v want="--- $2 ---" '
+    awk -v want="--- $2 ---" -v host="${SITE_HOST:-}" '
         $0 == want { inside = 1; next }
         /^--- .* ---$/ { inside = 0 }
-        inside { print }
+        inside {
+            if (host != "") gsub(/[{][{]SITE_HOST[}][}]/, host)
+            print
+        }
     ' "$1"
 }
 

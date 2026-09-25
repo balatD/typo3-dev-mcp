@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-return [
+use TYPO3\CMS\Core\Information\Typo3Version;
+
+$tca = [
     'ctrl' => [
         'title' => 'Benchmark item',
         'label' => 'title',
@@ -69,3 +71,10 @@ return [
         ],
     ],
 ];
+
+// v14 dropped searchFields and logs a deprecation for it on every TCA rebuild.
+if ((new Typo3Version())->getMajorVersion() >= 14) {
+    unset($tca['ctrl']['searchFields']);
+}
+
+return $tca;

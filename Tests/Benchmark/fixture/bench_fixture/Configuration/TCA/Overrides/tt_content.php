@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 defined('TYPO3') or die();
 
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 // Three columns that do not exist in vanilla core. F1 benchmark tasks ask which
@@ -88,13 +89,17 @@ ExtensionManagementUtility::addTcaSelectItem(
     ],
 );
 
+$isV14 = (new Typo3Version())->getMajorVersion() >= 14;
+
 // A two-sheet FlexForm, so `flexform_schema` has a non-trivial data structure
 // to resolve rather than only core's.
-ExtensionManagementUtility::addPiFlexFormValue(
-    '*',
-    'FILE:EXT:bench_fixture/Configuration/FlexForms/BenchPlugin.xml',
-    'benchfixture_listing',
-);
+if (!$isV14) {
+    ExtensionManagementUtility::addPiFlexFormValue(
+        '*',
+        'FILE:EXT:bench_fixture/Configuration/FlexForms/BenchPlugin.xml',
+        'benchfixture_listing',
+    );
+}
 
 $GLOBALS['TCA']['tt_content']['types']['benchfixture_listing'] = [
     'showitem' => '
@@ -107,3 +112,10 @@ $GLOBALS['TCA']['tt_content']['types']['benchfixture_listing'] = [
             --palette--;;access,
     ',
 ];
+
+// v14 keeps the data structure on the type itself, so it can only be set after
+// the type definition above, which would otherwise overwrite it.
+if ($isV14) {
+    $GLOBALS['TCA']['tt_content']['types']['benchfixture_listing']['columnsOverrides']['pi_flexform']['config']['ds']
+        = 'FILE:EXT:bench_fixture/Configuration/FlexForms/BenchPlugin.xml';
+}

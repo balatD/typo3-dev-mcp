@@ -14,8 +14,11 @@
 set -euo pipefail
 
 BENCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$BENCH_DIR/bin/_env.sh"
+load_bench_env
 MEASURED_TAX="${1:-0}"
-SERVE_CMD=(ddev exec -d /var/www/html/v13 vendor/bin/typo3 devmcp:serve)
+SERVE_CMD=(ddev -p "$PROJECT_NAME" exec vendor/bin/typo3 devmcp:serve)
 
 raw="$(printf '%s\n' \
     '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"bench","version":"1"}}}' \
