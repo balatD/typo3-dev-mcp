@@ -45,3 +45,6 @@ These values are computed at runtime and have no CLI equivalent.
 ## Cache
 
 - `flush_cache` — all caches, or one group: `system` for configuration and DI, `pages` for content and rendering.
+
+The tools read TYPO3's caches like the site itself does: after editing TCA, services or
+configuration, flush before checking the result.

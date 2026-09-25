@@ -39,7 +39,8 @@ final class TcaSchemaTool implements ToolInterface
     {
         return 'TYPO3\'s semantic data model (TCA) via the official Schema API. No arguments: all tables '
             . 'with their key capabilities. "table": per-field summary (type, relations), record types '
-            . 'and capabilities. "table" plus "field": the complete field configuration.';
+            . 'and capabilities. "type": the fields of that record type\'s form, in form order. "field": '
+            . 'the complete field configuration (within "type" if given).';
     }
 
     public function getInputSchema(): array
@@ -50,6 +51,10 @@ final class TcaSchemaTool implements ToolInterface
                 'table' => [
                     'type' => 'string',
                     'description' => 'Table (schema) name, e.g. "tt_content" or "pages"',
+                ],
+                'type' => [
+                    'type' => 'string',
+                    'description' => 'Record type, e.g. a CType like "textmedia" — its form fields with overrides applied',
                 ],
                 'field' => [
                     'type' => 'string',
@@ -82,11 +87,59 @@ final class TcaSchemaTool implements ToolInterface
 
         $schema = $this->tcaSchemaFactory->get($table);
 
+        $recordType = $arguments['type'] ?? null;
+        if (\is_string($recordType) && $recordType !== '') {
+            return $this->describeRecordType($schema, $table, $recordType, \is_string($field) ? $field : '');
+        }
+
         if (\is_string($field) && $field !== '') {
             return $this->describeField($schema, $table, $field);
         }
 
         return $this->describeSchema($schema, $table);
+    }
+
+    /**
+     * The Schema API builds a record type's sub-schema from its showitem, so
+     * its fields come in form order with palettes expanded and columnsOverrides
+     * and label overrides applied.
+     *
+     * @return array<string, mixed>
+     */
+    private function describeRecordType(TcaSchema $schema, string $table, string $recordType, string $field): array
+    {
+        if (!$schema->supportsSubSchema() || !$schema->hasSubSchema($recordType)) {
+            $known = $schema->supportsSubSchema()
+                ? implode(', ', array_map(static fn(TcaSchema $sub): string => $sub->getName(), iterator_to_array($schema->getSubSchemata(), false)))
+                : 'none — "' . $table . '" has no record types';
+            throw new \RuntimeException('Record type "' . $recordType . '" does not exist in "' . $table . '". Record types: ' . $known . '.');
+        }
+
+        $subSchema = $schema->getSubSchema($recordType);
+        if ($field !== '') {
+            return ['recordType' => $recordType] + $this->describeField($subSchema, $table, $field);
+        }
+
+        return array_filter([
+            'table' => $table,
+            'recordType' => $recordType,
+            'recordTypeLabel' => $this->recordTypeLabel($schema, $recordType),
+            'fields' => $this->summarizeFields($subSchema),
+            'hint' => 'Pass {"table": "' . $table . '", "type": "' . $recordType . '", "field": "<name>"} for a field\'s '
+                . 'configuration within this record type.',
+        ], static fn(mixed $value): bool => $value !== null);
+    }
+
+    private function recordTypeLabel(TcaSchema $schema, string $recordType): ?string
+    {
+        $typeField = $schema->getSubSchemaTypeInformation()->getFieldName();
+        foreach ($schema->getField($typeField)->getConfiguration()['items'] ?? [] as $item) {
+            if ((string)($item['value'] ?? '') === $recordType) {
+                return $this->labelTranslator->translate($item['label'] ?? null);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -123,30 +176,7 @@ final class TcaSchemaTool implements ToolInterface
      */
     private function describeSchema(TcaSchema $schema, string $table): array
     {
-        $fields = [];
-        foreach ($schema->getFields() as $schemaField) {
-            $configuration = $schemaField->getConfiguration();
-            $entry = array_filter([
-                'label' => $this->labelTranslator->translate($schemaField->getLabel()),
-                'type' => $schemaField->getType(),
-                'renderType' => $configuration['renderType'] ?? null,
-                'required' => $schemaField->isRequired() ?: null,
-                'itemCount' => isset($configuration['items']) ? \count($configuration['items']) : null,
-            ], static fn(mixed $value): bool => $value !== null && $value !== '');
-
-            if ($schemaField instanceof RelationalFieldTypeInterface) {
-                $entry['relationship'] = $schemaField->getRelationshipType()->name;
-                $entry['relations'] = array_map(
-                    static fn(ActiveRelation $relation): array => array_filter([
-                        'table' => $relation->toTable(),
-                        'field' => $relation->toField(),
-                    ]),
-                    $schemaField->getRelations(),
-                );
-            }
-
-            $fields[$schemaField->getName()] = $entry;
-        }
+        $fields = $this->summarizeFields($schema);
 
         $capabilities = [];
         foreach (TcaSchemaCapability::cases() as $capability) {
@@ -174,6 +204,39 @@ final class TcaSchemaTool implements ToolInterface
             'fields' => $fields,
             'hint' => 'Pass {"table": "' . $table . '", "field": "<name>"} for a full field configuration.',
         ], static fn(mixed $value): bool => $value !== null);
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function summarizeFields(TcaSchema $schema): array
+    {
+        $fields = [];
+        foreach ($schema->getFields() as $schemaField) {
+            $configuration = $schemaField->getConfiguration();
+            $entry = array_filter([
+                'label' => $this->labelTranslator->translate($schemaField->getLabel()),
+                'type' => $schemaField->getType(),
+                'renderType' => $configuration['renderType'] ?? null,
+                'required' => $schemaField->isRequired() ?: null,
+                'itemCount' => isset($configuration['items']) ? \count($configuration['items']) : null,
+            ], static fn(mixed $value): bool => $value !== null && $value !== '');
+
+            if ($schemaField instanceof RelationalFieldTypeInterface) {
+                $entry['relationship'] = $schemaField->getRelationshipType()->name;
+                $entry['relations'] = array_map(
+                    static fn(ActiveRelation $relation): array => array_filter([
+                        'table' => $relation->toTable(),
+                        'field' => $relation->toField(),
+                    ]),
+                    $schemaField->getRelations(),
+                );
+            }
+
+            $fields[$schemaField->getName()] = $entry;
+        }
+
+        return $fields;
     }
 
     /**

@@ -7,8 +7,12 @@ namespace BalatD\DevMcp\Mcp\Tool;
 use BalatD\DevMcp\Mcp\Support\LabelTranslator;
 use BalatD\DevMcp\Mcp\ToolInterface;
 use TYPO3\CMS\Core\Configuration\FlexForm\FlexFormTools;
+use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Schema\TcaSchema;
 use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * FlexForm data structures are the one part of the TCA that tca_schema cannot
@@ -30,6 +34,7 @@ final class FlexFormSchemaTool implements ToolInterface
         private readonly FlexFormTools $flexFormTools,
         private readonly TcaSchemaFactory $tcaSchemaFactory,
         private readonly LabelTranslator $labelTranslator,
+        private readonly ConnectionPool $connectionPool,
     ) {}
 
     public function getName(): string
@@ -42,7 +47,7 @@ final class FlexFormSchemaTool implements ToolInterface
         return 'Resolve the FlexForm data structure of a TCA field into sheets and fields with their TCA '
             . 'configuration — the field names a plugin actually stores in its FlexForm XML. Defaults to '
             . 'tt_content.pi_flexform; "type" selects the structure (the CType, or on TYPO3 v13 the '
-            . 'list_type of the plugin).';
+            . 'list_type of the plugin). "uid" reads a stored record and compares its values with the structure.';
     }
 
     public function getInputSchema(): array
@@ -62,6 +67,10 @@ final class FlexFormSchemaTool implements ToolInterface
                     'type' => 'string',
                     'description' => 'Record type selecting the structure — a CType like "textmedia", or a '
                         . 'v13 plugin list_type. Omit for the default structure.',
+                ],
+                'uid' => [
+                    'type' => 'integer',
+                    'description' => 'A stored record: resolves its structure and compares the values it stores with it',
                 ],
                 'record' => [
                     'type' => 'object',
@@ -108,18 +117,103 @@ final class FlexFormSchemaTool implements ToolInterface
             );
         }
 
-        $row = $record !== [] ? $record : $this->buildRow($schema, $fieldTca['config'], $type);
-        $dataStructure = $this->resolveDataStructure($fieldTca, $table, $field, $row, $schema, $type);
+        $uid = (int)($arguments['uid'] ?? 0);
+        $storedRow = $uid > 0 ? $this->fetchRecord($table, $uid) : null;
 
-        return array_filter([
+        $row = $storedRow ?? ($record !== [] ? $record : $this->buildRow($schema, $fieldTca['config'], $type));
+        $dataStructure = $this->resolveDataStructure($fieldTca, $table, $field, $row, $schema, $type);
+        $sheets = $this->describeSheets($dataStructure);
+
+        $result = array_filter([
             'table' => $table,
             'field' => $field,
             'type' => $type !== '' ? $type : null,
-            'resolvedWith' => $row !== [] ? $row : null,
-            'sheets' => $this->describeSheets($dataStructure),
+            'resolvedWith' => $storedRow !== null
+                ? $this->selectingColumns($schema, $fieldTca['config'], $storedRow)
+                : ($row !== [] ? $row : null),
+            'sheets' => $sheets,
             'hint' => 'Field names are the keys inside each sheet; FlexForm values are stored under '
                 . 'data.<sheet>.lDEF.<field>.vDEF in the XML.',
         ], static fn(mixed $value): bool => $value !== null);
+
+        if ($storedRow === null) {
+            return $result;
+        }
+
+        return ['uid' => $uid] + $result + $this->compareStoredValues((string)($storedRow[$field] ?? ''), $sheets);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function fetchRecord(string $table, int $uid): array
+    {
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable($table);
+        $queryBuilder->getRestrictions()->removeAll()->add(new DeletedRestriction());
+        $row = $queryBuilder
+            ->select('*')
+            ->from($table)
+            ->where($queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT)))
+            ->executeQuery()
+            ->fetchAssociative();
+
+        return $row !== false ? $row : throw new \RuntimeException('No ' . $table . ' record with uid ' . $uid . '.');
+    }
+
+    /**
+     * The record's columns that select its structure: the type field, and on
+     * v13 the ds_pointerField columns such as list_type.
+     *
+     * @param array<string, mixed> $fieldConfig
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private function selectingColumns(TcaSchema $schema, array $fieldConfig, array $row): array
+    {
+        $columns = explode(',', (string)($fieldConfig['ds_pointerField'] ?? ''));
+        if ($schema->supportsSubSchema()) {
+            $columns[] = $schema->getSubSchemaTypeInformation()->getFieldName();
+        }
+
+        $selecting = [];
+        foreach (array_unique(array_filter(array_map('trim', $columns))) as $column) {
+            if (($row[$column] ?? '') !== '') {
+                $selecting[$column] = $row[$column];
+            }
+        }
+
+        return $selecting;
+    }
+
+    /**
+     * Stored values keyed "<sheet>.<field>". A value whose field the structure
+     * no longer defines is silently dropped when TYPO3 reads the FlexForm.
+     *
+     * @param array<string, mixed> $sheets
+     * @return array<string, mixed>
+     */
+    private function compareStoredValues(string $xml, array $sheets): array
+    {
+        $stored = [];
+        $parsed = $xml !== '' ? GeneralUtility::xml2array($xml) : [];
+        foreach (\is_array($parsed) ? ($parsed['data'] ?? []) : [] as $sheetName => $sheet) {
+            foreach ($sheet['lDEF'] ?? [] as $fieldName => $value) {
+                $stored[$sheetName . '.' . $fieldName] = \is_array($value) ? ($value['vDEF'] ?? null) : $value;
+            }
+        }
+
+        $defaults = [];
+        foreach ($sheets as $sheetName => $sheet) {
+            foreach ($sheet['fields'] ?? [] as $fieldName => $definition) {
+                $defaults[$sheetName . '.' . $fieldName] = $definition['default'] ?? null;
+            }
+        }
+
+        return array_filter([
+            'values' => array_intersect_key($stored, $defaults),
+            'orphanedValues' => array_diff_key($stored, $defaults),
+            'fieldsWithoutValue' => array_diff_key($defaults, $stored),
+        ], static fn(array $group): bool => $group !== []);
     }
 
     /**
