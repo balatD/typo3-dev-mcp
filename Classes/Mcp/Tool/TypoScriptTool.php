@@ -26,6 +26,8 @@ use TYPO3\CMS\Core\Utility\RootlineUtility;
  */
 final class TypoScriptTool implements ToolInterface
 {
+    private const MAX_LISTED_KEYS = 40;
+
     public function __construct(
         private readonly SiteFinder $siteFinder,
         private readonly SysTemplateRepository $sysTemplateRepository,
@@ -128,14 +130,20 @@ final class TypoScriptTool implements ToolInterface
             );
         }
 
-        return $this->presentSection($data, $section, $pageId, $site->getIdentifier(), $path);
+        $sources = [
+            'site sets' => $site->getConfiguration()['dependencies'] ?? [],
+            'sys_template uids' => array_column($sysTemplateRows, 'uid'),
+        ];
+
+        return $this->presentSection($data, $section, $pageId, $site->getIdentifier(), $path, $sources);
     }
 
     /**
      * @param array<string, mixed> $data
+     * @param array<string, list<int|string>> $sources
      * @return array<string, mixed>
      */
-    private function presentSection(array $data, string $section, int $pageId, string $siteIdentifier, string $path): array
+    private function presentSection(array $data, string $section, int $pageId, string $siteIdentifier, string $path, array $sources): array
     {
         $result = [
             'pageId' => $pageId,
@@ -144,22 +152,10 @@ final class TypoScriptTool implements ToolInterface
         ];
 
         if ($path !== '') {
-            foreach (explode('.', $path) as $segment) {
-                // compiled TypoScript arrays key branches as "name." and values as "name"
-                if (\is_array($data) && \array_key_exists($segment . '.', $data)) {
-                    $data = $data[$segment . '.'];
-                } elseif (\is_array($data) && \array_key_exists($segment, $data)) {
-                    $data = $data[$segment];
-                } else {
-                    throw new \RuntimeException(
-                        'Path "' . $path . '" not found in ' . $section . ' (segment "' . $segment . '"). '
-                        . 'Call without "path" to list the top-level keys.',
-                    );
-                }
-            }
-
             $result['path'] = $path;
-            $result['value'] = $data;
+            $result['value'] = $section === 'constants'
+                ? $this->constantAt($data, $path)
+                : $this->subtreeAt($data, $path, $section, $sources);
 
             return $result;
         }
@@ -179,5 +175,88 @@ final class TypoScriptTool implements ToolInterface
         $result['hint'] = 'Pass {"path": "<key>"} to get a subtree, e.g. {"path": "page"}.';
 
         return $result;
+    }
+
+    /**
+     * Constants are flat, fully dotted keys: a path is either one of them or a
+     * prefix of several.
+     *
+     * @param array<string, mixed> $constants
+     */
+    private function constantAt(array $constants, string $path): mixed
+    {
+        if (\array_key_exists($path, $constants)) {
+            return $constants[$path];
+        }
+
+        $prefix = $path . '.';
+        $matches = array_filter($constants, static fn(string $key): bool => str_starts_with($key, $prefix), \ARRAY_FILTER_USE_KEY);
+        if ($matches !== []) {
+            return $matches;
+        }
+
+        $topLevel = array_unique(array_map(static fn(string $key): string => explode('.', $key)[0], array_keys($constants)));
+        throw new \RuntimeException(
+            'No constant matches "' . $path . '". Top-level prefixes: ' . $this->listKeys($topLevel) . '.',
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, list<int|string>> $sources
+     */
+    private function subtreeAt(array $data, string $path, string $section, array $sources): mixed
+    {
+        foreach (explode('.', $path) as $segment) {
+            // compiled TypoScript arrays key branches as "name." and values as "name"
+            if (\is_array($data) && \array_key_exists($segment . '.', $data)) {
+                $data = $data[$segment . '.'];
+            } elseif (\is_array($data) && \array_key_exists($segment, $data)) {
+                $data = $data[$segment];
+            } else {
+                $existing = \is_array($data)
+                    ? 'Keys at that level: ' . $this->listKeys(array_map(static fn($key): string => rtrim((string)$key, '.'), array_keys($data)))
+                    : 'The path ends at a value before that segment';
+                throw new \RuntimeException(\sprintf(
+                    'Path "%s" not found in %s (segment "%s"). %s. Loaded from %s.',
+                    $path,
+                    $section,
+                    $segment,
+                    $existing,
+                    $this->describeSources($sources),
+                ));
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param array<array-key, string> $keys
+     */
+    private function listKeys(array $keys): string
+    {
+        $keys = array_values(array_unique($keys));
+        sort($keys);
+        if ($keys === []) {
+            return 'none';
+        }
+        $shown = \array_slice($keys, 0, self::MAX_LISTED_KEYS);
+        $more = \count($keys) - \count($shown);
+
+        return implode(', ', $shown) . ($more > 0 ? ' (+' . $more . ' more)' : '');
+    }
+
+    /**
+     * @param array<string, list<int|string>> $sources
+     */
+    private function describeSources(array $sources): string
+    {
+        $parts = [];
+        foreach ($sources as $label => $values) {
+            $parts[] = $label . ': ' . ($values === [] ? 'none' : implode(', ', $values));
+        }
+
+        return implode('; ', $parts);
     }
 }

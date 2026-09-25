@@ -46,20 +46,12 @@ abstract class AbstractToolTestCase extends FunctionalTestCase
     }
 
     /**
-     * The site configuration is written by hand: core's SiteBasedTestTrait lives
-     * in typo3/sysext and is not reachable from an extension's test suite.
-     *
-     * The destination comes from Environment rather than a hardcoded `config/`:
-     * a functional test instance keeps its configuration under `typo3conf/`.
+     * The test site's config.yaml; tests needing other languages, sets or error
+     * handling override it.
      */
-    private function writeSiteConfiguration(): void
+    protected function siteConfiguration(): string
     {
-        $path = Environment::getConfigPath() . '/sites/' . self::SITE_IDENTIFIER;
-        if (!is_dir($path) && !mkdir($path, 0o775, true) && !is_dir($path)) {
-            self::fail('Could not create site configuration directory ' . $path);
-        }
-
-        file_put_contents($path . '/config.yaml', <<<'YAML'
+        return <<<'YAML'
             rootPageId: 1
             base: 'https://typo3-dev-mcp.test/'
             websiteTitle: 'typo3-dev-mcp functional tests'
@@ -73,7 +65,24 @@ abstract class AbstractToolTestCase extends FunctionalTestCase
                 flag: gb
             errorHandling: []
             routes: []
-            YAML);
+            YAML;
+    }
+
+    /**
+     * The site configuration is written by hand: core's SiteBasedTestTrait lives
+     * in typo3/sysext and is not reachable from an extension's test suite.
+     *
+     * The destination comes from Environment rather than a hardcoded `config/`:
+     * a functional test instance keeps its configuration under `typo3conf/`.
+     */
+    private function writeSiteConfiguration(): void
+    {
+        $path = Environment::getConfigPath() . '/sites/' . self::SITE_IDENTIFIER;
+        if (!is_dir($path) && !mkdir($path, 0o775, true) && !is_dir($path)) {
+            self::fail('Could not create site configuration directory ' . $path);
+        }
+
+        file_put_contents($path . '/config.yaml', $this->siteConfiguration());
     }
 
     /**
