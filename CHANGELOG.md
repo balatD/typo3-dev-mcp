@@ -1,5 +1,56 @@
 # Changelog
 
+## 1.1.0 — unreleased
+
+Every change here closes a gap the 1.0.0 benchmark streams exposed: a place where an agent
+with typo3-dev-mcp spent extra turns, or got a wrong answer.
+
+### Fixed
+
+- **Tools reported the installation as it was when the server started.** `devmcp:serve`
+  booted TYPO3 once and ran every call in that process, so after an edit `tca_schema`,
+  `list_events`, `backend_modules` and anything else reading boot-time state kept the old
+  picture — even after `flush_cache`. A benchmark agent that had just added a TCA field was
+  told the field did not exist. Every call now runs in a fresh `typo3 devmcp:call` process;
+  responses are byte-identical to before, checked for every tool on 13.4 and 14.3.
+- **`flush_cache` left the dependency-injection caches alone.** It called the
+  CacheManager, which does not touch the DI container, so new listeners and services never
+  appeared. It now runs core's `cache:flush`, and the `di` group works.
+- **`typoscript` could not address constants by path.** Constants are flat dotted keys,
+  which the path walk treated as nested. A path now returns the exact key, or every key
+  under that prefix.
+
+### Added
+
+- `tca_schema` takes `"type"`: the fields of one record type's form in form order, palettes
+  expanded and overrides applied. With `"field"`, that field's configuration within the type.
+- `flexform_schema` takes `"uid"`: it resolves the structure from the stored record and
+  compares the record's values with it — `values`, `orphanedValues` (stored under a field the
+  structure no longer defines, which TYPO3 silently drops) and `fieldsWithoutValue`.
+- `site_info` reports each language's configured base, navigation title and fallbacks, and
+  resolves a page error handler's `t3://page` target to its uid, title and slug.
+- `typoscript` names what exists when a path is missing: the keys at that level and where
+  the TypoScript came from — the site's sets and `sys_template` records.
+- The guidelines say that the tools follow TYPO3's caches, so flush after editing TCA,
+  services or configuration.
+
+### Changed
+
+- Each call starts a TYPO3 process: about 0.1–0.25 s, more for the first call after a DI
+  flush, and a 120-second limit. A broken edit (a syntax error, an invalid `Services.yaml`)
+  now fails calls with PHP's error instead of returning stale data.
+- `CollectToolsEvent` is dispatched at server start and again in every call's process.
+  `BeforeToolExecutionEvent` and `AfterToolExecutionEvent` listeners run in the call's
+  process and keep no in-memory state between calls. The events' classes and methods are
+  unchanged.
+- `list_commands` no longer lists hidden commands, such as `devmcp:call`.
+- `symfony/process` is a direct requirement; it previously came in through TYPO3 core only.
+
+### Documentation
+
+- Under DDEV, `DEV_MCP_ALLOW_WRITE` and `DEV_MCP_NO_NETWORK` must be set inside the
+  container: `ddev exec` does not forward host variables.
+
 ## 1.0.0 — 2026-09-23
 
 First release out of alpha. No new tools: the surface arrived at over eight alphas is the

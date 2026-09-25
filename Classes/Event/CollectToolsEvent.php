@@ -7,9 +7,11 @@ namespace BalatD\DevMcp\Event;
 use BalatD\DevMcp\Mcp\ToolInterface;
 
 /**
- * Dispatched once when the MCP server starts, before the tool list is
- * announced to the client. Listeners can add project-specific tools,
- * remove built-in ones, or replace a tool with a decorated variant.
+ * Dispatched when the MCP server starts, before the tool list is announced to
+ * the client, and again in the process of every tool call to find the tool to
+ * run. Listeners can add project-specific tools, remove built-in ones, or
+ * replace a tool with a decorated variant; they should be cheap and
+ * deterministic.
  *
  * @api Part of the public extension-point contract; covered by the
  *      backwards-compatibility promise documented in the README.

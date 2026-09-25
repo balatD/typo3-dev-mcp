@@ -116,6 +116,15 @@ The backend-module-only corners of TYPO3 — core ships no CLI for any of these.
 Because the DI container is cached, installing that package later needs a
 `vendor/bin/typo3 cache:flush` before the tool appears.
 
+### How tool calls run
+
+Each call runs in its own short-lived `vendor/bin/typo3` process, so a tool reports what
+TYPO3 sees now, not what the server saw when it started. Like the site itself, results
+follow TYPO3's caches: after editing TCA, services or configuration, flush first —
+`flush_cache` runs core's `cache:flush`, dependency-injection caches included. A call adds
+one TYPO3 boot (about 0.1–0.25 s) and is stopped after 120 seconds. The announced tool list
+is fixed when the server starts.
+
 ### Safety model
 
 - Everything is read-only by default; results carry MCP `readOnlyHint` annotations.
@@ -130,6 +139,9 @@ Because the DI container is cached, installing that package later needs a
   — those two tools then fail with an explanatory message and everything else is unaffected.
 - There is deliberately **no code-execution tool**: nothing this server exposes can run
   arbitrary PHP.
+- The environment flags are read by the server process. Under DDEV that runs inside the
+  container, and `ddev exec` does not forward host variables — set them via
+  `web_environment` in `.ddev/config.yaml`.
 
 ## Extending
 
@@ -178,9 +190,12 @@ as a readable error. After adding a tool, flush the DI cache
 
 | Event | Dispatched | Use it to |
 |-------|------------|-----------|
-| `CollectToolsEvent` | once at server start | add, remove or replace tools before they are announced |
+| `CollectToolsEvent` | at server start, and in each call's process | add, remove or replace tools before they are announced |
 | `BeforeToolExecutionEvent` | before every tool call | adjust arguments, short-circuit with your own result, or veto by throwing |
 | `AfterToolExecutionEvent` | after every successful call | post-process results (extra masking, audit logging) |
+
+Listeners run in the process of the call they belong to, so they keep no in-memory state
+between calls; `CollectToolsEvent` listeners should be cheap and deterministic.
 
 ```php
 #[AsEventListener]
