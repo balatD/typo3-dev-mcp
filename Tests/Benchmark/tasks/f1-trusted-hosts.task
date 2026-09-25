@@ -9,11 +9,16 @@ enabled?
 Answer with just those two values and nothing else.
 
 --- oracle ---
-echo "trustedHostsPattern=$(ddev exec vendor/bin/typo3 configuration:showactive SYS/trustedHostsPattern --json 2>/dev/null | tr -d '"' | tail -1)"
-echo "displayErrors=$(ddev exec vendor/bin/typo3 configuration:showactive SYS/displayErrors --json 2>/dev/null | tail -1)"
+# configuration:showactive comes from typo3-console; core's lowlevel has configuration:show.
+active() {
+    ddev exec vendor/bin/typo3 configuration:showactive "$1" --json 2>/dev/null \
+        || ddev exec vendor/bin/typo3 configuration:show "$1" --type=active --json 2>/dev/null
+}
+echo "trustedHostsPattern=$(active SYS/trustedHostsPattern | tr -d '"' | tail -1)"
+echo "displayErrors=$(active SYS/displayErrors | tr -d '"' | tail -1)"
 
 --- check ---
 # trustedHostsPattern is ".*", set in config/system/additional.php rather than
 # settings.php — an agent reading only settings.php reports the default and fails.
 grep -qF '.*' "$RESPONSE_FILE" || exit 1
-grep -qiE 'displayErrors[^a-z]*(=|is|:)?[[:space:]]*(1|true|on|enabled)' "$RESPONSE_FILE"
+grep -qiE 'displayErrors[^a-z]*(=|is|:)?[[:space:]]*(yes[^a-z0-9]*)?(1|true|on|enabled|yes)' "$RESPONSE_FILE"
