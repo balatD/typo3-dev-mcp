@@ -81,9 +81,10 @@ bench_ddev() {
 reset_state() {
     (
         cd "$BENCH_ROOT"
-        git checkout -q -- . 2>/dev/null || true
-        git clean -qfd 2>/dev/null || true
+        bench_git checkout -q -- . 2>/dev/null || true
+        bench_git clean -qfd 2>/dev/null || true
     )
+    rm -rf "${BENCH_MEMORY_DIR:?}"
     if ! bench_ddev snapshot restore bench-clean 2>&1 | grep -q 'was restored'; then
         echo "  !! snapshot restore failed — state is dirty, aborting" >&2
         exit 1
@@ -163,16 +164,21 @@ record() {
         | (.content | if type == "array" then (map(.text // "") | join("")) else (. // "") end)
         | length' "$stream" 2>/dev/null | awk '{s += $1} END {print s + 0}')"
 
-    local mcp_calls skill_calls
+    local mcp_calls skill_calls memory_path
     mcp_calls="$(echo "$tools" | jq '[.[] | select(.name | startswith("mcp__typo3-dev-mcp__")) | .calls] | add // 0')"
     skill_calls="$(echo "$tools" | jq '[.[] | select(.name == "Skill") | .calls] | add // 0')"
+    memory_path="$(jq -r 'select(.type == "system" and .subtype == "init") | .memory_paths.auto // ""' "$stream" | head -1)"
 
     # A violated assertion voids the run rather than silently skewing the aggregate.
+    # The memory check catches reset_state clearing a different directory than the
+    # one Claude Code actually loaded.
     local hygiene="ok"
     if [[ "$arm" == "a" && "$mcp_calls" != "0" ]]; then
         hygiene="VOID:arm-a-used-mcp"
     elif [[ "$skill_calls" != "0" ]]; then
         hygiene="VOID:skill-invoked"
+    elif [[ -n "$memory_path" && "${memory_path%/}" != "$BENCH_MEMORY_DIR" ]]; then
+        hygiene="VOID:memory-path"
     fi
 
     # Deterministic checker. Exit 2 means "not deterministically gradable" —

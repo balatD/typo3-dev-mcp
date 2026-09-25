@@ -69,6 +69,10 @@ check "set TypoScript reaches compiled setup" "bench_fixture" \
 check "fixture FlexForm is live" "sAppearance" \
     "$("$BENCH_DIR/bin/mcp-call.sh" flexform_schema '{"type":"benchfixture_listing"}' 2>/dev/null | jq -r '.content[0].text' 2>/dev/null)"
 
+# Same clearing as run.sh's reset, so the checks below see what a sweep sees.
+rm -rf "${BENCH_MEMORY_DIR:?}"
+check "no git metadata in the work tree" "absent" "$([[ -e "$BENCH_ROOT/.git" ]] && echo present || echo absent)"
+
 echo
 echo "Arm A (baseline)"
 "$BENCH_DIR/bin/switch-arm.sh" a >/dev/null

@@ -14,7 +14,7 @@ declare(strict_types=1);
  * Medians rather than means throughout: agent runs have a long right tail, and
  * one runaway run would otherwise swallow the signal.
  *
- * Usage: report.php [--json]
+ * Usage: report.php [--json] [--all | --sweep <id>]
  */
 
 $benchDir = dirname(__DIR__);
@@ -66,16 +66,22 @@ $sweeps = array_values(array_unique(array_map(
     $runs,
 )));
 sort($sweeps);
-if (!in_array('--all', $argv, true) && count($sweeps) > 1) {
-    $newest = end($sweeps);
+$sweepArg = array_search('--sweep', $argv, true);
+$wanted = $sweepArg !== false ? ($argv[$sweepArg + 1] ?? '') : null;
+if ($wanted !== null && !in_array($wanted, $sweeps, true)) {
+    fwrite(STDERR, "error: no sweep '$wanted' in the ledger. Known: " . implode(', ', $sweeps) . "\n");
+    exit(1);
+}
+if ($wanted !== null || (!in_array('--all', $argv, true) && count($sweeps) > 1)) {
+    $selected = $wanted ?? end($sweeps);
     $runs = array_values(array_filter(
         $runs,
-        static fn(array $r): bool => ($r['sweep'] ?? 'legacy') === $newest,
+        static fn(array $r): bool => ($r['sweep'] ?? 'legacy') === $selected,
     ));
     fwrite(STDERR, sprintf(
         "note: %d sweeps in ledger; reporting only '%s' (%d runs). Pass --all to aggregate.\n\n",
         count($sweeps),
-        $newest,
+        $selected,
         count($runs),
     ));
 }

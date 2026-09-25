@@ -33,8 +33,8 @@ fi
 # their oracle text is the written-down diagnosis rather than a live probe.
 (
     cd "$BENCH_ROOT"
-    git checkout -q -- . 2>/dev/null || true
-    git clean -qfd 2>/dev/null || true
+    bench_git checkout -q -- . 2>/dev/null || true
+    bench_git clean -qfd 2>/dev/null || true
 )
 
 fail=0

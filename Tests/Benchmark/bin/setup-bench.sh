@@ -74,8 +74,8 @@ if [[ "${1:-}" == "--sync-fixture" ]]; then
     # `git checkout`, so an uncommitted sync would be reverted by the first run.
     (
         cd "$BENCH_ROOT"
-        git add -A packages/bench_fixture
-        git -c user.email=bench@local -c user.name=bench commit -qm "bench: sync fixture" || true
+        bench_git add -A packages/bench_fixture
+        bench_git -c user.email=bench@local -c user.name=bench commit -qm "bench: sync fixture" || true
     )
     echo "fixture synced"
     exit 0
@@ -86,7 +86,7 @@ say() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
 if [[ -d "$BENCH_ROOT" && $RECREATE -eq 1 ]]; then
     say "Removing existing bench project at $BENCH_ROOT"
     (cd "$BENCH_ROOT" && ddev delete -Oy >/dev/null 2>&1) || true
-    rm -rf "$BENCH_ROOT"
+    rm -rf "$BENCH_ROOT" "$BENCH_ROOT.git"
 fi
 
 if [[ -d "$BENCH_ROOT" ]]; then
@@ -216,9 +216,13 @@ cat > .gitignore <<'EOF'
 /public/typo3
 /var/
 EOF
-git init -q
-git add -A
-git -c user.email=bench@local -c user.name=bench commit -qm "bench: clean baseline"
+# --separate-git-dir leaves a .git pointer file behind; removing it keeps git
+# invisible to agents while bench_git still reaches the metadata.
+git init -q --separate-git-dir "$BENCH_ROOT.git" "$BENCH_ROOT"
+rm -f "$BENCH_ROOT/.git"
+BENCH_GIT_DIR="$BENCH_ROOT.git"
+bench_git add -A
+bench_git -c user.email=bench@local -c user.name=bench commit -qm "bench: clean baseline"
 
 say "Taking clean DB snapshot"
 ddev snapshot --name bench-clean >/dev/null

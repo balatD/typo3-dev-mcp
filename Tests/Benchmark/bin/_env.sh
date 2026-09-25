@@ -33,4 +33,14 @@ load_bench_env() {
     source "$BENCH_ENV_FILE"
     set +a
     export SITE_HOST="${SITE_URL#https://}"
+    export BENCH_GIT_DIR="${BENCH_GIT_DIR:-$BENCH_ROOT.git}"
+    # Claude Code's auto-memory for the bench project. Notes left there load into
+    # every run despite --setting-sources project, so the harness clears it.
+    export BENCH_MEMORY_DIR="$HOME/.claude/projects/${BENCH_ROOT//\//-}/memory"
+}
+
+# The bench's git metadata lives outside its work tree: agents would otherwise
+# read a seeded fault straight off `git diff`. Call from inside $BENCH_ROOT.
+bench_git() {
+    git --git-dir="$BENCH_GIT_DIR" --work-tree="$BENCH_ROOT" "$@"
 }
