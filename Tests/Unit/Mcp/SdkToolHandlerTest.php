@@ -4,38 +4,18 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Tests\Unit\Mcp;
 
-use BalatD\DevMcp\Event\AfterToolExecutionEvent;
-use BalatD\DevMcp\Event\BeforeToolExecutionEvent;
 use BalatD\DevMcp\Mcp\SdkToolHandler;
-use BalatD\DevMcp\Tests\Unit\Fixture\CallableTool;
+use BalatD\DevMcp\Mcp\Support\Typo3Cli;
 use Mcp\Exception\ToolCallException;
 use Mcp\Server\ClientGateway;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Psr\EventDispatcher\EventDispatcherInterface;
 
 final class SdkToolHandlerTest extends TestCase
 {
-    /**
-     * @param array<class-string, list<callable>> $listeners
-     */
-    private function createDispatcher(array $listeners = []): EventDispatcherInterface
+    private function createHandler(string $toolName, int $timeout = 60): SdkToolHandler
     {
-        return new class ($listeners) implements EventDispatcherInterface {
-            /**
-             * @param array<class-string, list<callable>> $listeners
-             */
-            public function __construct(private readonly array $listeners) {}
-
-            public function dispatch(object $event): object
-            {
-                foreach ($this->listeners[$event::class] ?? [] as $listener) {
-                    $listener($event);
-                }
-
-                return $event;
-            }
-        };
+        return new SdkToolHandler($toolName, new Typo3Cli([\PHP_BINARY, __DIR__ . '/../Fixture/typo3-cli.php'], $timeout));
     }
 
     private function createGateway(): ClientGateway
@@ -44,100 +24,65 @@ final class SdkToolHandlerTest extends TestCase
     }
 
     #[Test]
-    public function executesToolWithArgumentsModifiedByBeforeEvent(): void
+    public function argumentsReachTheToolProcessWithoutTheSdkKeys(): void
     {
-        $tool = new CallableTool('echo', static fn(array $arguments): mixed => $arguments);
-        $dispatcher = $this->createDispatcher([
-            BeforeToolExecutionEvent::class => [
-                static fn(BeforeToolExecutionEvent $event) => $event->setArguments(['limit' => 5]),
-            ],
-        ]);
-
-        $result = (new SdkToolHandler($tool, $dispatcher))->execute(['limit' => 100], $this->createGateway());
-
-        self::assertSame(['limit' => 5], $result);
-        self::assertSame(1, $tool->executions);
-    }
-
-    #[Test]
-    public function sdkInjectedSessionAndRequestKeysNeverReachTheTool(): void
-    {
-        $tool = new CallableTool('echo', static fn(array $arguments): mixed => $arguments);
-
-        $seenByListener = null;
-        $dispatcher = $this->createDispatcher([
-            BeforeToolExecutionEvent::class => [
-                static function (BeforeToolExecutionEvent $event) use (&$seenByListener): void {
-                    $seenByListener = $event->getArguments();
-                },
-            ],
-        ]);
-
-        $result = (new SdkToolHandler($tool, $dispatcher))->execute([
-            'limit' => 5,
+        $result = $this->createHandler('echo')->execute([
+            'limit' => 5.0,
+            'query' => 'Größe',
             '_session' => new \stdClass(),
             '_request' => new \stdClass(),
         ], $this->createGateway());
 
-        self::assertSame(['limit' => 5], $result);
-        self::assertSame(['limit' => 5], $seenByListener);
+        self::assertSame(['limit' => 5.0, 'query' => 'Größe'], $result);
     }
 
     #[Test]
-    public function beforeEventResultShortCircuitsExecution(): void
+    public function everyCallRunsInAFreshProcess(): void
     {
-        $tool = new CallableTool('never');
-        $dispatcher = $this->createDispatcher([
-            BeforeToolExecutionEvent::class => [
-                static fn(BeforeToolExecutionEvent $event) => $event->setResult(['cached' => true]),
-            ],
-        ]);
+        // A long-running process keeps TCA, listeners and modules from its boot;
+        // a fresh one per call sees what the installation currently holds.
+        $handler = $this->createHandler('pid');
 
-        $result = (new SdkToolHandler($tool, $dispatcher))->execute([], $this->createGateway());
+        $first = $handler->execute([], $this->createGateway());
+        $second = $handler->execute([], $this->createGateway());
 
-        self::assertSame(['cached' => true], $result);
-        self::assertSame(0, $tool->executions);
+        self::assertNotSame(getmypid(), $first['pid']);
+        self::assertNotSame($first['pid'], $second['pid']);
     }
 
     #[Test]
-    public function afterEventCanReplaceTheResult(): void
+    public function aToolErrorReachesTheClientVerbatim(): void
     {
-        $tool = new CallableTool('secret', static fn(): array => ['value' => 'raw']);
-        $dispatcher = $this->createDispatcher([
-            AfterToolExecutionEvent::class => [
-                static fn(AfterToolExecutionEvent $event) => $event->setResult(['value' => 'masked']),
-            ],
-        ]);
-
-        $result = (new SdkToolHandler($tool, $dispatcher))->execute([], $this->createGateway());
-
-        self::assertSame(['value' => 'masked'], $result);
-    }
-
-    #[Test]
-    public function throwablesBecomeToolCallExceptions(): void
-    {
-        $tool = new CallableTool('broken', static fn() => throw new \RuntimeException('kaputt'));
-
         $this->expectException(ToolCallException::class);
         $this->expectExceptionMessage('kaputt');
 
-        (new SdkToolHandler($tool, $this->createDispatcher()))->execute([], $this->createGateway());
+        $this->createHandler('fails')->execute([], $this->createGateway());
     }
 
     #[Test]
-    public function listenerExceptionsBecomeToolCallExceptions(): void
+    public function aCrashReportsTheExitCodeAndStderr(): void
     {
-        $tool = new CallableTool('vetoed');
-        $dispatcher = $this->createDispatcher([
-            BeforeToolExecutionEvent::class => [
-                static fn() => throw new \RuntimeException('vetoed by policy'),
-            ],
-        ]);
-
         $this->expectException(ToolCallException::class);
-        $this->expectExceptionMessage('vetoed by policy');
+        $this->expectExceptionMessageMatches('/"crash" failed without a result \(exit code 255\).*Allowed memory size/s');
 
-        (new SdkToolHandler($tool, $dispatcher))->execute([], $this->createGateway());
+        $this->createHandler('crash')->execute([], $this->createGateway());
+    }
+
+    #[Test]
+    public function strayOutputIsReportedNotParsed(): void
+    {
+        $this->expectException(ToolCallException::class);
+        $this->expectExceptionMessageMatches('/"noise" failed without a result.*Deprecated: something/s');
+
+        $this->createHandler('noise')->execute([], $this->createGateway());
+    }
+
+    #[Test]
+    public function aHungCallIsStoppedAfterTheTimeout(): void
+    {
+        $this->expectException(ToolCallException::class);
+        $this->expectExceptionMessage('did not finish within 1 seconds');
+
+        $this->createHandler('slow', 1)->execute([], $this->createGateway());
     }
 }

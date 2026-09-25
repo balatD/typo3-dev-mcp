@@ -22,6 +22,14 @@ services:
         description: 'Start the typo3-dev-mcp MCP server on stdio (for AI assistants, not humans)'
         schedulable: false
 
+  BalatD\DevMcp\Command\CallCommand:
+    tags:
+      - name: console.command
+        command: 'devmcp:call'
+        description: 'Run one typo3-dev-mcp tool call (spawned by devmcp:serve)'
+        hidden: true
+        schedulable: false
+
   BalatD\DevMcp\Command\InstallCommand:
     tags:
       - name: console.command

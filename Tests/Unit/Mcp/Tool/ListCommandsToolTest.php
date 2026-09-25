@@ -19,6 +19,7 @@ final class ListCommandsToolTest extends TestCase
                 ->setDescription('Flush TYPO3 caches')
                 ->setAliases(['cf']),
             'site:list' => (new Command('site:list'))->setDescription('List all sites'),
+            'devmcp:call' => (new Command('devmcp:call'))->setDescription('Internal')->setHidden(),
         ];
         $commands['cache:flush']->addArgument('group');
 
@@ -41,6 +42,12 @@ final class ListCommandsToolTest extends TestCase
         self::assertSame(2, $result['commandCount']);
         self::assertSame('Flush TYPO3 caches', $result['commands']['cache:flush']);
         self::assertStringNotContainsString('[group]', (string)json_encode($result));
+    }
+
+    #[Test]
+    public function hiddenCommandsAreNotListed(): void
+    {
+        self::assertArrayNotHasKey('devmcp:call', $this->tool()->execute([])['commands']);
     }
 
     #[Test]

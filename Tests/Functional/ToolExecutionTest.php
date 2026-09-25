@@ -165,15 +165,6 @@ final class ToolExecutionTest extends AbstractToolTestCase
         );
     }
 
-    #[Test]
-    public function flushCacheReportsWhatItFlushed(): void
-    {
-        $tool = $this->getTool('flush_cache');
-
-        self::assertFalse($tool->isReadOnly(), 'flush_cache is the one tool that changes state.');
-        self::assertSame(['flushed' => 'all'], $tool->execute([]));
-    }
-
     /**
      * content_blocks is registered from Configuration/Services.php only when the
      * optional package is present. It is a dev dependency, so it is expected

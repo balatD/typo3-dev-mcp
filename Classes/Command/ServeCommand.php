@@ -6,6 +6,7 @@ namespace BalatD\DevMcp\Command;
 
 use BalatD\DevMcp\Event\CollectToolsEvent;
 use BalatD\DevMcp\Mcp\SdkToolHandler;
+use BalatD\DevMcp\Mcp\Support\Typo3Cli;
 use BalatD\DevMcp\Mcp\ToolRegistry;
 use Composer\InstalledVersions;
 use Mcp\Schema\Tool;
@@ -44,6 +45,7 @@ final class ServeCommand extends Command
     public function __construct(
         private readonly ToolRegistry $toolRegistry,
         private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly Typo3Cli $cli,
     ) {
         parent::__construct();
     }
@@ -74,7 +76,7 @@ final class ServeCommand extends Command
                     description: $tool->getDescription(),
                     annotations: new ToolAnnotations(readOnlyHint: $tool->isReadOnly()),
                 ),
-                new SdkToolHandler($tool, $this->eventDispatcher),
+                new SdkToolHandler($tool->getName(), $this->cli),
             );
         }
 

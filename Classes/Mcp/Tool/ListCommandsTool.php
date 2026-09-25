@@ -85,7 +85,11 @@ final class ListCommandsTool implements ToolInterface
         $commands = [];
         foreach ($this->commandRegistry->getNames() as $name) {
             try {
-                $description = $this->commandRegistry->get($name)->getDescription();
+                $command = $this->commandRegistry->get($name);
+                if ($command->isHidden()) {
+                    continue;
+                }
+                $description = $command->getDescription();
             } catch (\Throwable $e) {
                 $description = 'Could not load command: ' . $e->getMessage();
             }

@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Mcp\Tool;
 
+use BalatD\DevMcp\Mcp\Support\Typo3Cli;
 use BalatD\DevMcp\Mcp\ToolInterface;
-use TYPO3\CMS\Core\Cache\CacheManager;
-use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheGroupException;
 
 /**
  * The one state-changing convenience tool: after code/TCA/TypoScript changes
  * the AI must flush caches anyway — better a dedicated tool than a shell
  * detour.
+ *
+ * Runs core's `cache:flush` rather than the CacheManager: only the command
+ * also flushes the dependency-injection caches, without which new listeners
+ * and services never appear.
  *
  * @internal Not covered by the backwards-compatibility promise: tool
  *           response payloads and these implementation classes may change
@@ -20,7 +23,7 @@ use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheGroupException;
 final class FlushCacheTool implements ToolInterface
 {
     public function __construct(
-        private readonly CacheManager $cacheManager,
+        private readonly Typo3Cli $cli,
     ) {}
 
     public function getName(): string
@@ -57,19 +60,14 @@ final class FlushCacheTool implements ToolInterface
     public function execute(array $arguments): mixed
     {
         $group = $arguments['group'] ?? null;
+        $hasGroup = \is_string($group) && $group !== '';
 
-        if (\is_string($group) && $group !== '') {
-            try {
-                $this->cacheManager->flushCachesInGroup($group);
-            } catch (NoSuchCacheGroupException $e) {
-                throw new \RuntimeException($e->getMessage());
-            }
-
-            return ['flushed' => 'group:' . $group];
+        $process = $this->cli->run($hasGroup ? ['cache:flush', '--group=' . $group] : ['cache:flush']);
+        if (!$process->isSuccessful()) {
+            // Console errors arrive as a padded, multi-line block.
+            throw new \RuntimeException(trim((string)preg_replace('/\s+/', ' ', $process->getErrorOutput() . ' ' . $process->getOutput())));
         }
 
-        $this->cacheManager->flushCaches();
-
-        return ['flushed' => 'all'];
+        return ['flushed' => $hasGroup ? 'group:' . $group : 'all'];
     }
 }

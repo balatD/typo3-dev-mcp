@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace BalatD\DevMcp\Mcp;
 
-use BalatD\DevMcp\Event\AfterToolExecutionEvent;
-use BalatD\DevMcp\Event\BeforeToolExecutionEvent;
+use BalatD\DevMcp\Mcp\Support\ToolCallEnvelope;
+use BalatD\DevMcp\Mcp\Support\Typo3Cli;
 use Mcp\Exception\ToolCallException;
 use Mcp\Server\ClientGateway;
 use Mcp\Server\Handler\ToolHandlerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 
 /**
- * Bridges a typo3-dev-mcp tool to the MCP SDK's explicit handler contract, which
- * passes the raw argument bag instead of reflection-mapping named parameters.
+ * Bridges a tool announced by `devmcp:serve` to the MCP SDK and runs every
+ * call in a fresh `typo3 devmcp:call` process.
+ *
+ * A long-running server keeps the TCA, listeners and backend modules it booted
+ * with, so after a code or configuration change it would report the old state
+ * even once caches are flushed. A process per call sees what TYPO3 itself sees.
  *
  * Not a DI service — instantiated by the ServeCommand (excluded in Services.yaml).
  *
@@ -23,9 +27,11 @@ use Psr\EventDispatcher\EventDispatcherInterface;
  */
 final class SdkToolHandler implements ToolHandlerInterface
 {
+    private const OUTPUT_TAIL_BYTES = 2048;
+
     public function __construct(
-        private readonly ToolInterface $tool,
-        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly string $toolName,
+        private readonly Typo3Cli $cli,
     ) {}
 
     public function execute(array $arguments, ClientGateway $gateway): mixed
@@ -38,23 +44,33 @@ final class SdkToolHandler implements ToolHandlerInterface
         unset($arguments['_session'], $arguments['_request']);
 
         try {
-            $beforeEvent = new BeforeToolExecutionEvent($this->tool, $arguments);
-            $this->eventDispatcher->dispatch($beforeEvent);
-
-            $result = $beforeEvent->hasResult()
-                ? $beforeEvent->getResult()
-                : $this->tool->execute($beforeEvent->getArguments());
-
-            $afterEvent = new AfterToolExecutionEvent($this->tool, $beforeEvent->getArguments(), $result);
-            $this->eventDispatcher->dispatch($afterEvent);
-
-            return $afterEvent->getResult();
-        } catch (ToolCallException $e) {
-            throw $e;
+            $process = $this->cli->run(['devmcp:call', $this->toolName], ToolCallEnvelope::arguments($arguments));
+        } catch (ProcessTimedOutException $e) {
+            throw new ToolCallException(
+                \sprintf('Tool "%s" did not finish within %d seconds.', $this->toolName, $this->cli->getTimeoutSeconds()),
+                0,
+                $e,
+            );
         } catch (\Throwable $e) {
-            // Only ToolCallException reaches the client as a readable isError
-            // result — anything else degrades to an opaque internal error.
             throw new ToolCallException($e->getMessage(), 0, $e);
+        }
+
+        $errorOutput = $process->getErrorOutput();
+        if ($errorOutput !== '') {
+            // Keep notices and deprecations visible in the client's server log,
+            // as they were when tools ran inside this process.
+            fwrite(\STDERR, $errorOutput);
+        }
+
+        try {
+            return ToolCallEnvelope::open($process->getOutput());
+        } catch (\UnexpectedValueException) {
+            throw new ToolCallException(\sprintf(
+                'Tool "%s" failed without a result (exit code %d): %s',
+                $this->toolName,
+                (int)$process->getExitCode(),
+                substr(trim($errorOutput . "\n" . $process->getOutput()), -self::OUTPUT_TAIL_BYTES),
+            ));
         }
     }
 }
