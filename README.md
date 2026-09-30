@@ -57,38 +57,46 @@ Also published in the TER as `dev_mcp`, though Composer is the supported path fo
 
 `devmcp:install`
 
-- registers the MCP server with your AI clients — when DDEV is detected the server is
+- registers the MCP server with your AI agents — when DDEV is detected the server is
   started via `ddev exec vendor/bin/typo3 devmcp:serve`, otherwise via local PHP;
 - writes a tool reference into `.ai/guidelines/typo3.md`, imports it into `CLAUDE.md` and
   copies it into `AGENTS.md` (between idempotent markers, existing content is kept). It
   lists what each tool reports and nothing else — no framework advice.
 
-Choose the clients with `--client`, which can be repeated. Without it, an interactive run
-asks. A non-interactive run refreshes the clients already set up in the project, or sets
-up Claude Code in a fresh one.
+### Setting up your agents
+
+Name each agent with `--client`, and repeat it to set up several at once:
 
 ```bash
-vendor/bin/typo3 devmcp:install --client=codex --client=cursor
+vendor/bin/typo3 devmcp:install --client=claude --client=codex --client=cursor
+ddev exec vendor/bin/typo3 devmcp:install --client=claude --client=codex --client=cursor  # DDEV
 ```
 
-| Client | `--client` | Registered in |
-|---|---|---|
-| Claude Code | `claude` | `.mcp.json` |
-| Codex | `codex` | `.codex/config.toml` |
-| Cursor | `cursor` | `.cursor/mcp.json` |
-| VS Code (Copilot) | `vscode` | `.vscode/mcp.json` |
-| OpenCode | `opencode` | `opencode.json` |
+Without `--client`, an interactive run asks which agents to set up, with the ones already
+set up in the project preselected. A non-interactive run refreshes those, or sets up
+Claude Code in a fresh project.
 
-Existing files are merged, and other servers and settings stay as they are. Claude Code
-reads the guidelines through `CLAUDE.md`, the others through `AGENTS.md`. Then restart the
-client (or run `/mcp` in Claude Code), started in the project root: the registered
-command is relative to it.
+| Agent | `--client` | Registered in | Then |
+|---|---|---|---|
+| Claude Code | `claude` | `.mcp.json` | Run `/mcp` or restart, and approve the project's server |
+| Codex | `codex` | `.codex/config.toml` | Start `codex` in the project root and trust the project when asked |
+| Cursor | `cursor` | `.cursor/mcp.json` | Restart Cursor; the server appears in its MCP settings |
+| VS Code (Copilot) | `vscode` | `.vscode/mcp.json` | Reload the window in a trusted workspace; the tools are available in agent mode |
+| OpenCode | `opencode` | `opencode.json` | Restart OpenCode; `opencode mcp list` shows the server as connected |
 
-> **Codex** reads `.codex/config.toml` only in projects you trust, so accept its prompt on
-> the first start. The entry raises Codex's 60-second tool timeout above the server's own.
-> **OpenCode**: an `opencode.jsonc` is not rewritten, because its comments would be lost.
-> The installer prints the entry to add by hand. Any other MCP client can be pointed at
-> `vendor/bin/typo3 devmcp:serve` manually.
+- Start each agent in the project root: the registered command is relative to it.
+- Claude Code reads the guidelines through `CLAUDE.md`, the other agents through
+  `AGENTS.md` (VS Code when the `chat.useAgentsMdFile` setting is on).
+- Existing config files are merged, and other servers and settings stay as they are. The
+  files hold no absolute paths, so the team can share them through the repository.
+- To add an agent later, run the command again with its `--client`. A plain re-run, for
+  example after a TYPO3 upgrade, refreshes every agent already set up.
+- **Codex** ignores `.codex/config.toml` in projects you have not trusted. The entry
+  raises Codex's 60-second tool timeout above the server's own 120 seconds.
+- **OpenCode**: an `opencode.jsonc` is not rewritten, because its comments would be lost.
+  The installer prints the entry to add by hand.
+- Any other MCP client can be pointed at `vendor/bin/typo3 devmcp:serve` (under DDEV,
+  `ddev exec vendor/bin/typo3 devmcp:serve`) by hand, with `AGENTS.md` for the guidelines.
 
 ## Tools
 
