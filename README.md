@@ -9,33 +9,38 @@ from files, the AI reads them from the running application. Inspired by
 
 ## Does it actually help?
 
-Measured, not asserted. 340 benchmark runs of 1.0.0 on `claude-opus-5-5` against real TYPO3
-13.4 and 14.3 installations, comparing a plain Claude Code session against the same session
-after `devmcp:install` (median cost per task):
+Measured, not asserted. 680 benchmark runs on `claude-opus-5-5` against real TYPO3 13.4 and
+14.3 installations, comparing a plain Claude Code session against the same session after
+`devmcp:install` (median cost per task, 1.1.0):
 
 | Task family | TYPO3 13.4: baseline → with | TYPO3 14.3: baseline → with |
 |---|---|---|
-| **Live-state questions** (TCA, compiled TypoScript, FlexForm, site sets) | $0.074 → **$0.038** · 5 → 4 turns | $0.069 → **$0.045** · 5 → 4 turns |
-| Code changes | $0.106 → $0.109 · 7 → 7 turns | $0.096 → **$0.163** · 6 → 12 turns |
-| Debugging a seeded fault | $0.073 → $0.089 · 4 → 7 turns | $0.074 → $0.076 · 5 → 7 turns |
-| Control (pure refactoring, no live state) | $0.068 → $0.066 | $0.061 → $0.059 |
+| **Live-state questions** (TCA, compiled TypoScript, FlexForm, site sets) | $0.079 → **$0.032** · 5.5 → 4 turns | $0.076 → **$0.035** · 5 → 4 turns |
+| Code changes | $0.106 → $0.104 · 7 → 8 turns | $0.096 → $0.106 · 6 → 7 turns |
+| Debugging a seeded fault | $0.097 → $0.107 · 6 → 7 turns | $0.102 → **$0.073** · 6 → 7 turns |
+| Control (pure refactoring, no live state) | $0.051 → $0.062 | $0.055 → $0.062 |
 
-**On questions about the running installation: 48% cheaper on v13, 35% on v14.** The largest
-single case is still resolving `lib.contentElement.templateRootPaths` after site-set merging
-— a value that exists in no single file — where the baseline spent **145,000 more tokens**
-reconstructing it by reading across extensions.
+**On questions about the running installation: 59% cheaper on v13, 53% on v14**, winning all
+eight live-state tasks on both. The largest single case is resolving
+`lib.contentElement.templateRootPaths` after site-set merging — a value that exists in no
+single file — where the baseline read 4.4× the tokens reconstructing it.
+
+Code changes used to be the weak spot: in 1.0.0 the tools kept the state they booted with, so
+an agent verifying its own edit was told the new field did not exist, and code changes cost
+61–87% more than the baseline. 1.1.0 runs every call in a fresh process; they are now at
+parity (−3% on v13, +10% on v14).
 
 Three things this benchmark does **not** show, stated plainly:
 
-- **Task success was 100% in both arms, on all 17 tasks, on both versions, with zero
-  hallucinated claims.** A competent agent with grep and a shell solved everything. This is a
-  measure of efficiency, not capability — the tools make the agent faster on live-state
-  questions, not smarter.
-- **On v14 code changes it costs more.** The agent verifies its own edits through the tools
-  (flushing caches, re-reading events and TCA), doubling the turns without changing the
-  outcome.
-- The tool schemas cost **6,278 tokens on every request** (Opus 5.5), whether or not a tool
-  is used. On short, non-TYPO3 work that is pure overhead.
+- **Task success was 100% in both arms** on every checker-graded run (520 of 520), and every
+  judged answer graded was correct, with no hallucinated claims. A competent agent with grep
+  and a shell solved everything: this measures efficiency, not capability.
+- **Debugging and small tasks are not cheaper across the board.** One debugging task still costs
+  ~$0.03 more while the agent double-checks the tools' answer, and on short work the fixed
+  overhead below shows up as about $0.01 per task.
+- In Claude Code the tools add **~1,700 tokens to every request** (tool names, server
+  instructions, guidelines — schemas load on demand), whether or not a tool is used. A client
+  that loads every schema up front pays **~6,400**.
 
 Full methodology, per-task results, per-tool usage and limitations:
 **[Tests/Benchmark/README.md](Tests/Benchmark/README.md)**.

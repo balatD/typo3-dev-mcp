@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.0 — unreleased
+## 1.1.0 — 2026-09-29
 
 Every change here closes a gap the 1.0.0 benchmark streams exposed: a place where an agent
 with typo3-dev-mcp spent extra turns, or got a wrong answer.
@@ -50,6 +50,20 @@ with typo3-dev-mcp spent extra turns, or got a wrong answer.
 
 - Under DDEV, `DEV_MCP_ALLOW_WRITE` and `DEV_MCP_NO_NETWORK` must be set inside the
   container: `ddev exec` does not forward host variables.
+- The README's per-request cost was the figure for loading every schema up front. Claude Code
+  defers tool schemas, so installing typo3-dev-mcp adds about 1,700 tokens per request there;
+  about 6,400 is what a client pays that loads them all up front.
+
+### Benchmark
+
+- Rerun on `claude-opus-5-5` against TYPO3 13.4 and a new TYPO3 14.3 bench, 1.0.0 and 1.1.0
+  under one harness (680 runs). Against the no-MCP baseline, live-state questions are 59% (v13)
+  and 53% (v14) cheaper, up from 41% and 34% on 1.0.0; code changes are at parity, from +61%
+  and +87%. Every checker-graded run passed in both arms.
+- The harness clears the bench's Claude Code auto-memory before every run and voids a run that
+  loaded a different one, keeps git out of the agents' view, retries a failed snapshot restore
+  and can resume an interrupted sweep. An August memory note had skewed every v13 run of the
+  1.0.0 sweep in PR #2; those figures are withdrawn.
 
 ## 1.0.0 — 2026-09-23
 
