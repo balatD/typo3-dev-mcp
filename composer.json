@@ -70,7 +70,7 @@
     "extra": {
         "typo3/cms": {
             "extension-key": "dev_mcp",
-            "version": "1.1.1",
+            "version": "1.2.0",
             "Package": {
                 "providesPackages": {}
             }

@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 — 2026-09-30
+
+Multi-agent setup: `devmcp:install` registers the server with Codex, Cursor, VS Code
+(Copilot) and OpenCode as well as Claude Code, and agents that read `AGENTS.md` now get the
+tool reference itself instead of a link to it.
 
 ### Added
 
