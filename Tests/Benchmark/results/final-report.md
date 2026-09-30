@@ -117,6 +117,20 @@ median moved within noise.
 - **`f2-add-tca-field`**: +$0.03, the verification described above.
 - **F4 control**: +13–22% on medians, about $0.01 per task. The MCP is irrelevant to these
   tasks and mostly unused; this is the per-request overhead below showing up on short work.
+  A third of these runs also called `php` on a host without one and then spent turns
+  finding DDEV. The guidelines now say to use `ddev exec`. A follow-up sweep
+  (`20260930T080428Z`, v13, arm B only, F2 + F4 × 5 reps: 30 runs, all 25 checker-graded
+  runs passed, the 5 `f4-explain-file` answers not judged):
+
+  | | F4 `php` detours (runs / DDEV lookups) | F4 median | F2 median |
+  |---|---|---|---|
+  | arm A (1.1.0 sweep) | 9 of 15 / 5 | $0.051 · 4t | $0.106 · 7t |
+  | arm B 1.1.0 | 5 of 15 / 2 | $0.062 · 5t (+22%) | $0.104 · 8t (−3%) |
+  | arm B + DDEV hint | **0 of 15 / 0** | $0.053 · 5t (+5%) | $0.097 · 7t (−9%) |
+
+  The detours are gone. The medians move within the noise floor. F4 total spend rose
+  anyway ($0.93 → $1.00), because some `f4-rename-method` runs added a repo-wide grep; none
+  of those runs called `php` or DDEV.
 
 ## Tool usage
 
