@@ -8,23 +8,23 @@ Answers three questions with numbers instead of anecdote:
 
 ## Latest results
 
-340 runs of 1.0.0 (installed from Packagist), `claude-opus-5-5`, on TYPO3 13.4.35 and 14.3.7.
+680 runs on `claude-opus-5-5`, TYPO3 13.4.35 and 14.3.7, 1.0.0 against 1.1.0 under one harness.
 Full write-up: **[results/final-report.md](results/final-report.md)** · cost model:
 [results/tax-baseline.md](results/tax-baseline.md) · the August alpha.6 sweep:
 [results/final-report-alpha.6.md](results/final-report-alpha.6.md)
 
-Median cost per run, arm A (baseline) → arm B (installed):
+Median cost per run, arm A (baseline) → arm B (installed 1.1.0), and where 1.0.0 stood:
 
-| Family | TYPO3 13.4 | TYPO3 14.3 |
-|---|---|---|
-| F1 live-state | $0.074 → **$0.038** (5 → 4 turns) | $0.069 → **$0.045** (5 → 4 turns) |
-| F2 code change | $0.106 → $0.109 | $0.096 → **$0.163** (6 → 12 turns) |
-| F3 debug | $0.073 → $0.089 | $0.074 → $0.076 |
-| F4 control | $0.068 → $0.066 | $0.061 → $0.059 |
+| Family | TYPO3 13.4 | TYPO3 14.3 | arm B on 1.0.0 |
+|---|---|---|---|
+| F1 live-state | $0.079 → **$0.032** (−59%) | $0.076 → **$0.035** (−53%) | −41% / −34% |
+| F2 code change | $0.106 → $0.104 (−3%) | $0.096 → $0.106 (+10%) | +61% / +87% |
+| F3 debug | $0.097 → $0.107 (+11%) | $0.102 → **$0.073** (−29%) | −4% / −6% |
+| F4 control | $0.051 → $0.062 (+22%) | $0.055 → $0.062 (+13%) | +9% / +12% |
 
-**Success was 100% in both arms on all 17 tasks on both versions, with zero hallucinated
-claims.** This measures efficiency, not capability. On v14, arm B verifies its own code edits
-through the tools, which doubles F2's turns without changing the outcome.
+Every checker-graded run passed in both arms, and the 90 judged answers graded so far were all
+correct with no hallucinations. Arm A's two runs per bench differ by 4–12%, so the F4 and
+v13 F3 rows are within noise. 1.1.0's stale-state fix is the F2 row.
 
 ## Quick start
 

@@ -137,3 +137,28 @@ Still flat: the largest tool is 6.9%, the top five 32%.
 The guidelines are a separate, smaller cost that this probe excludes by design
 (`--setting-sources ""`): the 2,304-character `.ai/guidelines/typo3.md` that
 `devmcp:install` links from `CLAUDE.md`, down from 9,806 before alpha.8.
+
+## Update — 1.1.0, measured 2026-09-28
+
+| model | no MCP | with typo3-dev-mcp | **up-front tax** |
+|---|---|---|---|
+| `claude-sonnet-5` | 9,946 | 16,346 | **6,400** |
+| `claude-opus-5-5` | 3,524 | 9,933 | **6,409** |
+
++131 over 1.0.0 (15,127 serialized chars, was 14,727): the new `type` and `uid` arguments
+and their descriptions.
+
+**This is not what Claude Code pays.** `tax.sh` passes `--tools ""`, which switches tool search
+off, so every schema is loaded up front — the cost a client without deferred tools pays.
+Claude Code defers MCP tool schemas by default: the model sees tool names, the server's
+`instructions` and the guidelines, and loads a schema through `ToolSearch` when it first uses
+a tool. Measured from the sweeps' own first requests, installing typo3-dev-mcp adds:
+
+| | arm A (no MCP) | arm B (installed) | **per request** |
+|---|---|---|---|
+| 1.0.0, v13 | 20,944 | 22,535 | **1,591** |
+| 1.0.0, v14 | 20,606 | 22,284 | **1,678** |
+| 1.1.0, v14 | 20,484 | 22,172 | **1,688** |
+
+The price of deferral is one `ToolSearch` turn before the first use of a batch of tools;
+Claude Code offers no per-server opt-out, so that turn is outside this extension's control.
