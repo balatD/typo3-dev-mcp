@@ -1,0 +1,15 @@
+family: F5
+grade: deterministic
+
+--- prompt ---
+Our extension still calls ExtensionManagementUtility::addPageTSConfig(). In which TYPO3
+version was it deprecated, and what should replace it?
+
+--- oracle ---
+sed -n '/^Migration/,/^\.\. index::/p' \
+    vendor/typo3/cms-core/Documentation/Changelog/13.0/Deprecation-101799-ExtensionManagementUtilityaddPageTSConfig.rst
+
+--- check ---
+# Deprecated in 13.0 (#101799); the replacement is an extension's Configuration/page.tsconfig.
+grep -qF '13.0' "$RESPONSE_FILE" || exit 1
+grep -qF 'page.tsconfig' "$RESPONSE_FILE"

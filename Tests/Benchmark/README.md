@@ -132,6 +132,7 @@ nothing if TYPO3 never picked it up.
 | **F2** | real code changes, graded against the live install | 3 |
 | **F3** | seeded breakage, diagnosis only | 3 |
 | **F4** | negative controls — MCP is irrelevant, so cost here is the tax showing up | 3 |
+| **F5** | changelog — what a version deprecated and what replaces it, from the changelog core ships | 2 |
 
 F1 tasks are built so the plausible-but-wrong answer is the one you get from reading
 files alone: `trustedHostsPattern` is set in `additional.php` rather than

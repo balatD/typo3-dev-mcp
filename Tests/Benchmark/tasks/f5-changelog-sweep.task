@@ -1,0 +1,19 @@
+family: F5
+grade: deterministic
+
+--- prompt ---
+List the deprecations TYPO3 13.4 introduced, including its patch releases: the issue number
+and what is deprecated, and the TYPO3 version each one stops working in where the changelog
+entry states one.
+
+--- oracle ---
+ls vendor/typo3/cms-core/Documentation/Changelog/ | grep -E '^13\.4' | while read -r dir; do
+    ls "vendor/typo3/cms-core/Documentation/Changelog/$dir" | grep -oE '^Deprecation-[0-9]+' | cut -d- -f2
+done | sort -u
+
+--- check ---
+# Every 13.4 / 13.4.x deprecation this bench's core ships, by issue number.
+[ -s "$ORACLE_FILE" ] || exit 1
+while read -r issue; do
+    grep -qF "$issue" "$RESPONSE_FILE" || exit 1
+done < "$ORACLE_FILE"
