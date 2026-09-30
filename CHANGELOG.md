@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.1.1 — 2026-09-30
+
+A performance hotfix: two places where an agent with typo3-dev-mcp spent turns it did not
+need, found by benchmark follow-ups.
 
 ### Changed
 
