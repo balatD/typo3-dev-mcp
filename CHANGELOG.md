@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- **In DDEV projects the guidelines say how to run PHP.** `devmcp:install` adds one
+  sentence pointing at `ddev exec` and `ddev composer`. In the 1.1.0 benchmark a third of
+  the control tasks first called `php` on a host that has none, then spent turns finding
+  DDEV. Re-run `devmcp:install` to pick it up.
+
 ## 1.1.0 — 2026-09-29
 
 Every change here closes a gap the 1.0.0 benchmark streams exposed: a place where an agent

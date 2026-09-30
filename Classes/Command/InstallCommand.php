@@ -57,7 +57,7 @@ final class InstallCommand extends Command
         }
 
         if (!$input->getOption('skip-guidelines')) {
-            foreach ($this->guidelineComposer->install($projectPath) as $file) {
+            foreach ($this->guidelineComposer->install($projectPath, $viaDdev) as $file) {
                 $io->writeln(' ✓ ' . $file);
             }
         }

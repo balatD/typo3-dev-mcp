@@ -28,11 +28,15 @@ final class GuidelineComposer
 
     private const MARKER_END = '<!-- typo3-dev-mcp:guidelines:end -->';
 
+    private const DDEV_HINT = ' It runs in DDEV: call PHP, Composer and the TYPO3 CLI through DDEV'
+        . ' (`ddev exec php -l <file>`, `ddev composer <command>`, `ddev exec vendor/bin/typo3 <command>`),'
+        . ' not on the host.';
+
     public function __construct(
         private readonly PackageManager $packageManager,
     ) {}
 
-    public function compose(): string
+    public function compose(bool $viaDdev = false): string
     {
         $typo3Version = new Typo3Version();
 
@@ -41,6 +45,7 @@ final class GuidelineComposer
             [
                 '{{typo3Version}}' => $typo3Version->getVersion(),
                 '{{phpVersion}}' => PHP_VERSION,
+                '{{ddev}}' => $viaDdev ? self::DDEV_HINT : '',
             ],
         ));
 
@@ -51,7 +56,7 @@ final class GuidelineComposer
     /**
      * @return list<string> paths of all written/updated files
      */
-    public function install(string $projectPath): array
+    public function install(string $projectPath, bool $viaDdev = false): array
     {
         $projectPath = rtrim($projectPath, '/');
         $guidelineFile = $projectPath . '/.ai/guidelines/typo3.md';
@@ -59,7 +64,7 @@ final class GuidelineComposer
         if (!is_dir(\dirname($guidelineFile)) && !mkdir(\dirname($guidelineFile), 0775, true)) {
             throw new \RuntimeException('Could not create directory ' . \dirname($guidelineFile));
         }
-        file_put_contents($guidelineFile, $this->compose());
+        file_put_contents($guidelineFile, $this->compose($viaDdev));
 
         $written = [$guidelineFile];
         $written[] = $this->linkInAgentFile(

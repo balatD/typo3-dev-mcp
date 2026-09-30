@@ -1,6 +1,6 @@
 # TYPO3 tools
 
-This project runs TYPO3 {{typo3Version}} on PHP {{phpVersion}}.
+This project runs TYPO3 {{typo3Version}} on PHP {{phpVersion}}.{{ddev}}
 
 The `typo3-dev-mcp` tools report the state of the running installation — resolved
 configuration, the live data model, logs — which the files on disk do not always show.
