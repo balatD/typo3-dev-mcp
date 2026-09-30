@@ -20,7 +20,16 @@ final class SearchChangelogTool implements ToolInterface
 {
     private const DEFAULT_LIMIT = 10;
 
+    private const MAX_LIMIT = 200;
+
     private const TYPES = ['Breaking', 'Deprecation', 'Feature', 'Important'];
+
+    /**
+     * The removal is free text: "will be removed in TYPO3 v14.0", "removal in v15",
+     * "will stop working in TYPO3 v15.0". Sentences wrap, hence \s+.
+     */
+    private const REMOVAL_PATTERN = '/\b(?:(?:will\s+be\s+)?(?:removed|removal)\s+(?:in|with|for|from)'
+        . '|stop\s+working\s+(?:in|with))\s+(?:TYPO3\s+)?v?(\d+(?:\.\d+)?)\b/i';
 
     public function __construct(
         private readonly PackageManager $packageManager,
@@ -34,8 +43,9 @@ final class SearchChangelogTool implements ToolInterface
     public function getDescription(): string
     {
         return 'Search the core changelog shipped with the installed version (Breaking, Deprecation, '
-            . 'Feature, Important) — including the migration path for a changed or removed API. '
-            . 'All words of "query" must match, in filename or content.';
+            . 'Feature, Important). All words of "query" must match, in filename or content. The one entry '
+            . 'named after the query carries its migration section; without "query", "version" lists that version\'s entries. '
+            . 'Deprecations carry the version they stop working in where the entry states one.';
     }
 
     public function getInputSchema(): array
@@ -45,7 +55,7 @@ final class SearchChangelogTool implements ToolInterface
             'properties' => [
                 'query' => [
                     'type' => 'string',
-                    'description' => 'Search words, e.g. "GeneralUtility makeInstance" or a class/hook name',
+                    'description' => 'Search words, e.g. "GeneralUtility makeInstance", a class/hook name or an issue number',
                 ],
                 'type' => [
                     'type' => 'string',
@@ -59,11 +69,10 @@ final class SearchChangelogTool implements ToolInterface
                 'limit' => [
                     'type' => 'integer',
                     'minimum' => 1,
-                    'maximum' => 30,
+                    'maximum' => self::MAX_LIMIT,
                     'description' => 'Maximum results (default ' . self::DEFAULT_LIMIT . ')',
                 ],
             ],
-            'required' => ['query'],
             'additionalProperties' => false,
         ];
     }
@@ -76,32 +85,48 @@ final class SearchChangelogTool implements ToolInterface
     public function execute(array $arguments): mixed
     {
         $query = trim((string)($arguments['query'] ?? ''));
-        if ($query === '') {
-            throw new \RuntimeException('Argument "query" must not be empty.');
+        $typeFilter = $arguments['type'] ?? null;
+        $versionFilter = isset($arguments['version']) && $arguments['version'] !== '' ? (string)$arguments['version'] : null;
+        if ($query === '' && $versionFilter === null) {
+            throw new \RuntimeException('Pass "query", or "version" to list the entries of a version.');
         }
 
         $words = array_values(array_filter(array_map(strtolower(...), preg_split('/\s+/', $query) ?: [])));
-        $typeFilter = $arguments['type'] ?? null;
-        $versionFilter = isset($arguments['version']) ? (string)$arguments['version'] : null;
-        $limit = min(30, max(1, (int)($arguments['limit'] ?? self::DEFAULT_LIMIT)));
+        $limit = min(self::MAX_LIMIT, max(1, (int)($arguments['limit'] ?? self::DEFAULT_LIMIT)));
 
         $changelogPath = $this->getChangelogPath();
         $files = $this->collectFiles($changelogPath, $typeFilter, $versionFilter);
 
-        $matches = [];
-        foreach ($files as $file) {
-            $score = $this->scoreFile($changelogPath, $file, $words);
-            if ($score > 0) {
-                $matches[] = ['file' => $file, 'score' => $score];
+        $named = [];
+        if ($words === []) {
+            usort($files, static fn(string $a, string $b): int => strnatcmp(\dirname($b), \dirname($a)) ?: strcmp($a, $b));
+            $matches = $files;
+        } else {
+            $scored = [];
+            foreach ($files as $file) {
+                $score = $this->scoreFile($changelogPath, $file, $words);
+                if ($score > 0) {
+                    $scored[] = ['file' => $file, 'score' => $score];
+                }
+                if ($score === 3 * \count($words)) {
+                    $named[] = $file;
+                }
             }
+            usort($scored, static fn(array $a, array $b): int => $b['score'] <=> $a['score']);
+            $matches = array_column($scored, 'file');
         }
 
-        usort($matches, static fn(array $a, array $b): int => $b['score'] <=> $a['score']);
+        if ($matches === []) {
+            return $this->describeMiss($changelogPath, $files, $words, $typeFilter !== null || $versionFilter !== null);
+        }
+
         $matches = \array_slice($matches, 0, $limit);
+        // Other entries often mention an API in passing; the one named after it is the answer.
+        $withMigration = \count($matches) === 1 ? $matches[0] : (\count($named) === 1 ? $named[0] : null);
 
         $results = [];
         foreach ($matches as $match) {
-            $results[] = $this->describeFile($changelogPath, $match['file'], $words);
+            $results[] = $this->describeFile($changelogPath, $match, $match === $withMigration);
         }
 
         return [
@@ -180,25 +205,74 @@ final class SearchChangelogTool implements ToolInterface
     }
 
     /**
+     * What each word reaches on its own, and — where a filter is set and emptied
+     * the answer — what it reaches without the filter.
+     *
+     * @param list<string> $files
      * @param list<string> $words
      * @return array<string, mixed>
      */
-    private function describeFile(string $changelogPath, string $relativePath, array $words): array
+    private function describeMiss(string $changelogPath, array $files, array $words, bool $filtered): array
+    {
+        $miss = [
+            'resultCount' => 0,
+            'results' => [],
+            'wordMatches' => $this->countWordMatches($changelogPath, $files, $words),
+        ];
+
+        if ($filtered && \in_array(0, $miss['wordMatches'], true)) {
+            $unfiltered = $this->countWordMatches($changelogPath, $this->collectFiles($changelogPath, null, null), $words);
+            foreach ($miss['wordMatches'] as $word => $count) {
+                if ($count === 0 && $unfiltered[$word] > 0) {
+                    $miss['wordMatchesWithoutFilters'] = $unfiltered;
+                    break;
+                }
+            }
+        }
+
+        return $miss;
+    }
+
+    /**
+     * @param list<string> $files
+     * @param list<string> $words
+     * @return array<string, int>
+     */
+    private function countWordMatches(string $changelogPath, array $files, array $words): array
+    {
+        $counts = [];
+        foreach ($words as $word) {
+            $counts[$word] = \count(array_filter(
+                $files,
+                fn(string $file): bool => $this->scoreFile($changelogPath, $file, [$word]) > 0,
+            ));
+        }
+
+        return $counts;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function describeFile(string $changelogPath, string $relativePath, bool $withMigration): array
     {
         [$versionDir, $fileName] = explode('/', $relativePath, 2);
         preg_match('/^([A-Za-z]+)-(\d+)?/', $fileName, $nameParts);
 
         $content = (string)@file_get_contents($changelogPath . '/' . $relativePath);
         $lines = explode("\n", $content);
+        $type = $nameParts[1] ?? null;
 
         return array_filter([
-            'type' => $nameParts[1] ?? null,
+            'type' => $type,
             'issue' => isset($nameParts[2]) ? (int)$nameParts[2] : null,
             'version' => $versionDir,
             'title' => $this->extractTitle($lines),
-            'excerpt' => $this->extractExcerpt($lines, $words),
+            'removal' => $type === 'Deprecation' ? $this->extractRemoval($content, $versionDir) : null,
+            'tags' => $this->extractTags($lines),
             'file' => $relativePath,
-        ], static fn(mixed $value): bool => $value !== null);
+            'migration' => $withMigration ? $this->extractMigration($lines) : null,
+        ], static fn(mixed $value): bool => $value !== null && $value !== []);
     }
 
     /**
@@ -221,22 +295,59 @@ final class SearchChangelogTool implements ToolInterface
     }
 
     /**
-     * @param list<string> $words
-     * @param list<string> $lines
+     * Only a version later than the entry's own counts: "removed with v5" means
+     * Fluid standalone, and recaps name the release that already removed something.
      */
-    private function extractExcerpt(array $lines, array $words): ?string
+    private function extractRemoval(string $content, string $versionDir): ?string
     {
-        foreach ($lines as $index => $line) {
-            $lineLower = strtolower($line);
-            foreach ($words as $word) {
-                if (str_contains($lineLower, $word)) {
-                    $excerpt = trim(implode("\n", \array_slice($lines, max(0, $index - 1), 4)));
-
-                    return mb_substr($excerpt, 0, 400);
-                }
+        preg_match_all(self::REMOVAL_PATTERN, $content, $matches);
+        $ownVersion = str_replace('.x', '', $versionDir);
+        foreach ($matches[1] as $stated) {
+            if (version_compare($stated, $ownVersion, '>')) {
+                return $stated;
             }
         }
 
         return null;
+    }
+
+    /**
+     * @param list<string> $lines
+     * @return list<string>
+     */
+    private function extractTags(array $lines): array
+    {
+        foreach ($lines as $line) {
+            if (preg_match('/^\.\.\s+index::\s*(.*)$/', trim($line), $index) === 1) {
+                return array_values(array_filter(array_map(trim(...), explode(',', $index[1]))));
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * The "Migration" section up to the next ===-underlined heading or the index line,
+     * subsections and code blocks included.
+     *
+     * @param list<string> $lines
+     */
+    private function extractMigration(array $lines): ?string
+    {
+        $start = null;
+        foreach ($lines as $index => $line) {
+            $underlined = preg_match('/^=+\s*$/', $lines[$index + 1] ?? '') === 1;
+            if ($start === null) {
+                if (trim($line) === 'Migration' && $underlined) {
+                    $start = $index + 2;
+                }
+                continue;
+            }
+            if (preg_match('/^\.\.\s+index::/', trim($line)) === 1 || (trim($line) !== '' && $underlined)) {
+                return trim(implode("\n", \array_slice($lines, $start, $index - $start)));
+            }
+        }
+
+        return $start === null ? null : trim(implode("\n", \array_slice($lines, $start)));
     }
 }
