@@ -8,6 +8,13 @@
   sentence pointing at `ddev exec` and `ddev composer`. In the 1.1.0 benchmark a third of
   the control tasks first called `php` on a host that has none, then spent turns finding
   DDEV. Re-run `devmcp:install` to pick it up.
+- **`search_changelog` answers without a follow-up read.** The entry named after the query
+  carries its Migration section, and lists drop the excerpt. `version` without a query
+  lists that version's entries, up to 200. Entries carry their index tags, and
+  deprecations the version they stop working in where the entry states one. A miss
+  reports how many entries each word reaches, and whether the filter emptied the answer.
+  In a 13.4 benchmark follow-up, arm B's cost fell from $0.047 to $0.026 for a migration
+  lookup and from $0.172 to $0.091 for a version's deprecation list.
 
 ## 1.1.0 — 2026-09-29
 

@@ -132,6 +132,24 @@ median moved within noise.
   anyway ($0.93 → $1.00), because some `f4-rename-method` runs added a repo-wide grep; none
   of those runs called `php` or DDEV.
 
+## Changelog questions (F5, follow-up)
+
+`search_changelog` was never called in the sweeps above, so two changelog tasks were added:
+look up one deprecation's migration, and list 13.4's deprecations with their removal
+versions. TYPO3 13.4, 5 reps; arm A and arm B "before" ran on the 1.1.0 tool, arm B
+"after" on the reworked one. All 30 runs passed their checks.
+
+| Task | arm A | arm B, 1.1.0 tool | **arm B, reworked** |
+|---|---|---|---|
+| `f5-changelog-migration` | $0.063 · 3t | $0.047 · 4t | **$0.026 · 3t** |
+| `f5-changelog-sweep` | $0.135 · 5t | $0.172 · 11t | **$0.091 · 8t** |
+
+- **Migration:** the entry named after the query now carries its Migration section, so the
+  follow-up read is gone. Changelog-file reads went 2 → 0 and `search_changelog` calls 9 → 5.
+- **Sweep:** `version` without a query lists the entries with their removal versions, and
+  `search_changelog` calls went 34 → 12. Arm B still ran Bash to confirm the empty
+  `13.4.x` folder and one entry that states no removal (14 changelog-file calls, was 12).
+
 ## Tool usage
 
 15 of 22 tools were called in each 1.1.0 sweep. Never called in any of the four:
