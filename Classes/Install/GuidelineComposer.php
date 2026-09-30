@@ -9,8 +9,10 @@ use TYPO3\CMS\Core\Package\PackageManager;
 
 /**
  * Boost analog: the composed AI guidelines. Renders the guideline markdown from
- * Resources/Private/Guidelines, writes it to .ai/guidelines/typo3.md and links
- * it from CLAUDE.md / AGENTS.md between idempotent markers.
+ * Resources/Private/Guidelines, writes it to .ai/guidelines/typo3.md, imports
+ * that into CLAUDE.md and inlines it into AGENTS.md, both between idempotent
+ * markers. Inlined because Codex and most other AGENTS.md readers do not follow
+ * links or imports.
  *
  * The file documents which tools exist and what each reports. Framework advice
  * deliberately stays out of it: an agent already knows TYPO3, and every line
@@ -64,17 +66,15 @@ final class GuidelineComposer
         if (!is_dir(\dirname($guidelineFile)) && !mkdir(\dirname($guidelineFile), 0775, true)) {
             throw new \RuntimeException('Could not create directory ' . \dirname($guidelineFile));
         }
-        file_put_contents($guidelineFile, $this->compose($viaDdev));
+        $guidelines = $this->compose($viaDdev);
+        file_put_contents($guidelineFile, $guidelines);
 
         $written = [$guidelineFile];
-        $written[] = $this->linkInAgentFile(
+        $written[] = $this->writeMarkerBlock(
             $projectPath . '/CLAUDE.md',
             "@.ai/guidelines/typo3.md\n",
         );
-        $written[] = $this->linkInAgentFile(
-            $projectPath . '/AGENTS.md',
-            "Follow the TYPO3 guidelines in [.ai/guidelines/typo3.md](.ai/guidelines/typo3.md).\n",
-        );
+        $written[] = $this->writeMarkerBlock($projectPath . '/AGENTS.md', $guidelines);
 
         return $written;
     }
@@ -82,14 +82,14 @@ final class GuidelineComposer
     /**
      * Replaces the marker block if present, appends it otherwise.
      */
-    private function linkInAgentFile(string $file, string $blockContent): string
+    private function writeMarkerBlock(string $file, string $blockContent): string
     {
         $block = self::MARKER_START . "\n" . $blockContent . self::MARKER_END;
         $content = is_file($file) ? (string)file_get_contents($file) : '';
 
         $pattern = '/' . preg_quote(self::MARKER_START, '/') . '.*?' . preg_quote(self::MARKER_END, '/') . '/s';
         if (preg_match($pattern, $content) === 1) {
-            $content = (string)preg_replace($pattern, $block, $content);
+            $content = (string)preg_replace_callback($pattern, static fn(): string => $block, $content);
         } else {
             $content = rtrim($content) === ''
                 ? $block . "\n"

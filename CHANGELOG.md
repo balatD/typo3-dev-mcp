@@ -1,5 +1,29 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **`devmcp:install` registers the server with Codex, Cursor, VS Code (Copilot) and
+  OpenCode**, next to Claude Code. `--client` picks them and can be repeated. Without it,
+  an interactive run asks and a non-interactive one refreshes the clients already set up
+  in the project, or Claude Code in a fresh one. Each client gets its project-scoped file:
+  `.codex/config.toml`, `.cursor/mcp.json`, `.vscode/mcp.json` or `opencode.json`. Codex and
+  OpenCode entries raise the client's tool timeout above the server's 120 seconds, since
+  Codex otherwise stops waiting after 60.
+
+### Changed
+
+- **`AGENTS.md` carries the guidelines instead of a link to them.** Codex and OpenCode
+  read `AGENTS.md` as text and do not follow links, so their agents never saw the tool
+  reference. `CLAUDE.md` still imports `.ai/guidelines/typo3.md`. Re-run `devmcp:install`
+  to pick it up.
+
+### Fixed
+
+- Merging into an existing MCP config no longer rewrites another server's empty object
+  (`"env": {}`) as an empty list.
+
 ## 1.1.1 — 2026-09-30
 
 A performance hotfix: two places where an agent with typo3-dev-mcp spent turns it did not

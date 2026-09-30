@@ -1,6 +1,6 @@
 # typo3-dev-mcp — AI development helper for TYPO3
 
-`typo3-dev-mcp` gives Claude Code (and any MCP client) live insight into your TYPO3
+`typo3-dev-mcp` gives Claude Code, Codex and any other MCP client live insight into your TYPO3
 v13/v14 installation: instead of guessing versions, TCA columns, CTypes or config keys
 from files, the AI reads them from the running application. Inspired by
 [laravel/boost](https://github.com/laravel/boost).
@@ -57,18 +57,38 @@ Also published in the TER as `dev_mcp`, though Composer is the supported path fo
 
 `devmcp:install`
 
-- registers the MCP server in the project's `.mcp.json` — when DDEV is detected the
-  server is started via `ddev exec vendor/bin/typo3 devmcp:serve`, otherwise via local PHP;
-- writes a tool reference into `.ai/guidelines/typo3.md` and links it from `CLAUDE.md` /
-  `AGENTS.md` (between idempotent markers, existing content is kept). It lists what each
-  tool reports and nothing else — no framework advice.
+- registers the MCP server with your AI clients — when DDEV is detected the server is
+  started via `ddev exec vendor/bin/typo3 devmcp:serve`, otherwise via local PHP;
+- writes a tool reference into `.ai/guidelines/typo3.md`, imports it into `CLAUDE.md` and
+  copies it into `AGENTS.md` (between idempotent markers, existing content is kept). It
+  lists what each tool reports and nothing else — no framework advice.
 
-Then restart your AI assistant (or run `/mcp` in Claude Code).
+Choose the clients with `--client`, which can be repeated. Without it, an interactive run
+asks. A non-interactive run refreshes the clients already set up in the project, or sets
+up Claude Code in a fresh one.
 
-> **Claude Code** is supported out of the box via the project-scoped `.mcp.json`.
-> Support for other AI CLIs (Codex, Gemini CLI, …) is coming. Meanwhile any MCP
-> client can be pointed at `vendor/bin/typo3 devmcp:serve` manually — and the
-> composed guidelines already land in `AGENTS.md`, which most agents read.
+```bash
+vendor/bin/typo3 devmcp:install --client=codex --client=cursor
+```
+
+| Client | `--client` | Registered in |
+|---|---|---|
+| Claude Code | `claude` | `.mcp.json` |
+| Codex | `codex` | `.codex/config.toml` |
+| Cursor | `cursor` | `.cursor/mcp.json` |
+| VS Code (Copilot) | `vscode` | `.vscode/mcp.json` |
+| OpenCode | `opencode` | `opencode.json` |
+
+Existing files are merged, and other servers and settings stay as they are. Claude Code
+reads the guidelines through `CLAUDE.md`, the others through `AGENTS.md`. Then restart the
+client (or run `/mcp` in Claude Code), started in the project root: the registered
+command is relative to it.
+
+> **Codex** reads `.codex/config.toml` only in projects you trust, so accept its prompt on
+> the first start. The entry raises Codex's 60-second tool timeout above the server's own.
+> **OpenCode**: an `opencode.jsonc` is not rewritten, because its comments would be lost.
+> The installer prints the entry to add by hand. Any other MCP client can be pointed at
+> `vendor/bin/typo3 devmcp:serve` manually.
 
 ## Tools
 

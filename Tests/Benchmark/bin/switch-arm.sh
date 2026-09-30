@@ -48,7 +48,7 @@ case "$ARM" in
         ;;
     b)
         strip_arm_state
-        ddev -p "$PROJECT_NAME" exec vendor/bin/typo3 devmcp:install </dev/null >/dev/null
+        ddev -p "$PROJECT_NAME" exec vendor/bin/typo3 devmcp:install --client=claude </dev/null >/dev/null
         wait_for_artefacts || true
         ;;
     *)
