@@ -50,8 +50,24 @@ jobs:
       # dependencies are not installed here — a global install is enough.
       - run: composer global require typo3/tailor "^2.0" --no-progress
 
+      # The version's summary paragraph from CHANGELOG.md, then the reference; a
+      # version without one gets the reference alone. The TER shows plain text.
+      - name: Build the upload comment
+        id: comment
+        run: |
+          summary=$(awk -v heading="## ${{ steps.version.outputs.number }} " '
+            index($0, heading) == 1 { found = 1; next }
+            !found { next }
+            /^#/ { exit }
+            NF { printf "%s%s", (n++ ? " " : ""), $0; next }
+            n { exit }
+          ' CHANGELOG.md | tr -d '`')
+          echo "text=${summary:+$summary }See CHANGELOG.md for the release notes." >> "$GITHUB_OUTPUT"
+
       - name: Publish
+        env:
+          COMMENT: ${{ steps.comment.outputs.text }}
         run: |
           "$(composer global config bin-dir --absolute --quiet)/tailor" ter:publish \
-            --comment "See CHANGELOG.md for the release notes." \
+            --comment "$COMMENT" \
             "${{ steps.version.outputs.number }}" dev_mcp
