@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Support for `mcp/sdk` 0.9. The unit and functional suites and PHPStan pass on 0.9.0 with
+  TYPO3 14.3, and a stdio session (`initialize`, `tools/list`, `tools/call` including the
+  unknown-tool and tool-failure paths) works on TYPO3 13.4 and 14.3. The constraint is now
+  `^0.7.1 || ^0.8 || ^0.9`.
+
 ## 1.2.0 — 2026-09-30
 
 Multi-agent setup: `devmcp:install` registers the server with Codex, Cursor, VS Code
