@@ -1,8 +1,11 @@
 # Changelog
 
-## Unreleased
+## 1.2.1 — 2026-10-26
 
-### Added
+A compatibility release: typo3-dev-mcp can now be installed next to packages that require
+`mcp/sdk` 0.9.
+
+### Fixed
 
 - Support for `mcp/sdk` 0.9. The unit and functional suites and PHPStan pass on 0.9.0 with
   TYPO3 14.3, and a stdio session (`initialize`, `tools/list`, `tools/call` including the
